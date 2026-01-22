@@ -23,6 +23,22 @@ if not api_key:
 
 client = OpenAI(api_key=api_key)
 
+# 모델 선택
+model_options = {
+    "GPT-4o Mini (추천 - 가성비)": "gpt-4o-mini",
+    "GPT-4o (최고 품질)": "gpt-4o",
+    "GPT-4 Turbo": "gpt-4-turbo",
+    "GPT-4": "gpt-4",
+    "GPT-3.5 Turbo (빠름)": "gpt-3.5-turbo"
+}
+
+selected_model_name = st.selectbox(
+    "AI 모델 선택:",
+    options=list(model_options.keys()),
+    index=0  # 기본값: GPT-4o Mini
+)
+selected_model = model_options[selected_model_name]
+
 # 번역 방향 선택
 direction = st.radio(
     "번역 방향을 선택하세요:",
@@ -42,10 +58,10 @@ else:
 
 input_text = st.text_area("원문", placeholder=placeholder, height=150)
 
-def translate(text: str, source: str, target: str) -> str:
+def translate(text: str, source: str, target: str, model: str) -> str:
     """OpenAI API를 사용하여 텍스트를 번역합니다."""
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=model,
         messages=[
             {
                 "role": "system",
@@ -65,7 +81,7 @@ if st.button("번역하기", type="primary", use_container_width=True):
     if input_text.strip():
         with st.spinner("번역 중..."):
             try:
-                result = translate(input_text, source_lang, target_lang)
+                result = translate(input_text, source_lang, target_lang, selected_model)
                 st.subheader("번역 결과")
                 st.text_area("번역문", value=result, height=150, disabled=True)
             except Exception as e:
