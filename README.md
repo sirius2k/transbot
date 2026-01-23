@@ -36,6 +36,7 @@ TransBot은 OpenAI의 GPT-4o-mini 모델을 활용하여 빠르고 정확한 영
 
 - ✅ 영어 → 한국어 번역
 - ✅ 한국어 → 영어 번역
+- ✅ 다양한 AI 모델 선택 (GPT-4o Mini, GPT-4o, GPT-4 Turbo, GPT-4, GPT-3.5 Turbo)
 - ✅ 실시간 번역 진행 상태 표시
 - ✅ API 키 안전 관리 (환경 변수 또는 사이드바 입력)
 - ✅ 에러 처리 및 사용자 친화적 메시지
@@ -57,7 +58,38 @@ TransBot은 OpenAI의 GPT-4o-mini 모델을 활용하여 빠르고 정확한 영
    cd transbot
    ```
 
-2. **의존성 설치**
+2. **가상환경 생성 및 활성화** (권장)
+
+   가상환경을 사용하면 프로젝트별로 독립적인 Python 환경을 유지할 수 있습니다.
+
+   **macOS/Linux**
+
+   ```bash
+   # 가상환경 생성
+   python -m venv venv
+
+   # 가상환경 활성화
+   source venv/bin/activate
+   ```
+
+   **Windows**
+
+   ```bash
+   # 가상환경 생성
+   python -m venv venv
+
+   # 가상환경 활성화 (Command Prompt)
+   venv\Scripts\activate.bat
+
+   # 가상환경 활성화 (PowerShell)
+   venv\Scripts\Activate.ps1
+   ```
+
+   > 💡 **팁**: 가상환경이 활성화되면 터미널 프롬프트 앞에 `(venv)`가 표시됩니다.
+   >
+   > 가상환경을 비활성화하려면 `deactivate` 명령을 실행하세요.
+
+3. **의존성 설치**
 
    ```bash
    pip install -r requirements.txt
@@ -95,10 +127,20 @@ streamlit run app.py
 
 ### 3. 번역하기
 
-1. 번역 방향을 선택합니다 (영어 → 한국어 또는 한국어 → 영어)
-2. 원문 텍스트를 입력합니다
-3. "번역하기" 버튼을 클릭합니다
-4. 번역 결과를 확인합니다
+1. **AI 모델을 선택합니다**
+   - GPT-4o Mini (추천 - 가성비): 기본 선택, 빠르고 비용 효율적
+   - GPT-4o (최고 품질): 최신 모델, 가장 높은 번역 품질
+   - GPT-4 Turbo: 빠른 응답 속도
+   - GPT-4: 안정적인 성능
+   - GPT-3.5 Turbo (빠름): 가장 빠른 응답
+
+2. **번역 방향을 선택합니다** (영어 → 한국어 또는 한국어 → 영어)
+
+3. **원문 텍스트를 입력합니다**
+
+4. **"번역하기" 버튼을 클릭합니다**
+
+5. **번역 결과를 확인합니다**
 
 ### 사용 예시
 
@@ -146,7 +188,11 @@ transbot/
 
 ### AI 모델
 
-- **GPT-4o-mini**: 번역 성능과 비용 효율성의 균형
+- **GPT-4o Mini** (기본): 번역 성능과 비용 효율성의 균형
+- **GPT-4o**: 최고 품질의 번역 결과
+- **GPT-4 Turbo**: 빠른 응답 속도와 우수한 성능
+- **GPT-4**: 안정적이고 신뢰할 수 있는 번역
+- **GPT-3.5 Turbo**: 가장 빠르고 경제적인 옵션
 
 ## 문제 해결
 
@@ -190,9 +236,9 @@ pip install -r requirements.txt
 
 ### Phase 2
 
+- [x] 다양한 AI 모델 선택 옵션 (GPT-4o Mini, GPT-4o, GPT-4 Turbo, GPT-4, GPT-3.5 Turbo)
 - [ ] 번역 히스토리 저장 기능
 - [ ] 즐겨찾기 기능
-- [ ] 다양한 AI 모델 선택 옵션
 - [ ] 번역 결과 복사 버튼
 
 ### Phase 3
@@ -242,4 +288,4 @@ pip install -r requirements.txt
 
 **Made with ❤️ by TransBot Team**
 
-**Last Updated**: 2026-01-22
+**Last Updated**: 2026-01-24

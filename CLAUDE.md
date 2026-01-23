@@ -2,12 +2,13 @@
 
 ## 프로젝트 개요
 
-TransBot은 OpenAI GPT-4o-mini 모델을 활용한 영어-한국어 양방향 번역 웹 애플리케이션입니다.
+TransBot은 OpenAI GPT 모델을 활용한 영어-한국어 양방향 번역 웹 애플리케이션입니다.
 
 ### 주요 기능
 
 - 영어 → 한국어 번역
 - 한국어 → 영어 번역
+- AI 모델 선택 (GPT-4o, GPT-4o Mini, GPT-4 Turbo, GPT-4, GPT-3.5 Turbo)
 - Streamlit 기반 웹 인터페이스
 - OpenAI API 연동
 
@@ -16,7 +17,7 @@ TransBot은 OpenAI GPT-4o-mini 모델을 활용한 영어-한국어 양방향 �
 ### 프레임워크 및 라이브러리
 
 - **Streamlit**: 웹 UI 프레임워크
-- **OpenAI API**: GPT-4o-mini 번역 엔진
+- **OpenAI API**: 다양한 GPT 모델 지원 (GPT-4o, GPT-4o Mini, GPT-4 Turbo, GPT-4, GPT-3.5 Turbo)
 - **python-dotenv**: 환경 변수 관리
 - **Python 3.x**: 메인 개발 언어
 
@@ -30,7 +31,8 @@ transbot/
 ├── .gitignore               # Git 제외 파일 목록
 ├── README.md                # 프로젝트 소개 및 사용 가이드
 ├── PRD.md                   # 제품 요구사항 문서
-└── CLAUDE.md                # Claude AI 작업 가이드 (본 문서)
+├── CLAUDE.md                # Claude AI 작업 가이드 (본 문서)
+└── venv/                    # Python 가상환경 (Git 제외됨)
 ```
 
 ## 코딩 컨벤션
@@ -52,13 +54,14 @@ transbot/
 ### 코드 예시
 
 ```python
-def translate(text: str, source: str, target: str) -> str:
+def translate(text: str, source: str, target: str, model: str) -> str:
     """OpenAI API를 사용하여 텍스트를 번역합니다.
 
     Args:
         text: 번역할 텍스트
         source: 원본 언어 (예: "English", "Korean")
         target: 대상 언어 (예: "Korean", "English")
+        model: 사용할 AI 모델 (예: "gpt-4o-mini", "gpt-4o")
 
     Returns:
         번역된 텍스트
@@ -66,6 +69,63 @@ def translate(text: str, source: str, target: str) -> str:
     # API 호출 로직
     pass
 ```
+
+## 개발 환경 설정
+
+### 가상환경 사용 (권장)
+
+가상환경을 사용하면 프로젝트별로 독립적인 Python 환경을 유지할 수 있습니다.
+
+#### 1. 가상환경 생성
+
+```bash
+python3 -m venv venv
+```
+
+#### 2. 가상환경 활성화
+
+##### macOS/Linux
+
+```bash
+source venv/bin/activate
+```
+
+##### Windows
+
+```bash
+# Command Prompt
+venv\Scripts\activate.bat
+
+# PowerShell
+venv\Scripts\Activate.ps1
+```
+
+#### 3. 의존성 설치
+
+가상환경이 활성화된 상태에서:
+
+```bash
+pip install -r requirements.txt
+```
+
+#### 4. 가상환경 비활성화
+
+작업을 마친 후:
+
+```bash
+deactivate
+```
+
+### 가상환경 확인
+
+- 가상환경이 활성화되면 터미널 프롬프트 앞에 `(venv)`가 표시됩니다
+- `which python` (macOS/Linux) 또는 `where python` (Windows)로 Python 경로 확인
+
+### 주의사항
+
+- `venv/` 디렉토리는 `.gitignore`에 포함되어 Git에 커밋되지 않습니다
+- 팀원과 협업 시 `requirements.txt`를 최신 상태로 유지하세요
+- 새로운 패키지 설치 후 `pip freeze > requirements.txt`로 업데이트하세요
 
 ## 개발 가이드라인
 
@@ -143,6 +203,35 @@ def translate(text: str, source: str, target: str) -> str:
 #### MD047 - Files should end with a single newline character
 
 **규칙**: 파일 마지막에 빈 줄 하나 추가
+
+### AI 모델 선택 구현 가이드
+
+애플리케이션은 다양한 GPT 모델을 지원합니다. 모델 선택 기능 구현 시 다음 사항을 고려하세요:
+
+#### 지원 모델
+
+```python
+model_options = {
+    "GPT-4o Mini (추천 - 가성비)": "gpt-4o-mini",
+    "GPT-4o (최고 품질)": "gpt-4o",
+    "GPT-4 Turbo": "gpt-4-turbo",
+    "GPT-4": "gpt-4",
+    "GPT-3.5 Turbo (빠름)": "gpt-3.5-turbo"
+}
+```
+
+#### 기본 모델 설정
+
+- **번역 작업**: GPT-4o Mini (가성비 우수, 번역 품질 높음)
+- `st.selectbox`의 `index=0`으로 기본 선택 설정
+
+#### 모델별 특징
+
+- **GPT-4o Mini**: 번역에 최적화, 빠른 응답, 낮은 비용
+- **GPT-4o**: 최신 모델, 최고 품질
+- **GPT-4 Turbo**: GPT-4의 빠른 버전
+- **GPT-4**: 표준 고성능 모델
+- **GPT-3.5 Turbo**: 가장 빠르고 저렴
 
 ### 새 기능 추가 시
 
@@ -294,7 +383,7 @@ def translate(text: str, source: str, target: str) -> str:
 
 ```python
 try:
-    result = translate(input_text, source_lang, target_lang)
+    result = translate(input_text, source_lang, target_lang, selected_model)
 except Exception as e:
     st.error(f"번역 중 오류가 발생했습니다: {str(e)}")
 ```
@@ -315,13 +404,31 @@ if 'translation_history' not in st.session_state:
 
 ## 배포 체크리스트
 
-- [ ] `.env` 파일에 유효한 API 키 설정
+### 개발 환경
+
+- [ ] 가상환경 설정 완료 (`venv/` 디렉토리 존재)
+- [ ] 가상환경 활성화 확인 (프롬프트에 `(venv)` 표시)
 - [ ] requirements.txt 의존성 설치 확인
-- [ ] 모든 기능 테스트 완료
+
+### 애플리케이션
+
+- [ ] `.env` 파일에 유효한 API 키 설정
+- [ ] 모든 AI 모델 선택 옵션 테스트 완료
+- [ ] 양방향 번역 기능 테스트 (영어↔한국어)
 - [ ] 에러 핸들링 동작 확인
+
+### 문서
+
 - [ ] PRD.md 업데이트 (변경사항 반영)
 - [ ] README.md 업데이트 (사용자 가이드)
+- [ ] CLAUDE.md 업데이트 (개발 가이드)
+- [ ] 모든 문서 markdownlint 규칙 준수 확인
+
+### Git 및 배포
+
 - [ ] Git 커밋 메시지 명확하게 작성
+- [ ] commit-and-push 서브에이전트 사용 (권장)
+- [ ] GitHub 푸시 완료 확인
 
 ## 향후 개발 방향
 
@@ -413,6 +520,44 @@ app.py의 번역 함수를 리뷰해줘. 특히 다음 사항을 확인해줘:
 - ✅ "세 문서의 프로젝트 구조를 동기화해줘"
 - ❌ "문서 좀 만들어줘" (너무 모호함)
 - ❌ "수정해줘" (어떤 문서, 어떤 부분인지 불명확)
+
+### Git 커밋 및 푸시 요청 시
+
+#### commit-and-push 서브에이전트 사용 (권장)
+
+이 프로젝트는 `.claude/commands/commit-and-push.md` 서브에이전트를 제공합니다.
+
+**사용 방법**:
+
+```text
+"앞으로 커밋하고 푸시할 때는 commit-and-push 서브에이전트를 사용해줘"
+```
+
+이렇게 요청하면 Claude가 자동으로:
+
+1. 변경사항 분석
+2. 적절한 커밋 메시지 생성
+3. Git 커밋 실행
+4. GitHub에 푸시
+
+**커밋 메시지 형식**:
+
+```text
+[주요 변경사항에 대한 한줄 요약]
+
+- [변경사항에 대한 세부 내용]
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
+```
+
+#### 직접 커밋 요청 (대안)
+
+서브에이전트를 사용하지 않는 경우:
+
+```text
+좋은 예: "지금까지의 변경사항을 커밋하고 푸시해줘"
+더 좋은 예: "AI 모델 선택 기능을 추가했으니 이 변경사항을 커밋하고 푸시해줘"
+```
 
 ## 문서 업데이트 정책
 
@@ -515,6 +660,6 @@ git commit -m "docs: 기술 스택 정보 업데이트 (README, PRD, CLAUDE)"
 
 ---
 
-**마지막 업데이트**: 2026-01-22
+**마지막 업데이트**: 2026-01-24
 
 **작성자**: TransBot Development Team
