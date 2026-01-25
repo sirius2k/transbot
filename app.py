@@ -2,7 +2,7 @@ import streamlit as st
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
-import tiktoken
+from utils import detect_language, count_tokens, strip_markdown, translate
 
 load_dotenv()
 
@@ -13,6 +13,12 @@ st.set_page_config(
 )
 
 st.title("🌐 영어-한국어 번역기")
+
+# 세션 상태 초기화
+if 'input_text' not in st.session_state:
+    st.session_state.input_text = ""
+if 'translation_result' not in st.session_state:
+    st.session_state.translation_result = None
 
 # API 키 설정
 api_key = os.getenv("OPENAI_API_KEY")
@@ -41,36 +47,6 @@ selected_model_name = st.sidebar.selectbox(
 )
 selected_model = model_options[selected_model_name]
 
-def count_tokens(text: str, model: str = "gpt-4o") -> int:
-    """텍스트의 토큰 수를 계산합니다."""
-    try:
-        encoding = tiktoken.encoding_for_model(model)
-    except KeyError:
-        encoding = tiktoken.get_encoding("cl100k_base")
-    return len(encoding.encode(text))
-
-def detect_language(text: str) -> str:
-    """텍스트의 언어를 자동 감지합니다. (한글/영어)"""
-    if not text or not text.strip():
-        return "unknown"
-
-    # 한글 문자 확인 (가-힣)
-    korean_chars = sum(1 for char in text if '\uac00' <= char <= '\ud7a3')
-    # 영문 알파벳 확인
-    english_chars = sum(1 for char in text if char.isalpha() and ord(char) < 128)
-
-    # 전체 알파벳 문자 수
-    total_alpha = korean_chars + english_chars
-
-    if total_alpha == 0:
-        return "unknown"
-
-    # 한글이 50% 이상이면 한국어, 아니면 영어
-    if korean_chars / total_alpha > 0.5:
-        return "Korean"
-    else:
-        return "English"
-
 # 자동 언어 감지 모드
 st.info("🌐 **자동 번역**: 입력하신 언어를 자동으로 감지하여 번역합니다.")
 
@@ -83,8 +59,14 @@ with col1:
 with col2:
     stats_placeholder = st.empty()
 
-# 입력 텍스트 영역
-input_text = st.text_area("원문", placeholder="번역할 텍스트를 입력하세요... (한국어/English 자동 감지)", height=200, label_visibility="collapsed")
+# 입력 텍스트 영역 (key를 "input_text"로 설정하여 자동으로 session_state와 연동)
+input_text = st.text_area(
+    "원문",
+    placeholder="번역할 텍스트를 입력하세요... (한국어/English 자동 감지)",
+    height=200,
+    label_visibility="collapsed",
+    key="input_text"
+)
 
 # 언어 자동 감지 및 통계 업데이트
 if input_text:
@@ -114,53 +96,6 @@ else:
     source_lang = "unknown"
     target_lang = "unknown"
     stats_placeholder.markdown("<div style='text-align: right; color: #888;'>0자 / 0 토큰</div>", unsafe_allow_html=True)
-
-def translate(text: str, source: str, target: str, model: str) -> str:
-    """OpenAI API를 사용하여 텍스트를 번역합니다."""
-    response = client.chat.completions.create(
-        model=model,
-        messages=[
-            {
-                "role": "system",
-                "content": f"You are a professional translator. Translate the following {source} text to {target}. IMPORTANT: Preserve all Markdown formatting (bold, italic, headings, lists, links, code blocks, blockquotes, tables, etc.) in the translation. Only respond with the translation, nothing else."
-            },
-            {
-                "role": "user",
-                "content": text
-            }
-        ],
-        temperature=0.3
-    )
-    return response.choices[0].message.content
-
-def strip_markdown(text: str) -> str:
-    """Markdown 포맷을 제거하고 순수 텍스트만 반환합니다."""
-    import re
-
-    # 코드 블록 제거 (```)
-    text = re.sub(r'```[\s\S]*?```', '', text)
-    # 인라인 코드 제거 (`)
-    text = re.sub(r'`([^`]+)`', r'\1', text)
-    # 볼드 제거 (**)
-    text = re.sub(r'\*\*([^*]+)\*\*', r'\1', text)
-    # 이탤릭 제거 (*)
-    text = re.sub(r'\*([^*]+)\*', r'\1', text)
-    # 헤딩 제거 (#)
-    text = re.sub(r'^#{1,6}\s+', '', text, flags=re.MULTILINE)
-    # 링크 제거 [text](url) → text
-    text = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', text)
-    # 이미지 제거 ![alt](url)
-    text = re.sub(r'!\[([^\]]*)\]\([^)]+\)', r'\1', text)
-    # 리스트 기호 제거 (-, *, +)
-    text = re.sub(r'^\s*[-*+]\s+', '', text, flags=re.MULTILINE)
-    # 번호 리스트 제거 (1., 2., ...)
-    text = re.sub(r'^\s*\d+\.\s+', '', text, flags=re.MULTILINE)
-    # 인용문 제거 (>)
-    text = re.sub(r'^\s*>\s+', '', text, flags=re.MULTILINE)
-    # 수평선 제거 (---, ___, ***)
-    text = re.sub(r'^[-_*]{3,}$', '', text, flags=re.MULTILINE)
-
-    return text.strip()
 
 def create_copy_button(text_to_copy: str, button_label: str = "📋 복사", button_key: str = "copy_btn"):
     """클립보드 복사 버튼을 생성합니다."""
@@ -257,40 +192,60 @@ def create_dual_copy_buttons(text_with_format: str, button_key_prefix: str = "du
     """
     return button_html
 
-# 번역 버튼
-if st.button("번역하기", type="primary", use_container_width=True):
-    if input_text.strip():
-        if source_lang == "unknown" or target_lang == "unknown":
-            st.error("언어를 감지할 수 없습니다. 한국어 또는 영어 텍스트를 입력해주세요.")
+# 번역 버튼과 지우기 버튼
+col_btn1, col_btn2 = st.columns([3, 1])
+
+with col_btn1:
+    if st.button("번역하기", type="primary", use_container_width=True):
+        if input_text.strip():
+            if source_lang == "unknown" or target_lang == "unknown":
+                st.error("언어를 감지할 수 없습니다. 한국어 또는 영어 텍스트를 입력해주세요.")
+            else:
+                with st.spinner("번역 중..."):
+                    try:
+                        result = translate(client, input_text, source_lang, target_lang, selected_model)
+                        # 번역 결과를 session_state에 저장
+                        st.session_state.translation_result = {
+                            "text": result,
+                            "source": source_lang,
+                            "target": target_lang
+                        }
+                    except Exception as e:
+                        st.error(f"번역 중 오류가 발생했습니다: {str(e)}")
         else:
-            with st.spinner("번역 중..."):
-                try:
-                    result = translate(input_text, source_lang, target_lang, selected_model)
+            st.warning("번역할 텍스트를 입력해주세요.")
 
-                    # 번역 방향 표시
-                    direction_text = f"{source_lang} → {target_lang}"
-                    st.subheader(f"번역 결과 ({direction_text})")
+with col_btn2:
+    if st.button("🗑️ 지우기", use_container_width=True):
+        st.session_state.input_text = ""
+        st.session_state.translation_result = None
+        st.rerun()
 
-                    # 탭으로 번역문과 Markdown 원본 제공
-                    tab1, tab2 = st.tabs(["📄 번역문", "📝 Markdown 원본"])
+# 번역 결과 표시
+if st.session_state.translation_result:
+    result = st.session_state.translation_result["text"]
+    source_lang = st.session_state.translation_result["source"]
+    target_lang = st.session_state.translation_result["target"]
 
-                    with tab1:
-                        # 번역문 복사 버튼 (포맷포함 / 텍스트만)
-                        st.components.v1.html(
-                            create_dual_copy_buttons(result, "translation"),
-                            height=60
-                        )
-                        st.markdown(result)
+    # 번역 방향 표시
+    direction_text = f"{source_lang} → {target_lang}"
+    st.subheader(f"번역 결과 ({direction_text})")
 
-                    with tab2:
-                        # Markdown 원본 복사 버튼
-                        st.components.v1.html(
-                            create_copy_button(result, "📋 Markdown 복사", "markdown"),
-                            height=50
-                        )
-                        st.code(result, language="markdown", line_numbers=False)
+    # 탭으로 번역문과 Markdown 원본 제공
+    tab1, tab2 = st.tabs(["📄 번역문", "📝 Markdown 원본"])
 
-                except Exception as e:
-                    st.error(f"번역 중 오류가 발생했습니다: {str(e)}")
-    else:
-        st.warning("번역할 텍스트를 입력해주세요.")
+    with tab1:
+        # 번역문 복사 버튼 (포맷포함 / 텍스트만)
+        st.components.v1.html(
+            create_dual_copy_buttons(result, "translation"),
+            height=60
+        )
+        st.markdown(result)
+
+    with tab2:
+        # Markdown 원본 복사 버튼
+        st.components.v1.html(
+            create_copy_button(result, "📋 Markdown 복사", "markdown"),
+            height=50
+        )
+        st.code(result, language="markdown", line_numbers=False)

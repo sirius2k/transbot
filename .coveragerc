@@ -1,0 +1,26 @@
+[run]
+# 커버리지 측정 대상
+source = utils.py
+
+# 제외할 파일/디렉토리
+omit =
+    */tests/*
+    */venv/*
+    */.venv/*
+    */site-packages/*
+    setup.py
+    */migrations/*
+    app.py
+
+[report]
+# 리포트 설정
+precision = 2
+show_missing = True
+skip_covered = False
+
+# 커버리지 임계값
+fail_under = 80
+
+[html]
+# HTML 리포트 디렉토리
+directory = htmlcov

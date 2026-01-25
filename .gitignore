@@ -26,3 +26,12 @@ Thumbs.db
 
 # Claude Code
 .claude/
+
+# 테스트 및 커버리지
+.pytest_cache/
+.coverage
+htmlcov/
+pytest-report.html
+*.cover
+.hypothesis/
+.tox/
