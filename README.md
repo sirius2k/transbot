@@ -357,6 +357,6 @@ pip install -r requirements.txt
 
 ---
 
-**Made with ❤️ by TransBot Team**
+Made with ❤️ by TransBot Team
 
-**Last Updated**: 2026-01-26 08:42
+Last Updated: 2026-01-26 08:42
