@@ -31,7 +31,7 @@ open htmlcov/index.html
 #### pytest 테스트 결과 리포트
 
 ```bash
-open pytest-report.html
+open htmlcov/pytest-report.html
 ```
 
 ## 테스트 구조
