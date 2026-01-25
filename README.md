@@ -188,9 +188,11 @@ transbot/
 │   └── test_utils.py        # utils.py 단위 테스트
 ├── htmlcov/                 # 테스트 커버리지 및 pytest 리포트
 ├── docs/                    # 문서 디렉토리
-├── prompts/                 # 프롬프트 템플릿
-├── execution-plan/          # 실행 계획 문서
-├── PRD.md                   # 제품 요구사항 문서
+│   ├── product/             # 제품 요구사항 문서
+│   │   └── PRD.md
+│   ├── planning/            # 실행 계획 문서
+│   ├── templates/           # 프롬프트 템플릿
+│   └── guides/              # 개발 가이드
 ├── CLAUDE.md                # Claude AI 작업 가이드
 └── README.md                # 프로젝트 소개 문서 (본 문서)
 ```
@@ -317,7 +319,7 @@ pip install -r requirements.txt
 - [ ] 번역 스타일 선택 (격식체/비격식체)
 - [ ] REST API 제공
 
-자세한 내용은 [PRD.md](PRD.md)를 참고하세요.
+자세한 내용은 [PRD.md](docs/product/PRD.md)를 참고하세요.
 
 ## 기여하기
 
@@ -342,7 +344,7 @@ pip install -r requirements.txt
 
 ## 관련 문서
 
-- [PRD.md](PRD.md) - 제품 요구사항 문서
+- [PRD.md](docs/product/PRD.md) - 제품 요구사항 문서
 - [CLAUDE.md](CLAUDE.md) - Claude AI 작업 가이드
 
 ## 라이선스
@@ -357,4 +359,4 @@ pip install -r requirements.txt
 
 **Made with ❤️ by TransBot Team**
 
-**Last Updated**: 2026-01-26 07:21
+**Last Updated**: 2026-01-26 08:40
