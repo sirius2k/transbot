@@ -190,7 +190,7 @@ transbot/
 ├── docs/                    # 문서 디렉토리
 │   ├── product/             # 제품 요구사항 문서
 │   │   └── PRD.md
-│   ├── planning/            # 실행 계획 문서
+│   ├── feature/             # 기능 명세 및 실행 계획
 │   ├── templates/           # 프롬프트 템플릿
 │   └── guides/              # 개발 가이드
 ├── CLAUDE.md                # Claude AI 작업 가이드
@@ -359,4 +359,4 @@ pip install -r requirements.txt
 
 **Made with ❤️ by TransBot Team**
 
-**Last Updated**: 2026-01-26 08:40
+**Last Updated**: 2026-01-26 08:42

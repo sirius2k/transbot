@@ -40,7 +40,7 @@ transbot/
 ├── docs/                    # 문서 디렉토리
 │   ├── product/             # 제품 요구사항 문서
 │   │   └── PRD.md
-│   ├── planning/            # 실행 계획 문서
+│   ├── feature/             # 기능 명세 및 실행 계획
 │   ├── templates/           # 프롬프트 템플릿
 │   └── guides/              # 개발 가이드
 ├── README.md                # 프로젝트 소개 및 사용 가이드
@@ -780,6 +780,6 @@ git commit -m "docs: 기술 스택 정보 업데이트 (README, PRD, CLAUDE)"
 
 ---
 
-**마지막 업데이트**: 2026-01-26 08:40
+**마지막 업데이트**: 2026-01-26 08:42
 
 **작성자**: TransBot Development Team
