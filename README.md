@@ -36,7 +36,12 @@ TransBot은 OpenAI의 GPT-4o-mini 모델을 활용하여 빠르고 정확한 영
 
 - ✅ 영어 → 한국어 번역
 - ✅ 한국어 → 영어 번역
+- ✅ 자동 언어 감지
 - ✅ 다양한 AI 모델 선택 (GPT-4o Mini, GPT-4o, GPT-4 Turbo, GPT-4, GPT-3.5 Turbo)
+- ✅ Markdown 포맷 지원 및 보존
+- ✅ 번역 결과 듀얼 복사 버튼 (포맷포함 / 텍스트만)
+- ✅ 글자수/토큰수 실시간 표시
+- ✅ 지우기 버튼 (입력 및 번역 결과 초기화)
 - ✅ 실시간 번역 진행 상태 표시
 - ✅ API 키 안전 관리 (환경 변수 또는 사이드바 입력)
 - ✅ 에러 처리 및 사용자 친화적 메시지
@@ -91,8 +96,16 @@ TransBot은 OpenAI의 GPT-4o-mini 모델을 활용하여 빠르고 정확한 영
 
 3. **의존성 설치**
 
+   **프로덕션 환경**
+
    ```bash
    pip install -r requirements.txt
+   ```
+
+   **개발 환경** (테스트 및 코드 품질 도구 포함)
+
+   ```bash
+   pip install -r requirements-dev.txt
    ```
 
 ### 환경 설정
@@ -144,14 +157,14 @@ streamlit run app.py
 
 ### 사용 예시
 
-**영어 → 한국어 번역**
+#### 영어 → 한국어 번역
 
 ```text
 입력: Hello, how are you today?
 출력: 안녕하세요, 오늘 어떻게 지내세요?
 ```
 
-**한국어 → 영어 번역**
+#### 한국어 → 영어 번역
 
 ```text
 입력: 오늘 날씨가 정말 좋네요.
@@ -163,9 +176,20 @@ streamlit run app.py
 ```text
 transbot/
 ├── app.py                    # 메인 애플리케이션 파일
+├── utils.py                  # 유틸리티 함수 모듈
 ├── requirements.txt          # Python 의존성 목록
+├── requirements-dev.txt      # 개발 환경 의존성
 ├── .env.example             # 환경 변수 템플릿
 ├── .gitignore               # Git 제외 파일 목록
+├── pytest.ini               # pytest 설정 파일
+├── .coveragerc              # 코드 커버리지 설정
+├── tests/                   # 테스트 디렉토리
+│   ├── __init__.py
+│   └── test_utils.py        # utils.py 단위 테스트
+├── htmlcov/                 # 테스트 커버리지 및 pytest 리포트
+├── docs/                    # 문서 디렉토리
+├── prompts/                 # 프롬프트 템플릿
+├── execution-plan/          # 실행 계획 문서
 ├── PRD.md                   # 제품 요구사항 문서
 ├── CLAUDE.md                # Claude AI 작업 가이드
 └── README.md                # 프로젝트 소개 문서 (본 문서)
@@ -181,10 +205,18 @@ transbot/
 
 - **OpenAI API** 1.0.0+: GPT-4o-mini 모델 기반 번역 엔진
 - **Python** 3.x: 메인 개발 언어
+- **tiktoken**: 토큰 카운팅 라이브러리
 
 ### 환경 관리
 
 - **python-dotenv** 1.0.0+: 환경 변수 관리
+
+### 테스트 및 품질 관리
+
+- **pytest** 7.4.0+: 테스트 프레임워크
+- **pytest-cov** 4.1.0+: 코드 커버리지 측정
+- **pytest-html** 4.1.0+: HTML 테스트 리포트 생성
+- **pytest-mock** 3.12.0+: Mock 객체 지원
 
 ### AI 모델
 
@@ -193,6 +225,43 @@ transbot/
 - **GPT-4 Turbo**: 빠른 응답 속도와 우수한 성능
 - **GPT-4**: 안정적이고 신뢰할 수 있는 번역
 - **GPT-3.5 Turbo**: 가장 빠르고 경제적인 옵션
+
+## 테스트
+
+### 테스트 실행
+
+프로젝트는 pytest를 사용한 단위 테스트를 포함하고 있습니다.
+
+```bash
+# 모든 테스트 실행
+pytest
+
+# 특정 테스트 파일 실행
+pytest tests/test_utils.py
+
+# 커버리지 리포트와 함께 실행
+pytest --cov=utils --cov-report=html
+```
+
+### 테스트 리포트 확인
+
+테스트 실행 후 `htmlcov/` 폴더에 다음 리포트가 생성됩니다:
+
+- **index.html**: 코드 커버리지 리포트
+- **pytest-report.html**: pytest 테스트 결과 리포트
+
+```bash
+# macOS/Linux
+open htmlcov/index.html
+
+# Windows
+start htmlcov/index.html
+```
+
+### 커버리지 목표
+
+- 최소 커버리지: **80%** 이상 유지
+- 모든 핵심 함수에 대한 단위 테스트 작성 필수
 
 ## 문제 해결
 
@@ -288,4 +357,4 @@ pip install -r requirements.txt
 
 **Made with ❤️ by TransBot Team**
 
-**Last Updated**: 2026-01-24
+**Last Updated**: 2026-01-26 07:21

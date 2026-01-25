@@ -26,9 +26,20 @@ TransBot은 OpenAI GPT 모델을 활용한 영어-한국어 양방향 번역 웹
 ```text
 transbot/
 ├── app.py                    # 메인 애플리케이션 파일
+├── utils.py                  # 유틸리티 함수 모듈
 ├── requirements.txt          # Python 의존성
+├── requirements-dev.txt      # 개발 환경 의존성
 ├── .env.example             # 환경 변수 템플릿
 ├── .gitignore               # Git 제외 파일 목록
+├── pytest.ini               # pytest 설정 파일
+├── .coveragerc              # 코드 커버리지 설정
+├── tests/                   # 테스트 디렉토리
+│   ├── __init__.py
+│   └── test_utils.py        # utils.py 단위 테스트
+├── htmlcov/                 # 테스트 커버리지 및 pytest 리포트
+├── docs/                    # 문서 디렉토리
+├── prompts/                 # 프롬프트 템플릿
+├── execution-plan/          # 실행 계획 문서
 ├── README.md                # 프로젝트 소개 및 사용 가이드
 ├── PRD.md                   # 제품 요구사항 문서
 ├── CLAUDE.md                # Claude AI 작업 가이드 (본 문서)
@@ -136,11 +147,16 @@ deactivate
    - 에러 핸들링 반드시 포함
    - 사용자 경험을 최우선으로 고려
 
-2. **requirements.txt 수정 시**
+2. **utils.py 수정 시**
+   - 모든 함수에 docstring 작성
+   - 타입 힌트 명시 (예: `def func(text: str) -> str:`)
+   - 새로운 함수 추가 시 반드시 단위 테스트 작성
+
+3. **requirements.txt 수정 시**
    - 버전 명시 권장 (예: `streamlit>=1.28.0`)
    - 새로운 라이브러리 추가 시 PRD.md 업데이트
 
-3. **Markdown 문서 수정 시**
+4. **Markdown 문서 수정 시**
    - markdownlint 규칙 준수 필수
    - 모든 문서에 일관되게 적용
 
@@ -238,7 +254,8 @@ model_options = {
 1. PRD.md의 "향후 고려사항" 섹션 확인
 2. 기존 코드 구조와 일관성 유지
 3. 에러 처리 및 사용자 피드백 포함
-4. 테스트 후 커밋
+4. **단위 테스트 작성 필수**
+5. 테스트 통과 확인 후 커밋
 
 ### API 키 관리
 
@@ -375,6 +392,95 @@ model_options = {
 - [ ] Claude 협업 팁이 실용적임
 - [ ] 실무 중심의 가이드
 
+## 테스트 가이드
+
+### 테스트 작성 원칙
+
+1. **단위 테스트 작성 규칙**
+   - 모든 핵심 함수는 반드시 테스트 작성
+   - 테스트 파일명: `test_[모듈명].py` (예: `test_utils.py`)
+   - 테스트 클래스명: `Test[기능명]` (예: `TestDetectLanguage`)
+   - 테스트 함수명: `test_[테스트내용]` (예: `test_detect_korean`)
+
+2. **테스트 케이스 작성 가이드**
+
+   ```python
+   class TestDetectLanguage:
+       """언어 감지 함수 테스트"""
+
+       def test_detect_korean(self):
+           """한국어 텍스트 감지 테스트"""
+           result = detect_language("안녕하세요")
+           assert result == "Korean"
+   ```
+
+3. **Mock 객체 사용**
+
+   외부 API 호출이 필요한 함수는 Mock 객체를 사용하여 테스트합니다.
+
+   ```python
+   from unittest.mock import Mock
+
+   def test_translate_success():
+       """번역 성공 테스트"""
+       mock_client = Mock()
+       mock_response = Mock()
+       mock_response.choices = [Mock()]
+       mock_response.choices[0].message.content = "번역된 텍스트"
+
+       mock_client.chat.completions.create.return_value = mock_response
+
+       result = translate(mock_client, "Hello", "English", "Korean", "gpt-4o")
+       assert result == "번역된 텍스트"
+   ```
+
+### 테스트 실행
+
+```bash
+# 모든 테스트 실행
+pytest
+
+# 특정 파일 테스트
+pytest tests/test_utils.py
+
+# 특정 클래스 테스트
+pytest tests/test_utils.py::TestDetectLanguage
+
+# 특정 함수 테스트
+pytest tests/test_utils.py::TestDetectLanguage::test_detect_korean
+
+# 상세 출력
+pytest -v
+
+# 커버리지와 함께 실행
+pytest --cov=utils --cov-report=html
+```
+
+### 테스트 커버리지 확인
+
+```bash
+# 터미널에서 커버리지 확인
+pytest --cov=utils --cov-report=term-missing
+
+# HTML 리포트 생성
+pytest --cov=utils --cov-report=html
+
+# 리포트 열기 (macOS)
+open htmlcov/index.html
+
+# 리포트 열기 (Linux)
+xdg-open htmlcov/index.html
+
+# 리포트 열기 (Windows)
+start htmlcov/index.html
+```
+
+### 커버리지 목표
+
+- **최소 커버리지**: 80% 이상 유지
+- **핵심 함수**: 100% 커버리지 목표
+- 커버리지 80% 미만 시 pytest 실패 (`pytest.ini`에 설정됨)
+
 ## 문제 해결 가이드
 
 ### 자주 발생하는 이슈
@@ -409,13 +515,24 @@ if 'translation_history' not in st.session_state:
 - [ ] 가상환경 설정 완료 (`venv/` 디렉토리 존재)
 - [ ] 가상환경 활성화 확인 (프롬프트에 `(venv)` 표시)
 - [ ] requirements.txt 의존성 설치 확인
+- [ ] requirements-dev.txt 의존성 설치 확인 (개발 환경)
 
 ### 애플리케이션
 
 - [ ] `.env` 파일에 유효한 API 키 설정
 - [ ] 모든 AI 모델 선택 옵션 테스트 완료
 - [ ] 양방향 번역 기능 테스트 (영어↔한국어)
+- [ ] Markdown 포맷 보존 테스트
+- [ ] 복사 버튼 동작 확인
+- [ ] 지우기 버튼 동작 확인
 - [ ] 에러 핸들링 동작 확인
+
+### 테스트 및 품질
+
+- [ ] **모든 단위 테스트 통과 확인** (`pytest`)
+- [ ] **코드 커버리지 80% 이상 확인** (`pytest --cov`)
+- [ ] 테스트 리포트 생성 확인 (`htmlcov/`)
+- [ ] 새로운 함수에 대한 테스트 작성 완료
 
 ### 문서
 
@@ -423,6 +540,7 @@ if 'translation_history' not in st.session_state:
 - [ ] README.md 업데이트 (사용자 가이드)
 - [ ] CLAUDE.md 업데이트 (개발 가이드)
 - [ ] 모든 문서 markdownlint 규칙 준수 확인
+- [ ] 모든 문서의 "최종 수정일" 업데이트 (날짜 + 시간)
 
 ### Git 및 배포
 
@@ -660,6 +778,6 @@ git commit -m "docs: 기술 스택 정보 업데이트 (README, PRD, CLAUDE)"
 
 ---
 
-**마지막 업데이트**: 2026-01-24
+**마지막 업데이트**: 2026-01-26 07:21
 
 **작성자**: TransBot Development Team
