@@ -20,6 +20,12 @@ if 'input_text' not in st.session_state:
 if 'translation_result' not in st.session_state:
     st.session_state.translation_result = None
 
+
+def clear_inputs():
+    """입력 텍스트와 번역 결과를 초기화하는 콜백 함수"""
+    st.session_state.input_text = ""
+    st.session_state.translation_result = None
+
 # API 키 설정
 api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
@@ -216,10 +222,7 @@ with col_btn1:
             st.warning("번역할 텍스트를 입력해주세요.")
 
 with col_btn2:
-    if st.button("🗑️ 지우기", use_container_width=True):
-        st.session_state.input_text = ""
-        st.session_state.translation_result = None
-        st.rerun()
+    st.button("🗑️ 지우기", use_container_width=True, on_click=clear_inputs)
 
 # 번역 결과 표시
 if st.session_state.translation_result:
