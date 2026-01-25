@@ -25,7 +25,7 @@ if not api_key:
 client = OpenAI(api_key=api_key)
 
 # 사이드바 - 모델 선택
-st.sidebar.header("⚙️ 설정")
+st.sidebar.header("⚙️ 영어-한국어 번역기 설정")
 model_options = {
     "GPT-4o Mini (추천 - 가성비)": "gpt-4o-mini",
     "GPT-4o (최고 품질)": "gpt-4o",
