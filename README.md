@@ -177,6 +177,13 @@ streamlit run app.py
 transbot/
 ├── app.py                    # 메인 애플리케이션 파일
 ├── utils.py                  # 유틸리티 함수 모듈
+├── components/               # 클래스 기반 컴포넌트 모듈
+│   ├── __init__.py
+│   ├── language.py          # LanguageDetector 클래스
+│   ├── text.py              # TextAnalyzer 클래스
+│   ├── translation.py       # TranslationManager 클래스
+│   └── ui/                  # UI 컴포넌트 (향후 확장)
+│       └── __init__.py
 ├── requirements.txt          # Python 의존성 목록
 ├── requirements-dev.txt      # 개발 환경 의존성
 ├── .env.example             # 환경 변수 템플릿
@@ -185,7 +192,10 @@ transbot/
 ├── .coveragerc              # 코드 커버리지 설정
 ├── tests/                   # 테스트 디렉토리
 │   ├── __init__.py
-│   └── test_utils.py        # utils.py 단위 테스트
+│   ├── test_utils.py        # utils.py 단위 테스트
+│   ├── test_language.py     # LanguageDetector 단위 테스트
+│   ├── test_text.py         # TextAnalyzer 단위 테스트
+│   └── test_translation.py  # TranslationManager 단위 테스트
 ├── htmlcov/                 # 테스트 커버리지 및 pytest 리포트
 ├── docs/                    # 문서 디렉토리
 │   ├── product/             # 제품 요구사항 문서
@@ -193,6 +203,9 @@ transbot/
 │   ├── feature-execution-plan/  # 기능 명세 및 실행 계획
 │   ├── templates/           # 프롬프트 템플릿
 │   └── guides/              # 개발 가이드
+├── .claude/                 # Claude AI 서브에이전트 및 커스텀 명령어
+│   ├── commands/            # 커스텀 명령어
+│   └── agents/              # 서브에이전트
 ├── create-labels.sh         # GitHub 레이블 생성 스크립트
 ├── CLAUDE.md                # Claude AI 작업 가이드
 └── README.md                # 프로젝트 소개 문서 (본 문서)
@@ -210,6 +223,13 @@ transbot/
 - **Python** 3.x: 메인 개발 언어
 - **tiktoken**: 토큰 카운팅 라이브러리
 
+### 아키텍처
+
+- **클래스 기반 컴포넌트 설계**: 관심사 분리 및 재사용성을 위한 모듈화 구조
+  - `LanguageDetector`: 언어 감지 및 번역 방향 관리
+  - `TextAnalyzer`: 텍스트 분석 및 통계 생성
+  - `TranslationManager`: 번역 작업 관리 및 OpenAI 클라이언트 처리
+
 ### 환경 관리
 
 - **python-dotenv** 1.0.0+: 환경 변수 관리
@@ -220,6 +240,8 @@ transbot/
 - **pytest-cov** 4.1.0+: 코드 커버리지 측정
 - **pytest-html** 4.1.0+: HTML 테스트 리포트 생성
 - **pytest-mock** 3.12.0+: Mock 객체 지원
+- **코드 커버리지**: 97.98% 달성 (목표: 80% 이상)
+- **총 테스트 수**: 79개 (utils + components 통합)
 
 ### AI 모델
 
@@ -264,7 +286,8 @@ start htmlcov/index.html
 ### 커버리지 목표
 
 - 최소 커버리지: **80%** 이상 유지
-- 모든 핵심 함수에 대한 단위 테스트 작성 필수
+- 현재 커버리지: **97.98%** 달성 (2026-01-27 기준)
+- 모든 핵심 함수 및 클래스에 대한 단위 테스트 작성 필수
 
 ## 문제 해결
 
@@ -360,4 +383,4 @@ pip install -r requirements.txt
 
 Made with ❤️ by TransBot Team
 
-Last Updated: 2026-01-26 21:29
+Last Updated: 2026-01-27 23:57
