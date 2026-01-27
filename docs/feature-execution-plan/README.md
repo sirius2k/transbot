@@ -14,6 +14,12 @@
 | [FEATURE-006](FEATURE-006.md) | 번역 결과 듀얼 복사 버튼 | ✅ 완료 | FE |
 | [FEATURE-007](FEATURE-007.md) | 사이드바 UI (설정 섹션) | ✅ 완료 | FE |
 
+## Phase 2 계획 중 기능 목록
+
+| FEATURE | 기능명 | 상태 | 분류 | 우선순위 |
+|---------|--------|------|------|----------|
+| [FEATURE-008](FEATURE-008.md) | Azure OpenAI Service 지원 | 🔲 계획 중 | BE + FE | P1 |
+
 ## 기능 간 의존성 다이어그램
 
 ```text
@@ -22,6 +28,8 @@ FEATURE-001 (핵심 번역)
     ├──→ FEATURE-002 (자동 언어 감지)
     │
     ├──→ FEATURE-003 (모델 선택)
+    │       │
+    │       └──→ FEATURE-008 (Azure OpenAI 지원) ← Provider 선택 확장
     │
     ├──→ FEATURE-004 (글자수/토큰 표시)
     │
@@ -33,6 +41,7 @@ FEATURE-001 (핵심 번역)
               │
               ├── API 키 입력
               ├── 모델 선택 (FEATURE-003)
+              ├── Provider 선택 (FEATURE-008)
               └── 번역 설정 (FEATURE-002)
 ```
 
@@ -56,21 +65,22 @@ FEATURE-001 (핵심 번역)
 
 ## 총 작업(Task) 수
 
-| FEATURE | Task 수 |
-|---------|---------|
-| FEATURE-001 | 5 |
-| FEATURE-002 | 4 |
-| FEATURE-003 | 4 |
-| FEATURE-004 | 4 |
-| FEATURE-005 | 4 |
-| FEATURE-006 | 5 |
-| FEATURE-007 | 6 |
-| **총합** | **32** |
+| FEATURE     | Task 수 |
+| ----------- | ------- |
+| FEATURE-001 | 5       |
+| FEATURE-002 | 4       |
+| FEATURE-003 | 4       |
+| FEATURE-004 | 4       |
+| FEATURE-005 | 4       |
+| FEATURE-006 | 5       |
+| FEATURE-007 | 6       |
+| FEATURE-008 | 8       |
+| **총합**    | **40**  |
 
 ## 파일 구조
 
 ```text
-excution-plan/
+feature-execution-plan/
 ├── README.md           # 이 파일 (전체 요약)
 ├── FEATURE-001.md      # 영어 ↔ 한국어 양방향 번역
 ├── FEATURE-002.md      # 자동 언어 감지
@@ -78,7 +88,8 @@ excution-plan/
 ├── FEATURE-004.md      # 글자수/토큰수 실시간 표시
 ├── FEATURE-005.md      # Markdown 포맷 지원 및 보존
 ├── FEATURE-006.md      # 번역 결과 듀얼 복사 버튼
-└── FEATURE-007.md      # 사이드바 UI (설정 섹션)
+├── FEATURE-007.md      # 사이드바 UI (설정 섹션)
+└── FEATURE-008.md      # Azure OpenAI Service 지원
 ```
 
 ---
