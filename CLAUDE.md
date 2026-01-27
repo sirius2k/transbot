@@ -21,12 +21,25 @@ TransBot은 OpenAI GPT 모델을 활용한 영어-한국어 양방향 번역 웹
 - **python-dotenv**: 환경 변수 관리
 - **Python 3.x**: 메인 개발 언어
 
+### 아키텍처 패턴
+
+- **클래스 기반 컴포넌트**: 관심사 분리 및 재사용성 향상을 위한 모듈화 구조
+- **함수형 유틸리티**: 기존 utils.py는 순수 함수로 유지하며 컴포넌트에서 래핑
+- **레이어드 아키텍처**: app.py (UI) → components (비즈니스 로직) → utils (유틸리티)
+
 ## 프로젝트 구조
 
 ```text
 transbot/
 ├── app.py                    # 메인 애플리케이션 파일
 ├── utils.py                  # 유틸리티 함수 모듈
+├── components/               # 클래스 기반 컴포넌트 모듈
+│   ├── __init__.py
+│   ├── language.py          # LanguageDetector 클래스
+│   ├── text.py              # TextAnalyzer 클래스
+│   ├── translation.py       # TranslationManager 클래스
+│   └── ui/                  # UI 컴포넌트 (향후 확장)
+│       └── __init__.py
 ├── requirements.txt          # Python 의존성
 ├── requirements-dev.txt      # 개발 환경 의존성
 ├── .env.example             # 환경 변수 템플릿
@@ -35,7 +48,10 @@ transbot/
 ├── .coveragerc              # 코드 커버리지 설정
 ├── tests/                   # 테스트 디렉토리
 │   ├── __init__.py
-│   └── test_utils.py        # utils.py 단위 테스트
+│   ├── test_utils.py        # utils.py 단위 테스트
+│   ├── test_language.py     # LanguageDetector 단위 테스트
+│   ├── test_text.py         # TextAnalyzer 단위 테스트
+│   └── test_translation.py  # TranslationManager 단위 테스트
 ├── htmlcov/                 # 테스트 커버리지 및 pytest 리포트
 ├── docs/                    # 문서 디렉토리
 │   ├── product/             # 제품 요구사항 문서
@@ -43,6 +59,9 @@ transbot/
 │   ├── feature-execution-plan/  # 기능 명세 및 실행 계획
 │   ├── templates/           # 프롬프트 템플릿
 │   └── guides/              # 개발 가이드
+├── .claude/                 # Claude AI 서브에이전트 및 커스텀 명령어
+│   ├── commands/            # 커스텀 명령어
+│   └── agents/              # 서브에이전트
 ├── create-labels.sh         # GitHub 레이블 생성 스크립트
 ├── README.md                # 프로젝트 소개 및 사용 가이드
 ├── CLAUDE.md                # Claude AI 작업 가이드 (본 문서)
@@ -67,20 +86,54 @@ transbot/
 
 ### 코드 예시
 
+#### 클래스 기반 컴포넌트
+
 ```python
-def translate(text: str, source: str, target: str, model: str) -> str:
-    """OpenAI API를 사용하여 텍스트를 번역합니다.
+class TranslationManager:
+    """번역 작업을 관리하는 클래스
+
+    OpenAI 클라이언트를 관리하고 번역 설정(모델, temperature)을 유지합니다.
+    """
+
+    def __init__(self, client, model: str = "gpt-4o-mini", temperature: float = 0.3):
+        """
+        Args:
+            client: OpenAI 클라이언트 인스턴스
+            model: 사용할 AI 모델 (기본 gpt-4o-mini)
+            temperature: 번역 창의성 설정 (기본 0.3)
+        """
+        self.client = client
+        self.model = model
+        self.temperature = temperature
+
+    def translate(self, text: str, source: str, target: str) -> str:
+        """텍스트를 번역합니다.
+
+        Args:
+            text: 번역할 텍스트
+            source: 원본 언어 (예: "Korean", "English")
+            target: 대상 언어 (예: "English", "Korean")
+
+        Returns:
+            번역된 텍스트
+        """
+        # API 호출 로직
+        pass
+```
+
+#### 함수 기반 유틸리티
+
+```python
+def detect_language(text: str) -> str:
+    """텍스트의 언어를 감지합니다.
 
     Args:
-        text: 번역할 텍스트
-        source: 원본 언어 (예: "English", "Korean")
-        target: 대상 언어 (예: "Korean", "English")
-        model: 사용할 AI 모델 (예: "gpt-4o-mini", "gpt-4o")
+        text: 분석할 텍스트
 
     Returns:
-        번역된 텍스트
+        감지된 언어명 ("Korean", "English", "unknown")
     """
-    # API 호출 로직
+    # 언어 감지 로직
     pass
 ```
 
@@ -149,19 +202,97 @@ deactivate
    - Streamlit 컴포넌트 구조 유지
    - 에러 핸들링 반드시 포함
    - 사용자 경험을 최우선으로 고려
+   - 비즈니스 로직은 components 모듈로 분리
 
-2. **utils.py 수정 시**
+2. **components/ 모듈 수정 시**
+   - 단일 책임 원칙(SRP) 준수: 각 클래스는 하나의 명확한 책임만 가짐
+   - 클래스에 docstring 및 모든 메서드에 상세한 설명 작성
+   - 타입 힌트 명시 (예: `def method(text: str) -> str:`)
+   - 새로운 클래스/메서드 추가 시 반드시 단위 테스트 작성
+   - 기존 utils.py 함수를 래핑하여 재사용
+   - 상태를 가진 객체는 불변성(immutability) 고려
+
+3. **utils.py 수정 시**
+   - 순수 함수(pure function)로 유지: 부작용 없이 입력에 대한 출력만 반환
    - 모든 함수에 docstring 작성
    - 타입 힌트 명시 (예: `def func(text: str) -> str:`)
    - 새로운 함수 추가 시 반드시 단위 테스트 작성
 
-3. **requirements.txt 수정 시**
+4. **requirements.txt 수정 시**
    - 버전 명시 권장 (예: `streamlit>=1.28.0`)
    - 새로운 라이브러리 추가 시 PRD.md 업데이트
 
-4. **Markdown 문서 수정 시**
+5. **Markdown 문서 수정 시**
    - markdownlint 규칙 준수 필수
    - 모든 문서에 일관되게 적용
+
+### 컴포넌트 모듈 개발 가이드
+
+#### 모듈 구성 원칙
+
+- **components/language.py**: 언어 감지 및 번역 방향 관리
+  - `LanguageDetector` 클래스: 언어 자동 감지, 번역 방향 결정
+  - 언어별 설정을 딕셔너리로 관리 (DIRECTION_CONFIG)
+
+- **components/text.py**: 텍스트 분석 및 Markdown 처리
+  - `TextAnalyzer` 클래스: 토큰 카운팅, 문자 수 계산, Markdown 처리
+  - 통계 정보 생성 및 UI 표시 로직 캡슐화
+
+- **components/translation.py**: 번역 작업 관리
+  - `TranslationManager` 클래스: OpenAI 클라이언트 관리, 번역 실행
+  - 모델 및 temperature 설정 관리
+  - Azure OpenAI 지원 확장 준비
+
+#### 클래스 설계 예시
+
+```python
+class LanguageDetector:
+    """텍스트의 언어를 자동 감지하고 번역 방향을 결정하는 클래스"""
+
+    # 클래스 상수: 언어별 설정을 딕셔너리로 관리
+    DIRECTION_CONFIG = {
+        "Korean": {
+            "source": "Korean",
+            "target": "English",
+            "arrow": "🇰🇷 → 🇺🇸",
+            "code": "ko",
+            "flag": "🇰🇷"
+        },
+        # ... 다른 언어 설정
+    }
+
+    def __init__(self, threshold: float = 0.5):
+        """초기화 메서드: 필요한 설정값 저장"""
+        self.threshold = threshold
+
+    def get_translation_direction(self, text: str) -> tuple[str, str, str]:
+        """번역 방향을 결정하는 핵심 메서드
+
+        if-elif 체인을 딕셔너리 조회로 대체하여 간결성 향상
+        """
+        detected = self.detect(text)
+        config = self.DIRECTION_CONFIG.get(detected, self.DIRECTION_CONFIG["unknown"])
+        return (config["source"], config["target"], config["arrow"])
+```
+
+#### 컴포넌트 사용 예시 (app.py)
+
+```python
+# 컴포넌트 import
+from components.language import LanguageDetector
+from components.text import TextAnalyzer
+from components.translation import TranslationManager
+
+# 인스턴스 생성
+language_detector = LanguageDetector()
+text_analyzer = TextAnalyzer()
+translation_manager = TranslationManager(client, model="gpt-4o-mini")
+
+# 사용 (기존 20줄 로직이 1줄로 간소화)
+source_lang, target_lang, direction_arrow = language_detector.get_translation_direction(input_text)
+stats_html = text_analyzer.format_statistics_display(input_text, direction_arrow)
+result = translation_manager.translate(input_text, source_lang, target_lang)
+```
 
 ### Markdownlint 규칙 상세 가이드
 
@@ -481,8 +612,90 @@ start htmlcov/index.html
 ### 커버리지 목표
 
 - **최소 커버리지**: 80% 이상 유지
+- **현재 커버리지**: 97.98% 달성 (2026-01-27 기준)
 - **핵심 함수**: 100% 커버리지 목표
 - 커버리지 80% 미만 시 pytest 실패 (`pytest.ini`에 설정됨)
+
+### 테스트 현황
+
+#### 전체 테스트 통계 (2026-01-27 기준)
+
+- **총 테스트 수**: 79개
+- **전체 커버리지**: 97.98%
+- **모듈별 커버리지**: 모든 컴포넌트 100% 달성
+
+#### 모듈별 테스트 세부사항
+
+##### utils.py (32개 테스트)
+
+- `detect_language()`: 언어 감지 함수 (8개 테스트)
+- `count_tokens()`: 토큰 카운팅 함수 (5개 테스트)
+- `strip_markdown()`: Markdown 제거 함수 (14개 테스트)
+- `translate()`: 번역 함수 (3개 Mock 테스트)
+- 기타 유틸리티 함수 (2개 테스트)
+
+##### components/language.py (16개 테스트)
+
+- `LanguageDetector.detect()`: 언어 감지 메서드
+- `LanguageDetector.get_translation_direction()`: 번역 방향 결정
+- `LanguageDetector.get_language_code()`: 언어 코드 변환
+- `LanguageDetector.get_language_flag()`: 플래그 이모지 반환
+
+##### components/text.py (16개 테스트)
+
+- `TextAnalyzer.count_tokens()`: 토큰 카운팅
+- `TextAnalyzer.get_statistics()`: 통계 정보 생성
+- `TextAnalyzer.strip_markdown()`: Markdown 제거
+- `TextAnalyzer.has_markdown()`: Markdown 포함 여부 확인
+- `TextAnalyzer.format_statistics_display()`: UI 표시용 HTML 생성
+
+##### components/translation.py (15개 테스트)
+
+- `TranslationManager.translate()`: 번역 수행
+- `TranslationManager.set_model()`: 모델 변경
+- `TranslationManager.set_temperature()`: temperature 설정
+- `TranslationManager.validate_model()`: 모델 검증
+- `TranslationManager.get_model_list()`: 지원 모델 목록 조회
+
+### 컴포넌트 테스트 작성 가이드
+
+#### 클래스 테스트 구조
+
+```python
+class TestLanguageDetector:
+    """LanguageDetector 클래스 테스트"""
+
+    def test_detect_korean(self):
+        """한국어 텍스트 감지 테스트"""
+        detector = LanguageDetector()
+        result = detector.detect("안녕하세요")
+        assert result == "Korean"
+
+    def test_get_translation_direction_korean(self):
+        """한국어 번역 방향 결정 테스트"""
+        detector = LanguageDetector()
+        source, target, arrow = detector.get_translation_direction("안녕하세요")
+        assert source == "Korean"
+        assert target == "English"
+        assert arrow == "🇰🇷 → 🇺🇸"
+```
+
+#### 컴포넌트 테스트 작성 원칙
+
+1. **각 컴포넌트마다 별도의 테스트 파일 작성**
+   - `test_language.py`, `test_text.py`, `test_translation.py`
+
+2. **클래스별 테스트 클래스 생성**
+   - 테스트 클래스명: `Test[클래스명]` (예: `TestLanguageDetector`)
+
+3. **메서드별 테스트 함수 작성**
+   - 테스트 함수명: `test_[메서드명]_[시나리오]` (예: `test_detect_korean`)
+
+4. **경계값 및 예외 상황 테스트**
+   - 정상 케이스, 에러 케이스, 엣지 케이스 모두 커버
+
+5. **Mock 객체 활용**
+   - 외부 API 의존성은 Mock으로 대체하여 테스트
 
 ## 문제 해결 가이드
 
@@ -886,6 +1099,6 @@ git commit -m "docs: 기술 스택 정보 업데이트 (README, PRD, CLAUDE)"
 
 ---
 
-마지막 업데이트: 2026-01-26 23:46
+마지막 업데이트: 2026-01-27 23:57
 
 작성자: TransBot Development Team

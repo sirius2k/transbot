@@ -2,7 +2,11 @@ import streamlit as st
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
-from utils import detect_language, count_tokens, strip_markdown, translate
+from utils import strip_markdown  # create_dual_copy_buttons에서 사용
+# 새로운 클래스 기반 모듈 import
+from components.language import LanguageDetector
+from components.text import TextAnalyzer
+from components.translation import TranslationManager
 
 load_dotenv()
 
@@ -36,6 +40,10 @@ if not api_key:
 
 client = OpenAI(api_key=api_key)
 
+# 클래스 기반 모듈 인스턴스 초기화
+language_detector = LanguageDetector()
+text_analyzer = TextAnalyzer()
+
 # 사이드바 - 모델 선택
 st.sidebar.header("⚙️ 영어-한국어 번역기 설정")
 model_options = {
@@ -52,6 +60,9 @@ selected_model_name = st.sidebar.selectbox(
     index=0  # 기본값: GPT-4o Mini
 )
 selected_model = model_options[selected_model_name]
+
+# TranslationManager 초기화 (선택된 모델 사용)
+translation_manager = TranslationManager(client, model=selected_model)
 
 # 자동 언어 감지 모드
 st.info("🌐 **자동 번역**: 입력하신 언어를 자동으로 감지하여 번역합니다.")
@@ -76,28 +87,14 @@ input_text = st.text_area(
 
 # 언어 자동 감지 및 통계 업데이트
 if input_text:
-    detected_lang = detect_language(input_text)
-    char_count = len(input_text)
-    token_count = count_tokens(input_text, selected_model)
+    # LanguageDetector 클래스로 언어 감지 및 번역 방향 결정
+    source_lang, target_lang, direction_arrow = language_detector.get_translation_direction(input_text)
 
-    # 감지된 언어에 따라 번역 방향 설정
-    if detected_lang == "Korean":
-        source_lang = "Korean"
-        target_lang = "English"
-        direction_arrow = "🇰🇷 → 🇺🇸"
-    elif detected_lang == "English":
-        source_lang = "English"
-        target_lang = "Korean"
-        direction_arrow = "🇺🇸 → 🇰🇷"
-    else:
-        source_lang = "unknown"
-        target_lang = "unknown"
-        direction_arrow = "❓"
+    # TextAnalyzer 클래스로 통계 표시 HTML 생성
+    text_analyzer.model = selected_model  # 선택된 모델로 업데이트
+    stats_html = text_analyzer.format_statistics_display(input_text, direction_arrow)
 
-    stats_placeholder.markdown(
-        f"<div style='text-align: right;'>{direction_arrow}<br/>{char_count:,}자 / {token_count:,} 토큰</div>",
-        unsafe_allow_html=True
-    )
+    stats_placeholder.markdown(stats_html, unsafe_allow_html=True)
 else:
     source_lang = "unknown"
     target_lang = "unknown"
@@ -209,7 +206,8 @@ with col_btn1:
             else:
                 with st.spinner("번역 중..."):
                     try:
-                        result = translate(client, input_text, source_lang, target_lang, selected_model)
+                        # TranslationManager 클래스로 번역 수행
+                        result = translation_manager.translate(input_text, source_lang, target_lang)
                         # 번역 결과를 session_state에 저장
                         st.session_state.translation_result = {
                             "text": result,

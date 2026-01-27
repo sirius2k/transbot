@@ -137,7 +137,27 @@ Phase 3 (P2-P3 기능)
 
 ## 6. 개발 인프라 및 품질 관리
 
-### 6.1 테스트 프레임워크
+### 6.1 아키텍처 구조
+
+#### 클래스 기반 컴포넌트 설계 (Phase 1.5 완료)
+
+프로젝트는 함수 기반에서 클래스 기반 아키텍처로 리팩토링되었습니다.
+
+| 컴포넌트 | 책임 | 주요 기능 |
+| -------- | ---- | --------- |
+| `LanguageDetector` | 언어 감지 및 번역 방향 관리 | 자동 언어 감지, 번역 방향 결정, 언어 코드 변환 |
+| `TextAnalyzer` | 텍스트 분석 및 통계 생성 | 토큰 카운팅, 통계 계산, Markdown 처리 |
+| `TranslationManager` | 번역 작업 관리 | OpenAI 클라이언트 관리, 번역 실행, 모델 설정 |
+
+#### 아키텍처 개선 효과
+
+- **코드 중복 제거**: 언어 감지 로직 20줄 → 1줄로 간소화
+- **관심사 분리**: UI(app.py), 비즈니스 로직(components), 유틸리티(utils.py) 계층화
+- **재사용성 향상**: 클래스 인스턴스를 통한 설정 공유 및 재사용
+- **테스트 용이성**: 각 컴포넌트별 독립적인 단위 테스트
+- **확장성 준비**: Azure OpenAI 지원 등 향후 기능 확장 기반 마련
+
+### 6.2 테스트 프레임워크
 
 | 항목 | 기술 | 설명 |
 | ---- | ---- | ---- |
@@ -146,24 +166,49 @@ Phase 3 (P2-P3 기능)
 | HTML 리포트 | pytest-html 4.1.0+ | 테스트 결과 HTML 리포트 생성 |
 | Mock 지원 | pytest-mock 3.12.0+ | Mock 객체를 사용한 테스트 |
 
-### 6.2 코드 품질 기준
+### 6.3 코드 품질 기준
 
-| 지표 | 목표 | 현재 상태 |
-| ---- | ---- | -------- |
-| 코드 커버리지 | 80% 이상 | ✅ 달성 |
-| 단위 테스트 | 모든 핵심 함수 | ✅ utils.py 완료 |
+| 지표 | 목표 | 현재 상태 (2026-01-27) |
+| ---- | ---- | ----------------------- |
+| 코드 커버리지 | 80% 이상 | ✅ **97.98%** 달성 |
+| 총 테스트 수 | 모든 핵심 함수 및 클래스 | ✅ **79개** 완료 |
+| 컴포넌트 커버리지 | 100% | ✅ 모든 컴포넌트 100% 달성 |
 | 테스트 리포트 | htmlcov/ 폴더 통합 관리 | ✅ 구현 완료 |
 
-### 6.3 테스트 대상 모듈
+### 6.4 테스트 대상 모듈
 
-#### utils.py (완료)
+#### utils.py (32개 테스트)
 
-- `detect_language()`: 언어 감지 함수 (8개 테스트 케이스)
-- `count_tokens()`: 토큰 카운팅 함수 (5개 테스트 케이스)
-- `strip_markdown()`: Markdown 제거 함수 (14개 테스트 케이스)
+- `detect_language()`: 언어 감지 함수 (8개 테스트)
+- `count_tokens()`: 토큰 카운팅 함수 (5개 테스트)
+- `strip_markdown()`: Markdown 제거 함수 (14개 테스트)
 - `translate()`: 번역 함수 (3개 Mock 테스트)
+- 기타 유틸리티 함수 (2개 테스트)
 
-### 6.4 리포트 관리
+#### components/language.py (16개 테스트)
+
+- `LanguageDetector.detect()`: 언어 감지
+- `LanguageDetector.get_translation_direction()`: 번역 방향 결정
+- `LanguageDetector.get_language_code()`: 언어 코드 변환
+- `LanguageDetector.get_language_flag()`: 플래그 이모지 반환
+
+#### components/text.py (16개 테스트)
+
+- `TextAnalyzer.count_tokens()`: 토큰 카운팅
+- `TextAnalyzer.get_statistics()`: 통계 정보 생성
+- `TextAnalyzer.strip_markdown()`: Markdown 제거
+- `TextAnalyzer.has_markdown()`: Markdown 포함 여부
+- `TextAnalyzer.format_statistics_display()`: UI 표시용 HTML 생성
+
+#### components/translation.py (15개 테스트)
+
+- `TranslationManager.translate()`: 번역 수행
+- `TranslationManager.set_model()`: 모델 변경
+- `TranslationManager.set_temperature()`: temperature 설정
+- `TranslationManager.validate_model()`: 모델 검증
+- `TranslationManager.get_model_list()`: 지원 모델 목록
+
+### 6.5 리포트 관리
 
 모든 테스트 및 커버리지 리포트는 `htmlcov/` 폴더에 통합 관리됩니다:
 
@@ -172,4 +217,4 @@ Phase 3 (P2-P3 기능)
 
 ---
 
-**최종 수정일**: 2026-01-27 02:15
+**최종 수정일**: 2026-01-27 23:57

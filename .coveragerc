@@ -1,6 +1,8 @@
 [run]
 # 커버리지 측정 대상
-source = utils.py
+source =
+    utils.py
+    components
 
 # 제외할 파일/디렉토리
 omit =
