@@ -1,5 +1,4 @@
 """번역 관리 기능을 제공하는 모듈"""
-from utils import translate as translate_func
 
 
 class TranslationManager:
@@ -37,7 +36,7 @@ class TranslationManager:
     def translate(self, text: str, source: str, target: str) -> str:
         """텍스트를 번역합니다.
 
-        기존 translate() 함수를 사용하되, 클래스의 설정(model, temperature)을 적용합니다.
+        OpenAI API를 사용하여 클래스의 설정(model, temperature)을 적용합니다.
 
         Args:
             text: 번역할 텍스트
@@ -47,9 +46,6 @@ class TranslationManager:
         Returns:
             번역된 텍스트
         """
-        # 기존 translate 함수를 사용하되, temperature는 클래스 설정 사용
-        # 현재 utils.translate는 temperature를 매개변수로 받지 않으므로
-        # client의 completions.create 호출에 직접 전달
         response = self.client.chat.completions.create(
             model=self.model,
             messages=[
@@ -94,21 +90,8 @@ class TranslationManager:
 
     @staticmethod
     def get_model_list() -> list[str]:
-        """지원하는 모델 목록을 반환합니다.
-
-        Returns:
-            모델명 리스트
-        """
         return TranslationManager.SUPPORTED_MODELS.copy()
 
     @staticmethod
     def validate_model(model: str) -> bool:
-        """모델이 지원되는지 검증합니다.
-
-        Args:
-            model: 검증할 모델명
-
-        Returns:
-            지원 여부 (True/False)
-        """
         return model in TranslationManager.SUPPORTED_MODELS

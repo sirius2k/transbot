@@ -13,27 +13,9 @@ class TextAnalyzer:
         self.model = model
 
     def count_tokens(self, text: str) -> int:
-        """텍스트의 토큰 수를 계산합니다.
-
-        기존 count_tokens() 함수를 사용합니다.
-
-        Args:
-            text: 분석할 텍스트
-
-        Returns:
-            토큰 수
-        """
         return count_tokens(text, self.model)
 
     def count_characters(self, text: str) -> int:
-        """텍스트의 문자 수를 계산합니다.
-
-        Args:
-            text: 분석할 텍스트
-
-        Returns:
-            문자 수
-        """
         return len(text)
 
     def get_statistics(self, text: str) -> dict:
@@ -58,27 +40,9 @@ class TextAnalyzer:
         }
 
     def strip_markdown(self, text: str) -> str:
-        """Markdown 포맷을 제거하고 순수 텍스트만 반환합니다.
-
-        기존 strip_markdown() 함수를 사용합니다.
-
-        Args:
-            text: Markdown 텍스트
-
-        Returns:
-            Markdown이 제거된 순수 텍스트
-        """
         return strip_markdown(text)
 
     def has_markdown(self, text: str) -> bool:
-        """텍스트에 Markdown 포맷이 포함되어 있는지 확인합니다.
-
-        Args:
-            text: 확인할 텍스트
-
-        Returns:
-            Markdown 포함 여부
-        """
         stripped = self.strip_markdown(text)
         return stripped != text
 

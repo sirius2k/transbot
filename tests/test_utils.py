@@ -2,8 +2,7 @@
 utils.py의 핵심 함수들에 대한 단위 테스트
 """
 import pytest
-from unittest.mock import Mock
-from utils import detect_language, count_tokens, strip_markdown, translate
+from utils import detect_language, count_tokens, strip_markdown
 
 
 class TestDetectLanguage:
@@ -188,58 +187,3 @@ class TestStripMarkdown:
         text = "This is plain text with no markdown."
         result = strip_markdown(text)
         assert result == text
-
-
-class TestTranslate:
-    """번역 함수 테스트 (Mock 사용)"""
-
-    def test_translate_success(self):
-        """번역 성공 테스트"""
-        # Mock client 생성
-        mock_client = Mock()
-        mock_response = Mock()
-        mock_response.choices = [Mock()]
-        mock_response.choices[0].message.content = "번역된 텍스트"
-
-        mock_client.chat.completions.create.return_value = mock_response
-
-        result = translate(mock_client, "Hello", "English", "Korean", "gpt-4o")
-
-        assert result == "번역된 텍스트"
-        mock_client.chat.completions.create.assert_called_once()
-
-    def test_translate_with_correct_parameters(self):
-        """번역 함수가 올바른 파라미터로 호출되는지 테스트"""
-        mock_client = Mock()
-        mock_response = Mock()
-        mock_response.choices = [Mock()]
-        mock_response.choices[0].message.content = "Translated"
-
-        mock_client.chat.completions.create.return_value = mock_response
-
-        translate(mock_client, "Test", "English", "Korean", "gpt-4o-mini")
-
-        call_args = mock_client.chat.completions.create.call_args
-        assert call_args[1]['model'] == "gpt-4o-mini"
-        assert call_args[1]['temperature'] == 0.3
-        assert len(call_args[1]['messages']) == 2
-        assert call_args[1]['messages'][0]['role'] == "system"
-        assert call_args[1]['messages'][1]['role'] == "user"
-        assert call_args[1]['messages'][1]['content'] == "Test"
-
-    def test_translate_preserves_markdown_instruction(self):
-        """번역 함수가 Markdown 보존 지시를 포함하는지 테스트"""
-        mock_client = Mock()
-        mock_response = Mock()
-        mock_response.choices = [Mock()]
-        mock_response.choices[0].message.content = "Result"
-
-        mock_client.chat.completions.create.return_value = mock_response
-
-        translate(mock_client, "Text", "English", "Korean", "gpt-4o")
-
-        call_args = mock_client.chat.completions.create.call_args
-        system_message = call_args[1]['messages'][0]['content']
-
-        assert "Markdown" in system_message
-        assert "Preserve" in system_message or "preserve" in system_message
