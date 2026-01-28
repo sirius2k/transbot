@@ -129,7 +129,6 @@ def create_dual_copy_buttons(text_with_format: str, button_key_prefix: str = "du
 
 
 def clear_inputs() -> None:
-    """입력 텍스트와 번역 결과를 초기화하는 콜백 함수"""
     st.session_state.input_text = ""
     st.session_state.translation_result = None
 
@@ -139,7 +138,6 @@ def clear_inputs() -> None:
 # ============================================================================
 
 def initialize_page_config() -> None:
-    """페이지 설정을 초기화합니다."""
     st.set_page_config(
         page_title="영어-한국어 번역기",
         page_icon="🌐",
@@ -148,7 +146,6 @@ def initialize_page_config() -> None:
 
 
 def initialize_session_state() -> None:
-    """세션 상태를 초기화합니다."""
     if 'input_text' not in st.session_state:
         st.session_state.input_text = ""
     if 'translation_result' not in st.session_state:
@@ -213,12 +210,10 @@ def setup_sidebar() -> tuple[str, dict[str, str]]:
 # ============================================================================
 
 def show_title() -> None:
-    """페이지 타이틀을 표시합니다."""
     st.title("🌐 영어-한국어 번역기")
 
 
 def show_info_messages() -> None:
-    """정보 메시지를 표시합니다."""
     st.info("🌐 **자동 번역**: 입력하신 언어를 자동으로 감지하여 번역합니다.")
     st.info("💡 **Markdown 지원**: **볼드**, *이탤릭*, `코드`, [링크](URL), 리스트(- 또는 1.), > 인용문, 표 등 사용 가능")
 
@@ -273,7 +268,6 @@ def render_action_buttons(
 
 
 def render_translation_result() -> None:
-    """번역 결과를 렌더링합니다."""
     if st.session_state.translation_result:
         result = st.session_state.translation_result["text"]
         source_lang = st.session_state.translation_result["source"]
