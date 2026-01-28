@@ -240,8 +240,8 @@ transbot/
 - **pytest-cov** 4.1.0+: 코드 커버리지 측정
 - **pytest-html** 4.1.0+: HTML 테스트 리포트 생성
 - **pytest-mock** 3.12.0+: Mock 객체 지원
-- **코드 커버리지**: 97.98% 달성 (목표: 80% 이상)
-- **총 테스트 수**: 79개 (utils + components 통합)
+- **코드 커버리지**: 98% 달성 (목표: 80% 이상)
+- **총 테스트 수**: 76개 (utils + components 통합)
 
 ### AI 모델
 
@@ -286,7 +286,7 @@ start htmlcov/index.html
 ### 커버리지 목표
 
 - 최소 커버리지: **80%** 이상 유지
-- 현재 커버리지: **97.98%** 달성 (2026-01-27 기준)
+- 현재 커버리지: **98%** 달성 (2026-01-28 기준)
 - 모든 핵심 함수 및 클래스에 대한 단위 테스트 작성 필수
 
 ## 문제 해결
@@ -383,4 +383,4 @@ pip install -r requirements.txt
 
 Made with ❤️ by TransBot Team
 
-Last Updated: 2026-01-27 23:57
+Last Updated: 2026-01-28 15:45
