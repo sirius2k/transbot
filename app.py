@@ -7,8 +7,12 @@ from utils import strip_markdown
 from components.language import LanguageDetector
 from components.text import TextAnalyzer
 from components.translation import TranslationManager
+from config import Config
 
 load_dotenv()
+
+# 설정 로드
+config = Config.load()
 
 
 # ============================================================================
@@ -138,10 +142,14 @@ def clear_inputs() -> None:
 # ============================================================================
 
 def initialize_page_config() -> None:
+    """페이지 설정을 초기화합니다.
+
+    Config에서 APP_TITLE, APP_ICON, APP_LAYOUT을 로드하여 적용합니다.
+    """
     st.set_page_config(
-        page_title="영어-한국어 번역기",
-        page_icon="🌐",
-        layout="centered"
+        page_title=config.APP_TITLE,
+        page_icon=config.APP_ICON,
+        layout=config.APP_LAYOUT
     )
 
 
@@ -182,6 +190,8 @@ def initialize_components() -> tuple[LanguageDetector, TextAnalyzer]:
 def setup_sidebar() -> tuple[str, dict[str, str]]:
     """사이드바를 설정하고 선택된 모델을 반환합니다.
 
+    Config에서 DEFAULT_MODEL을 로드하여 기본 선택 모델을 설정합니다.
+
     Returns:
         (선택된 모델명, 모델 옵션 딕셔너리) 튜플
     """
@@ -195,10 +205,20 @@ def setup_sidebar() -> tuple[str, dict[str, str]]:
         "GPT-3.5 Turbo (빠름)": "gpt-3.5-turbo"
     }
 
+    # Config에서 기본 모델 가져오기
+    default_model = config.DEFAULT_MODEL
+
+    # 기본 모델에 해당하는 인덱스 찾기
+    default_index = 0
+    for idx, (_, model_id) in enumerate(model_options.items()):
+        if model_id == default_model:
+            default_index = idx
+            break
+
     selected_model_name = st.sidebar.selectbox(
         "AI 모델 선택:",
         options=list(model_options.keys()),
-        index=0  # 기본값: GPT-4o Mini
+        index=default_index
     )
     selected_model = model_options[selected_model_name]
 
@@ -210,7 +230,11 @@ def setup_sidebar() -> tuple[str, dict[str, str]]:
 # ============================================================================
 
 def show_title() -> None:
-    st.title("🌐 영어-한국어 번역기")
+    """페이지 타이틀을 표시합니다.
+
+    Config에서 APP_ICON과 APP_TITLE을 로드하여 표시합니다.
+    """
+    st.title(f"{config.APP_ICON} {config.APP_TITLE}")
 
 
 def show_info_messages() -> None:
@@ -220,6 +244,8 @@ def show_info_messages() -> None:
 
 def render_input_area() -> st.delta_generator.DeltaGenerator:
     """입력 영역을 렌더링하고 통계 placeholder를 반환합니다.
+
+    Config에서 TEXT_AREA_HEIGHT를 로드하여 텍스트 영역 높이를 설정합니다.
 
     Returns:
         통계를 표시할 placeholder
@@ -235,7 +261,7 @@ def render_input_area() -> st.delta_generator.DeltaGenerator:
     st.text_area(
         "원문",
         placeholder="번역할 텍스트를 입력하세요... (한국어/English 자동 감지)",
-        height=200,
+        height=config.TEXT_AREA_HEIGHT,
         label_visibility="collapsed",
         key="input_text"
     )
