@@ -3,13 +3,7 @@ TransBot 유틸리티 함수 모듈
 """
 import tiktoken
 import re
-
-
-# ============================================================================
-# 언어 감지 상수
-# ============================================================================
-
-_KOREAN_DETECTION_THRESHOLD = 0.5  # 한국어 감지 임계값 (50% 이상)
+from config import Config
 
 
 # ============================================================================
@@ -34,8 +28,22 @@ _MARKDOWN_HORIZONTAL_RULE_PATTERN = re.compile(r'^[-_*]{3,}$', re.MULTILINE)
 # ============================================================================
 
 def detect_language(text: str) -> str:
+    """텍스트의 언어를 감지합니다.
+
+    Config에서 LANGUAGE_DETECTION_THRESHOLD를 로드하여 한국어 감지 임계값으로 사용합니다.
+
+    Args:
+        text: 분석할 텍스트
+
+    Returns:
+        감지된 언어 ("Korean", "English", "unknown")
+    """
     if not text or not text.strip():
         return "unknown"
+
+    # Config에서 임계값 로드
+    config = Config.load()
+    threshold = config.LANGUAGE_DETECTION_THRESHOLD
 
     korean_chars = sum(1 for char in text if '\uac00' <= char <= '\ud7a3')
     english_chars = sum(1 for char in text if char.isalpha() and ord(char) < 128)
@@ -45,7 +53,7 @@ def detect_language(text: str) -> str:
     if total_alpha == 0:
         return "unknown"
 
-    if korean_chars / total_alpha > _KOREAN_DETECTION_THRESHOLD:
+    if korean_chars / total_alpha > threshold:
         return "Korean"
     else:
         return "English"
