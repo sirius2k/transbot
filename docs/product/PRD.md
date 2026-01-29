@@ -95,21 +95,21 @@ TransBot은 Streamlit 기반의 영어-한국어 양방향 번역 웹 애플리�
 
 | 기능 | 우선순위 | 선정 이유 |
 | ---- | -------- | --------- |
-| ✅ 영어 ↔ 한국어 양방향 번역 | **P0** | 서비스의 핵심 존재 이유 |
-| ✅ 자동 언어 감지 | **P0** | 사용자 편의성의 핵심 |
-| ✅ 번역 결과 듀얼 복사 버튼 | **P0** | Use Case 직접 충족 |
-| ✅ 다양한 AI 모델 선택 | **P1** | 비용/품질 선택권 제공 |
-| ✅ Markdown 포맷 지원 및 보존 | **P1** | 개발자 대상 기술 문서에 필수 |
+| ✅ FEATURE-001: [영어 ↔ 한국어 양방향 번역](../feature-execution-plan/FEATURE-001.md) | **P0** | 서비스의 핵심 존재 이유 |
+| ✅ FEATURE-002: [자동 언어 감지](../feature-execution-plan/FEATURE-002.md) | **P0** | 사용자 편의성의 핵심 |
+| ✅ FEATURE-006: [번역 결과 듀얼 복사 버튼](../feature-execution-plan/FEATURE-006.md) | **P0** | Use Case 직접 충족 |
+| ✅ FEATURE-003: [다양한 AI 모델 선택](../feature-execution-plan/FEATURE-003.md) | **P1** | 비용/품질 선택권 제공 |
+| ✅ FEATURE-005: [Markdown 포맷 지원 및 보존](../feature-execution-plan/FEATURE-005.md) | **P1** | 개발자 대상 기술 문서에 필수 |
+| ✅ FEATURE-009: [환경 변수 기반 설정 관리 시스템](../feature-execution-plan/FEATURE-009.md) | **P1** | 하드코딩 제거, 환경별 설정 분리 |
 | ✅ 지우기 버튼 (입력 및 번역 결과 초기화) | **P1** | 사용성 개선, 빠른 재시작 |
-| ✅ 글자수/토큰수 실시간 표시 | **P2** | 비용 예측 보조 기능 |
-| ✅ 사이드바 UI (설정 섹션) | **P2** | UI 레이아웃 구성 요소 |
+| ✅ FEATURE-004: [글자수/토큰수 실시간 표시](../feature-execution-plan/FEATURE-004.md) | **P2** | 비용 예측 보조 기능 |
+| ✅ FEATURE-007: [사이드바 UI (설정 섹션)](../feature-execution-plan/FEATURE-007.md) | **P2** | UI 레이아웃 구성 요소 |
 
 ### 5.3 향후 개발 예정
 
 | 기능 | 우선순위 | 선정 이유 | Phase |
 | ---- | -------- | --------- | ----- |
-| 🔲 환경 변수 기반 설정 관리 시스템 | **P1** | 하드코딩 제거, 환경별 설정 분리. Azure OpenAI 지원의 전제조건 | 2 |
-| 🔲 Azure OpenAI Service 지원 | **P1** | 기업 환경(Azure) 사용자 지원. OpenAI/Azure 간 유연한 전환 | 2 |
+| 🔲 FEATURE-008: [Azure OpenAI Service 지원](../feature-execution-plan/FEATURE-008.md) | **P1** | 기업 환경(Azure) 사용자 지원. OpenAI/Azure 간 유연한 전환 | 2 |
 | 🔲 번역 히스토리 저장 및 관리 | **P1** | Use Case 직접 충족. 즐겨찾기 등 후속 기능의 기반 인프라 | 2 |
 | 🔲 사전 검색 기능 | **P1** | Use Case 직접 충족. 독립적 구현 가능 | 2 |
 | 🔲 즐겨찾기 기능 | **P2** | 편의 기능. 히스토리 기능에 의존 | 2.5 |
@@ -229,4 +229,4 @@ Phase 3 (P2-P3 기능)
 
 ---
 
-**최종 수정일**: 2026-01-29 23:30
+**최종 수정일**: 2026-01-29 23:40
