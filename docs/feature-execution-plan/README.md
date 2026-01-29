@@ -16,9 +16,10 @@
 
 ## Phase 2 계획 중 기능 목록
 
-| FEATURE | 기능명 | 상태 | 분류 | 우선순위 |
-|---------|--------|------|------|----------|
-| [FEATURE-008](FEATURE-008.md) | Azure OpenAI Service 지원 | 🔲 계획 중 | BE + FE | P1 |
+| FEATURE                       | 기능명                             | 상태        | 분류     | 우선순위 |
+| ----------------------------- | ---------------------------------- | ----------- | -------- | -------- |
+| [FEATURE-009](FEATURE-009.md) | 환경 변수 기반 설정 관리 시스템    | 🔲 계획 중  | BE + FE  | P1       |
+| [FEATURE-008](FEATURE-008.md) | Azure OpenAI Service 지원          | 🔲 계획 중  | BE + FE  | P1       |
 
 ## 기능 간 의존성 다이어그램
 
@@ -29,7 +30,9 @@ FEATURE-001 (핵심 번역)
     │
     ├──→ FEATURE-003 (모델 선택)
     │       │
-    │       └──→ FEATURE-008 (Azure OpenAI 지원) ← Provider 선택 확장
+    │       └──→ FEATURE-009 (설정 관리) ← config.py 기반 인프라
+    │               │
+    │               └──→ FEATURE-008 (Azure OpenAI 지원) ← Provider 선택 확장
     │
     ├──→ FEATURE-004 (글자수/토큰 표시)
     │
@@ -41,6 +44,7 @@ FEATURE-001 (핵심 번역)
               │
               ├── API 키 입력
               ├── 모델 선택 (FEATURE-003)
+              ├── 설정 관리 (FEATURE-009)
               ├── Provider 선택 (FEATURE-008)
               └── 번역 설정 (FEATURE-002)
 ```
@@ -74,8 +78,9 @@ FEATURE-001 (핵심 번역)
 | FEATURE-005 | 4       |
 | FEATURE-006 | 5       |
 | FEATURE-007 | 6       |
+| FEATURE-009 | 8       |
 | FEATURE-008 | 8       |
-| **총합**    | **40**  |
+| **총합**    | **48**  |
 
 ## 파일 구조
 
@@ -89,9 +94,11 @@ feature-execution-plan/
 ├── FEATURE-005.md      # Markdown 포맷 지원 및 보존
 ├── FEATURE-006.md      # 번역 결과 듀얼 복사 버튼
 ├── FEATURE-007.md      # 사이드바 UI (설정 섹션)
+├── FEATURE-009.md      # 환경 변수 기반 설정 관리 시스템
 └── FEATURE-008.md      # Azure OpenAI Service 지원
 ```
 
 ---
 
 **생성일**: 2026년 1월 25일
+**최종 수정일**: 2026년 1월 29일
