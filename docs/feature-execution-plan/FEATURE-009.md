@@ -339,7 +339,7 @@ def test_config_invalid_type():
 | ---- | ---- | ---- | --------- | --------- | ------ | ---- | ---- |
 | 9.1 | 설정 모듈 설계 및 구현 | ✅ 완료 | 1.5h | 1.5h | 2026-01-29 | [4157051](https://github.com/sirius2k/transbot/commit/4157051) | [#2](https://github.com/sirius2k/transbot/issues/2) |
 | 9.2 | .env.example 업데이트 | ✅ 완료 | 30m | 30m | 2026-01-29 | [c9430f9](https://github.com/sirius2k/transbot/commit/c9430f9) | [#3](https://github.com/sirius2k/transbot/issues/3) |
-| 9.3 | TranslationManager 적용 | ✅ 완료 | 1h | 2m | 2026-01-29 | - | [#4](https://github.com/sirius2k/transbot/issues/4) |
+| 9.3 | TranslationManager 적용 | ✅ 완료 | 1h | 2m | 2026-01-29 | [930e3e3](https://github.com/sirius2k/transbot/commit/930e3e3) | [#4](https://github.com/sirius2k/transbot/issues/4) |
 <!-- Task 9.3: 시작 2026-01-29 20:44, 종료 2026-01-29 20:46, 실제 2분 -->
 | 9.4 | app.py에 설정 적용 | 🔲 대기 | 1h | - | - | - | [#5](https://github.com/sirius2k/transbot/issues/5) |
 | 9.5 | utils.py에 설정 적용 | 🔲 대기 | 30m | - | - | - | [#6](https://github.com/sirius2k/transbot/issues/6) |
@@ -365,5 +365,5 @@ def test_config_invalid_type():
 ---
 
 **작성일**: 2026년 1월 29일
-**최종 수정일**: 2026년 1월 29일
+**최종 수정일**: 2026년 1월 29일 20:46
 **작성자**: TransBot Development Team
