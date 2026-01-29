@@ -341,7 +341,7 @@ def test_config_invalid_type():
 | 9.2 | .env.example 업데이트 | ✅ 완료 | 30m | 30m | 2026-01-29 | [c9430f9](https://github.com/sirius2k/transbot/commit/c9430f9) | [#3](https://github.com/sirius2k/transbot/issues/3) |
 | 9.3 | TranslationManager 적용 | ✅ 완료 | 1h | 2m | 2026-01-29 | [930e3e3](https://github.com/sirius2k/transbot/commit/930e3e3) | [#4](https://github.com/sirius2k/transbot/issues/4) |
 <!-- Task 9.3: 시작 2026-01-29 20:44, 종료 2026-01-29 20:46, 실제 2분 -->
-| 9.4 | app.py에 설정 적용 | ✅ 완료 | 1h | 11m | 2026-01-30 | - | [#5](https://github.com/sirius2k/transbot/issues/5) |
+| 9.4 | app.py에 설정 적용 | ✅ 완료 | 1h | 11m | 2026-01-30 | [9424dfc](https://github.com/sirius2k/transbot/commit/9424dfc) | [#5](https://github.com/sirius2k/transbot/issues/5) |
 <!-- Task 9.4: 시작 2026-01-29 20:49, 종료 2026-01-30 00:00, 실제 작업 11분 -->
 | 9.5 | utils.py에 설정 적용 | 🔲 대기 | 30m | - | - | - | [#6](https://github.com/sirius2k/transbot/issues/6) |
 | 9.6 | 입력 길이 검증 구현 | 🔲 대기 | 45m | - | - | - | [#7](https://github.com/sirius2k/transbot/issues/7) |
