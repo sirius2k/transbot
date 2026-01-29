@@ -253,7 +253,7 @@ def render_input_area() -> st.delta_generator.DeltaGenerator:
     # 원문 입력 영역 - 타이틀과 통계를 좌우로 나누기
     col1, col2 = st.columns([3, 1])
     with col1:
-        st.markdown("**원문 (Markdown 지원)**")
+        st.markdown("**원문**")
     with col2:
         stats_placeholder = st.empty()
 
@@ -305,12 +305,10 @@ def render_action_buttons(
     col_btn1, col_btn2 = st.columns([3, 1])
 
     with col_btn1:
-        # 최대 길이 초과 시 번역 버튼 비활성화
         if st.button(
             "번역하기",
             type="primary",
-            use_container_width=True,
-            disabled=(input_length > max_length or not input_text.strip())
+            use_container_width=True
         ):
             handle_translation(input_text, source_lang, target_lang, translation_manager)
 
@@ -424,6 +422,19 @@ def handle_translation(
     """
     if not input_text.strip():
         st.warning("번역할 텍스트를 입력해주세요.")
+        return
+
+    # 최대 길이 검증
+    max_length = config.MAX_INPUT_LENGTH
+    if len(input_text) > max_length:
+        st.error(
+            f"⚠️ **입력 길이 제한 초과**\n\n"
+            f"입력 텍스트가 최대 길이를 초과했습니다.\n"
+            f"- 현재: {len(input_text):,}자\n"
+            f"- 최대: {max_length:,}자\n"
+            f"- 초과: {len(input_text) - max_length:,}자\n\n"
+            f"텍스트를 줄여주세요."
+        )
         return
 
     if source_lang == "unknown" or target_lang == "unknown":
