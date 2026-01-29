@@ -2,6 +2,7 @@
 # 커버리지 측정 대상
 source =
     utils.py
+    config.py
     components
 
 # 제외할 파일/디렉토리
