@@ -1,5 +1,8 @@
 """번역 관리 기능을 제공하는 모듈"""
 
+from typing import Optional
+from config import Config
+
 
 class TranslationManager:
     """번역 작업을 관리하는 클래스
@@ -16,27 +19,47 @@ class TranslationManager:
         "gpt-3.5-turbo"
     ]
 
-    def __init__(self, client, model: str = "gpt-4o-mini", temperature: float = 0.3):
+    def __init__(
+        self,
+        client,
+        model: Optional[str] = None,
+        temperature: Optional[float] = None,
+        timeout: Optional[int] = None,
+        max_retries: Optional[int] = None,
+        max_tokens: Optional[int] = None
+    ):
         """
         Args:
             client: OpenAI 클라이언트 인스턴스
-            model: 사용할 AI 모델 (기본 gpt-4o-mini)
-            temperature: 번역 창의성 설정 (기본 0.3)
+            model: 사용할 AI 모델 (None이면 config에서 로드)
+            temperature: 번역 창의성 설정 (None이면 config에서 로드)
+            timeout: API 타임아웃 초 (None이면 config에서 로드)
+            max_retries: API 재시도 횟수 (None이면 config에서 로드)
+            max_tokens: 최대 출력 토큰 수 (None이면 config에서 로드)
 
         Raises:
             ValueError: 지원하지 않는 모델인 경우
         """
-        if not self.validate_model(model):
-            raise ValueError(f"지원하지 않는 모델입니다: {model}")
+        # Config에서 기본값 로드
+        config = Config.load()
+
+        # 파라미터가 None이면 config 값 사용
+        self.model = model if model is not None else config.DEFAULT_MODEL
+        self.temperature = temperature if temperature is not None else config.DEFAULT_TEMPERATURE
+        self.timeout = timeout if timeout is not None else config.OPENAI_API_TIMEOUT
+        self.max_retries = max_retries if max_retries is not None else config.OPENAI_MAX_RETRIES
+        self.max_tokens = max_tokens if max_tokens is not None else config.MAX_TOKENS
+
+        # 모델 검증
+        if not self.validate_model(self.model):
+            raise ValueError(f"지원하지 않는 모델입니다: {self.model}")
 
         self.client = client
-        self.model = model
-        self.temperature = temperature
 
     def translate(self, text: str, source: str, target: str) -> str:
         """텍스트를 번역합니다.
 
-        OpenAI API를 사용하여 클래스의 설정(model, temperature)을 적용합니다.
+        OpenAI API를 사용하여 클래스의 설정(model, temperature, timeout, max_tokens)을 적용합니다.
 
         Args:
             text: 번역할 텍스트
@@ -58,7 +81,9 @@ class TranslationManager:
                     "content": text
                 }
             ],
-            temperature=self.temperature
+            temperature=self.temperature,
+            max_tokens=self.max_tokens,
+            timeout=self.timeout
         )
         return response.choices[0].message.content
 
