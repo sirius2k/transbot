@@ -375,23 +375,20 @@ def update_statistics(
         # 언어 감지 및 번역 방향 결정
         source_lang, target_lang, direction_arrow = language_detector.get_translation_direction(input_text)
 
-        # 통계 표시 HTML 생성
+        # 통계 계산
         text_analyzer.model = selected_model
-        stats_html = text_analyzer.format_statistics_display(input_text, direction_arrow)
-
-        # 입력 길이 정보 추가
         input_length = len(input_text)
+        token_count = text_analyzer.count_tokens(input_text)
+
+        # 색상 결정
         length_color = "#888"
         if input_length > max_length:
             length_color = "#ff4444"  # 빨간색: 초과
         elif input_length > max_length * 0.8:
             length_color = "#ff8800"  # 주황색: 경고
 
-        # stats_html에 길이 정보 추가 (</div> 태그 앞에 삽입)
-        stats_html = stats_html.replace(
-            "</div>",
-            f"<br/><span style='color: {length_color}; font-size: 0.9em;'>입력: {input_length:,} / {max_length:,}자</span></div>"
-        )
+        # 통합된 통계 표시 HTML 생성
+        stats_html = f"<div style='text-align: right; color: {length_color};'>{input_length:,} / {max_length:,}자 <span style='font-size: 0.85em;'>({token_count:,} 토큰)</span></div>"
 
         stats_placeholder.markdown(stats_html, unsafe_allow_html=True)
     else:
