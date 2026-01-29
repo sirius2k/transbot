@@ -343,7 +343,7 @@ def test_config_invalid_type():
 <!-- Task 9.3: 시작 2026-01-29 20:44, 종료 2026-01-29 20:46, 실제 2분 -->
 | 9.4 | app.py에 설정 적용 | ✅ 완료 | 1h | 11m | 2026-01-30 | [9424dfc](https://github.com/sirius2k/transbot/commit/9424dfc) | [#5](https://github.com/sirius2k/transbot/issues/5) |
 <!-- Task 9.4: 시작 2026-01-29 20:49, 종료 2026-01-30 00:00, 실제 작업 11분 -->
-| 9.5 | utils.py에 설정 적용 | ✅ 완료 | 30m | 1m | 2026-01-30 | - | [#6](https://github.com/sirius2k/transbot/issues/6) |
+| 9.5 | utils.py에 설정 적용 | ✅ 완료 | 30m | 1m | 2026-01-30 | [616e733](https://github.com/sirius2k/transbot/commit/616e733) | [#6](https://github.com/sirius2k/transbot/issues/6) |
 <!-- Task 9.5: 시작 2026-01-30 00:05, 종료 2026-01-30 00:06, 실제 작업 1분 -->
 | 9.6 | 입력 길이 검증 구현 | 🔲 대기 | 45m | - | - | - | [#7](https://github.com/sirius2k/transbot/issues/7) |
 | 9.7 | 단위 테스트 작성 | 🔲 대기 | 1.5h | - | - | - | [#8](https://github.com/sirius2k/transbot/issues/8) |
