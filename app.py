@@ -277,16 +277,41 @@ def render_action_buttons(
 ) -> None:
     """번역하기와 지우기 버튼을 렌더링합니다.
 
+    Config에서 MAX_INPUT_LENGTH를 로드하여 입력 길이를 검증합니다.
+
     Args:
         input_text: 입력 텍스트
         source_lang: 원본 언어
         target_lang: 대상 언어
         translation_manager: 번역 관리자 인스턴스
     """
+    # 입력 길이 검증
+    input_length = len(input_text)
+    max_length = config.MAX_INPUT_LENGTH
+
+    # 길이 초과 경고
+    if input_length > max_length:
+        st.error(
+            f"⚠️ **입력 길이 제한 초과**: 현재 {input_length:,}자 / 최대 {max_length:,}자\n\n"
+            f"입력 텍스트가 최대 길이를 {input_length - max_length:,}자 초과했습니다. "
+            f"텍스트를 줄여주세요."
+        )
+    elif input_length > max_length * 0.8:  # 80% 이상이면 경고
+        st.warning(
+            f"⚠️ **입력 길이 주의**: 현재 {input_length:,}자 / 최대 {max_length:,}자\n\n"
+            f"최대 길이에 가까워지고 있습니다. (남은 용량: {max_length - input_length:,}자)"
+        )
+
     col_btn1, col_btn2 = st.columns([3, 1])
 
     with col_btn1:
-        if st.button("번역하기", type="primary", use_container_width=True):
+        # 최대 길이 초과 시 번역 버튼 비활성화
+        if st.button(
+            "번역하기",
+            type="primary",
+            use_container_width=True,
+            disabled=(input_length > max_length or not input_text.strip())
+        ):
             handle_translation(input_text, source_lang, target_lang, translation_manager)
 
     with col_btn2:
@@ -346,6 +371,8 @@ def update_statistics(
     Returns:
         (source_lang, target_lang, direction_arrow) 튜플
     """
+    max_length = config.MAX_INPUT_LENGTH
+
     if input_text:
         # 언어 감지 및 번역 방향 결정
         source_lang, target_lang, direction_arrow = language_detector.get_translation_direction(input_text)
@@ -353,12 +380,28 @@ def update_statistics(
         # 통계 표시 HTML 생성
         text_analyzer.model = selected_model
         stats_html = text_analyzer.format_statistics_display(input_text, direction_arrow)
+
+        # 입력 길이 정보 추가
+        input_length = len(input_text)
+        length_color = "#888"
+        if input_length > max_length:
+            length_color = "#ff4444"  # 빨간색: 초과
+        elif input_length > max_length * 0.8:
+            length_color = "#ff8800"  # 주황색: 경고
+
+        # stats_html에 길이 정보 추가 (</div> 태그 앞에 삽입)
+        stats_html = stats_html.replace(
+            "</div>",
+            f"<br/><span style='color: {length_color}; font-size: 0.9em;'>입력: {input_length:,} / {max_length:,}자</span></div>"
+        )
+
         stats_placeholder.markdown(stats_html, unsafe_allow_html=True)
     else:
         source_lang = "unknown"
         target_lang = "unknown"
+        direction_arrow = ""
         stats_placeholder.markdown(
-            "<div style='text-align: right; color: #888;'>0자 / 0 토큰</div>",
+            f"<div style='text-align: right; color: #888;'>0자 / 0 토큰<br/><span style='font-size: 0.9em;'>입력: 0 / {max_length:,}자</span></div>",
             unsafe_allow_html=True
         )
 
