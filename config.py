@@ -40,6 +40,10 @@ class Config:
     _DEFAULT_TEXT_AREA_HEIGHT = 200
     _DEFAULT_MAX_INPUT_LENGTH = 50000
 
+    # Azure OpenAI 설정
+    _DEFAULT_AI_PROVIDER = "openai"
+    _DEFAULT_AZURE_API_VERSION = "2024-02-15-preview"
+
     # 지원하는 모델 목록
     _SUPPORTED_MODELS = [
         "gpt-4o",
@@ -75,6 +79,13 @@ class Config:
         # UI 설정
         self.TEXT_AREA_HEIGHT: int = self._DEFAULT_TEXT_AREA_HEIGHT
         self.MAX_INPUT_LENGTH: int = self._DEFAULT_MAX_INPUT_LENGTH
+
+        # Azure OpenAI 설정
+        self.AI_PROVIDER: str = self._DEFAULT_AI_PROVIDER
+        self.AZURE_OPENAI_API_KEY: Optional[str] = None
+        self.AZURE_OPENAI_ENDPOINT: Optional[str] = None
+        self.AZURE_OPENAI_API_VERSION: str = self._DEFAULT_AZURE_API_VERSION
+        self.AZURE_DEPLOYMENTS: Optional[str] = None
 
     @classmethod
     def load(cls) -> 'Config':
@@ -153,6 +164,21 @@ class Config:
             "MAX_INPUT_LENGTH",
             cls._DEFAULT_MAX_INPUT_LENGTH
         )
+
+        # Azure OpenAI 설정
+        config.AI_PROVIDER = cls._get_str_env(
+            "AI_PROVIDER",
+            cls._DEFAULT_AI_PROVIDER
+        )
+        cls._validate_provider(config.AI_PROVIDER)
+
+        config.AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
+        config.AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
+        config.AZURE_OPENAI_API_VERSION = cls._get_str_env(
+            "AZURE_OPENAI_API_VERSION",
+            cls._DEFAULT_AZURE_API_VERSION
+        )
+        config.AZURE_DEPLOYMENTS = os.getenv("AZURE_DEPLOYMENTS")
 
         return config
 
@@ -288,3 +314,43 @@ class Config:
                 f"지원하지 않는 레이아웃 모드입니다: {layout}. "
                 f"지원 모드: {', '.join(cls._SUPPORTED_LAYOUTS)}"
             )
+
+    @staticmethod
+    def _validate_provider(provider: str) -> None:
+        """AI Provider가 유효한지 검증합니다.
+
+        Args:
+            provider: 검증할 Provider ("openai" 또는 "azure")
+
+        Raises:
+            ValueError: 지원하지 않는 Provider인 경우
+        """
+        if provider not in ["openai", "azure"]:
+            raise ValueError(
+                f"지원하지 않는 Provider입니다: {provider}. "
+                f"지원 Provider: openai, azure"
+            )
+
+    @staticmethod
+    def parse_azure_deployments(deployments_str: Optional[str]) -> dict[str, str]:
+        """Azure deployment 문자열을 파싱합니다.
+
+        Args:
+            deployments_str: "model:deployment,model:deployment" 형식의 문자열
+                           예: "gpt-4o:my-gpt4o,gpt-4o-mini:my-mini"
+
+        Returns:
+            모델명과 deployment 이름의 매핑 딕셔너리
+            예: {"gpt-4o": "my-gpt4o", "gpt-4o-mini": "my-mini"}
+        """
+        if not deployments_str:
+            return {}
+
+        result = {}
+        for pair in deployments_str.split(","):
+            pair = pair.strip()
+            if ":" in pair:
+                model, deployment = pair.split(":", 1)
+                result[model.strip()] = deployment.strip()
+
+        return result
