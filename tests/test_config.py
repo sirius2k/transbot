@@ -1,6 +1,5 @@
 """Config 클래스 테스트"""
 import pytest
-import os
 from config import Config
 
 

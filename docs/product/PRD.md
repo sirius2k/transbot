@@ -117,11 +117,13 @@ TransBot은 Streamlit 기반의 영어-한국어 양방향 번역 웹 애플리�
 | 🔲 FEATURE-014: 외부 툴 연동 (Notion, Confluence 등) | **P2** | Use Case 직접 충족. 각 플랫폼 API 연동 필요로 복잡도 높음 | 3 |
 | 🔲 FEATURE-015: 용어집(Glossary) 기능 | **P3** | 고급 사용자 대상. 번역 품질 향상 | 3 |
 | 🔲 FEATURE-016: Langfuse 연동 | **P3** | 개발자/관리자 관점. 운영 단계에서 필요 | 3 |
+| 🔲 FEATURE-017: [구조화된 로깅 시스템](../feature-execution-plan/FEATURE-017.md) | **P1** | 디버깅, 모니터링, 문제 해결을 위한 필수 인프라. 운영 안정성 확보 | 2 |
 
 ### 5.4 권장 개발 순서
 
 ```text
 Phase 2 (P1 기능)
+├── FEATURE-017: 구조화된 로깅 시스템          ← 설정 관리(FEATURE-009) 기반, 디버깅 인프라 우선 구축
 ├── FEATURE-008: Azure OpenAI Service 지원      ← 설정 관리(FEATURE-009) 완료 후 구현
 ├── FEATURE-010: 번역 히스토리 저장 및 관리    ← 다른 기능의 기반, 독립적 개발 가능
 └── FEATURE-011: 사전 검색 기능                ← 독립적, 병렬 개발 가능
@@ -228,4 +230,4 @@ Phase 3 (P2-P3 기능)
 
 ---
 
-**최종 수정일**: 2026-01-30 00:30
+**최종 수정일**: 2026-01-31 10:15
