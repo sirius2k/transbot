@@ -1,6 +1,6 @@
 """번역 관리 기능을 제공하는 모듈"""
 
-from typing import Optional
+from typing import Optional, Any
 from config import Config
 
 
@@ -21,13 +21,13 @@ class TranslationManager:
 
     def __init__(
         self,
-        client,
+        client: Any,
         model: Optional[str] = None,
         temperature: Optional[float] = None,
         timeout: Optional[int] = None,
         max_retries: Optional[int] = None,
         max_tokens: Optional[int] = None
-    ):
+    ) -> None:
         """
         Args:
             client: OpenAI 클라이언트 인스턴스
@@ -74,7 +74,7 @@ class TranslationManager:
             messages=[
                 {
                     "role": "system",
-                    "content": f"You are a professional translator. Translate the following {source} text to {target}. IMPORTANT: Preserve all Markdown formatting (bold, italic, headings, lists, links, code blocks, blockquotes, tables, etc.) in the translation. Only respond with the translation, nothing else."
+                    "content": f"You are a professional translator. Translate the following {source} text to {target}. IMPORTANT: Preserve all Markdown formatting (bold, italic, headings, lists, links, code blocks, blockquotes, tables, etc.) in the translation. Only respond with the translation, nothing else." # noqa: E501
                 },
                 {
                     "role": "user",
@@ -87,7 +87,7 @@ class TranslationManager:
         )
         return response.choices[0].message.content
 
-    def set_model(self, model: str):
+    def set_model(self, model: str) -> None:
         """사용할 AI 모델을 변경합니다.
 
         Args:
@@ -100,7 +100,7 @@ class TranslationManager:
             raise ValueError(f"지원하지 않는 모델입니다: {model}")
         self.model = model
 
-    def set_temperature(self, temperature: float):
+    def set_temperature(self, temperature: float) -> None:
         """번역 창의성 설정을 변경합니다.
 
         Args:
@@ -133,14 +133,14 @@ class AzureTranslationManager(TranslationManager):
 
     def __init__(
         self,
-        client,
+        client: Any,
         deployment: str,
         model: Optional[str] = None,
         temperature: Optional[float] = None,
         timeout: Optional[int] = None,
         max_retries: Optional[int] = None,
         max_tokens: Optional[int] = None
-    ):
+    ) -> None:
         """Azure OpenAI용 초기화
 
         Args:
@@ -186,7 +186,7 @@ class AzureTranslationManager(TranslationManager):
             messages=[
                 {
                     "role": "system",
-                    "content": f"You are a professional translator. Translate the following {source} text to {target}. IMPORTANT: Preserve all Markdown formatting (bold, italic, headings, lists, links, code blocks, blockquotes, tables, etc.) in the translation. Only respond with the translation, nothing else."
+                    "content": f"You are a professional translator. Translate the following {source} text to {target}. IMPORTANT: Preserve all Markdown formatting (bold, italic, headings, lists, links, code blocks, blockquotes, tables, etc.) in the translation. Only respond with the translation, nothing else." # noqa: E501
                 },
                 {
                     "role": "user",
@@ -230,7 +230,7 @@ class TranslationManagerFactory:
     """
 
     @staticmethod
-    def create(provider: str, client, **kwargs) -> TranslationManager:
+    def create(provider: str, client: Any, **kwargs: Any) -> TranslationManager:
         """Provider에 따른 TranslationManager 생성
 
         Args:
