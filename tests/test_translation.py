@@ -1,7 +1,11 @@
 """TranslationManager 클래스 테스트"""
 import pytest
 from unittest.mock import Mock
-from components.translation import TranslationManager
+from components.translation import (
+    TranslationManager,
+    AzureTranslationManager,
+    TranslationManagerFactory
+)
 
 
 class TestTranslationManager:
@@ -147,3 +151,188 @@ class TestTranslationManager:
         assert TranslationManager.validate_model("invalid-model") is False
         assert TranslationManager.validate_model("") is False
         assert TranslationManager.validate_model("gpt-5") is False
+
+
+class TestAzureTranslationManager:
+    """AzureTranslationManager 클래스 테스트"""
+
+    def setup_method(self):
+        """각 테스트 전에 실행"""
+        self.mock_client = Mock()
+
+    def test_azure_init_with_deployment(self):
+        """deployment로 초기화 테스트"""
+        manager = AzureTranslationManager(
+            self.mock_client,
+            deployment="my-gpt4o-deployment"
+        )
+
+        assert manager.deployment == "my-gpt4o-deployment"
+        assert manager.model == "my-gpt4o-deployment"  # deployment를 기본값으로 사용
+        assert manager.client == self.mock_client
+        assert manager.temperature == 0.3  # Config 기본값
+
+    def test_azure_init_with_model_and_deployment(self):
+        """model과 deployment 동시 초기화 테스트"""
+        manager = AzureTranslationManager(
+            self.mock_client,
+            deployment="my-deployment",
+            model="gpt-4o"
+        )
+
+        assert manager.deployment == "my-deployment"
+        assert manager.model == "gpt-4o"  # model 파라미터 우선
+
+    def test_azure_translate_uses_deployment(self):
+        """translate()에서 deployment 사용 확인"""
+        # Mock 응답 설정
+        mock_response = Mock()
+        mock_response.choices = [Mock()]
+        mock_response.choices[0].message.content = "번역 결과"
+        self.mock_client.chat.completions.create.return_value = mock_response
+
+        manager = AzureTranslationManager(
+            self.mock_client,
+            deployment="my-deployment"
+        )
+
+        # 번역 실행
+        result = manager.translate("Hello", "English", "Korean")
+
+        # deployment가 model 파라미터로 사용되었는지 확인
+        self.mock_client.chat.completions.create.assert_called_once()
+        call_args = self.mock_client.chat.completions.create.call_args
+        assert call_args.kwargs["model"] == "my-deployment"
+        assert result == "번역 결과"
+
+    def test_azure_translate_success(self):
+        """Azure 번역 성공 테스트"""
+        # Mock 응답 설정
+        mock_response = Mock()
+        mock_response.choices = [Mock()]
+        mock_response.choices[0].message.content = "안녕하세요"
+        self.mock_client.chat.completions.create.return_value = mock_response
+
+        manager = AzureTranslationManager(
+            self.mock_client,
+            deployment="my-gpt4o"
+        )
+
+        result = manager.translate("Hello", "English", "Korean")
+        assert result == "안녕하세요"
+
+    def test_azure_translate_api_params(self):
+        """Azure API 호출 파라미터 검증"""
+        # Mock 응답 설정
+        mock_response = Mock()
+        mock_response.choices = [Mock()]
+        mock_response.choices[0].message.content = "번역됨"
+        self.mock_client.chat.completions.create.return_value = mock_response
+
+        manager = AzureTranslationManager(
+            self.mock_client,
+            deployment="my-deployment",
+            temperature=0.5,
+            max_tokens=5000
+        )
+
+        manager.translate("Test", "English", "Korean")
+
+        # API 호출 파라미터 검증
+        call_args = self.mock_client.chat.completions.create.call_args
+        assert call_args.kwargs["model"] == "my-deployment"
+        assert call_args.kwargs["temperature"] == 0.5
+        assert call_args.kwargs["max_tokens"] == 5000
+
+    def test_azure_load_deployments_empty(self, monkeypatch):
+        """빈 deployment 로드 테스트"""
+        from config import Config
+
+        # 빈 AZURE_DEPLOYMENTS 설정
+        monkeypatch.setenv("AZURE_DEPLOYMENTS", "")
+
+        config = Config.load()
+        AzureTranslationManager.load_deployments(config)
+
+        assert AzureTranslationManager.SUPPORTED_DEPLOYMENTS == {}
+
+    def test_azure_load_deployments_valid(self, monkeypatch):
+        """정상 deployment 로드 테스트"""
+        from config import Config
+
+        # deployment 문자열 설정
+        monkeypatch.setenv("AZURE_DEPLOYMENTS", "gpt-4o:my-gpt4o,gpt-4o-mini:my-mini")
+
+        config = Config.load()
+        AzureTranslationManager.load_deployments(config)
+
+        assert "gpt-4o" in AzureTranslationManager.SUPPORTED_DEPLOYMENTS
+        assert "gpt-4o-mini" in AzureTranslationManager.SUPPORTED_DEPLOYMENTS
+        assert AzureTranslationManager.SUPPORTED_DEPLOYMENTS["gpt-4o"] == "my-gpt4o"
+        assert AzureTranslationManager.SUPPORTED_DEPLOYMENTS["gpt-4o-mini"] == "my-mini"
+
+    def test_azure_validate_deployment_valid(self, monkeypatch):
+        """유효한 deployment 검증"""
+        from config import Config
+
+        monkeypatch.setenv("AZURE_DEPLOYMENTS", "gpt-4o:my-deployment")
+        config = Config.load()
+        AzureTranslationManager.load_deployments(config)
+
+        assert AzureTranslationManager.validate_deployment("my-deployment") is True
+
+    def test_azure_validate_deployment_invalid(self, monkeypatch):
+        """무효한 deployment 검증"""
+        from config import Config
+
+        monkeypatch.setenv("AZURE_DEPLOYMENTS", "gpt-4o:my-deployment")
+        config = Config.load()
+        AzureTranslationManager.load_deployments(config)
+
+        assert AzureTranslationManager.validate_deployment("invalid-deployment") is False
+
+
+class TestTranslationManagerFactory:
+    """TranslationManagerFactory 클래스 테스트"""
+
+    def setup_method(self):
+        """각 테스트 전에 실행"""
+        self.mock_client = Mock()
+
+    def test_factory_create_openai(self):
+        """Factory로 OpenAI Manager 생성 테스트"""
+        manager = TranslationManagerFactory.create(
+            "openai",
+            self.mock_client,
+            model="gpt-4o"
+        )
+
+        assert isinstance(manager, TranslationManager)
+        assert not isinstance(manager, AzureTranslationManager)
+        assert manager.model == "gpt-4o"
+
+    def test_factory_create_azure(self):
+        """Factory로 Azure Manager 생성 테스트"""
+        manager = TranslationManagerFactory.create(
+            "azure",
+            self.mock_client,
+            deployment="my-deployment"
+        )
+
+        assert isinstance(manager, AzureTranslationManager)
+        assert manager.deployment == "my-deployment"
+
+    def test_factory_create_azure_with_deployment(self):
+        """Factory + deployment 파라미터 테스트"""
+        manager = TranslationManagerFactory.create(
+            "azure",
+            self.mock_client,
+            deployment="custom-deployment",
+            model="gpt-4o",
+            temperature=0.7
+        )
+
+        assert isinstance(manager, AzureTranslationManager)
+        assert manager.deployment == "custom-deployment"
+        assert manager.model == "gpt-4o"
+        assert manager.temperature == 0.7
