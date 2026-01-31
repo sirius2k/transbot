@@ -1,9 +1,11 @@
-# FEATURE-008-ISSUE-14 작업 시간 로그
+# FEATURE-008-TASK-8.5 작업 시간 로그
 
-## 이슈 정보
-- 이슈 번호: #14
-- 이슈 제목: [FEATURE-008] Task 8.5: setup_sidebar() 함수 모델/Deployment 목록 분리
+## 작업 정보
+- Task 번호: 8.5
+- Task 제목: setup_sidebar() 함수 모델/Deployment 목록 분리
+- GitHub Issue: #14
 - 작업 브랜치: issue-14
+- PR 번호: #21
 - 작업 날짜: 2026-01-31
 
 ## 작업 시간 상세

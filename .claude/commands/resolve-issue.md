@@ -21,30 +21,45 @@
 
 ### 로그 파일 위치
 
-- **파일 경로**: `docs/feature-execution-log/FEATURE-XXX-ISSUE-YY.log`
-- **예시**: `docs/feature-execution-log/FEATURE-008-ISSUE-12.log`
+- **파일 경로**: `docs/feature-execution-log/FEATURE-XXX-TASK-X.Y.log`
+- **예시**: `docs/feature-execution-log/FEATURE-008-TASK-8.5.log`
 - **디렉토리 생성**: `docs/feature-execution-log/` 디렉토리가 없으면 자동 생성
+- **GitHub Issue 연동**: GitHub Issue가 있는 경우 로그 파일 내 "GitHub Issue: #YY" 필드로 명시
 
 ### 작업 분류
 
-모든 작업은 다음 4가지 유형으로 분류하여 기록한다:
+모든 작업은 다음 유형으로 분류하여 기록한다 (ISSUE와 TASK 공통):
 
-1. **문서작업** (DOC): 문서 읽기, 계획 수립, 문서 업데이트
+#### 기본 4가지 분류 (필수)
+
+1. **문서작업** (DOC): 문서 읽기, 작성, 업데이트, 계획 수립
+   - 예시: README 수정, 설계 문서 작성, FEATURE 계획 수립
 2. **코딩작업** (CODE): 코드 작성, 수정, 리팩토링
-3. **테스트작업** (TEST): 테스트 작성, 실행, 디버깅
-4. **기타** (ETC): 브랜치 세팅, PR 생성, 이슈 분석 등
+   - 예시: 함수 구현, 클래스 수정, 버그 수정, 코드 개선
+3. **테스트작업** (TEST): 테스트 작성, 실행, 디버깅, 검증
+   - 예시: 단위 테스트, 통합 테스트, 커버리지 확인, 린트 실행
+4. **기타** (ETC): 위 3가지에 속하지 않는 모든 작업
+   - 예시: 브랜치 생성, PR 생성, 환경 설정, 의존성 설치
+
+#### 선택적 분류 (필요 시 사용)
+
+1. **분석작업** (ANALYSIS): 코드베이스 리서치, 설계 분석, 조사
+   - 예시: 아키텍처 조사, 의존성 분석, 성능 프로파일링, 이슈 원인 분석
+   - 참고: 간단한 분석은 `[DOC]`에 포함 가능 (예: "문서 분석 및 계획 수립")
 
 ### 로그 형식
 
 각 작업 단계마다 시작 시간과 완료 시간을 ISO 8601 형식으로 기록한다:
 
 ```text
-# FEATURE-008-ISSUE-12 작업 시간 로그
+# FEATURE-008-TASK-8.3 작업 시간 로그
 
-## 이슈 정보
-- 이슈 번호: #12
-- 이슈 제목: setup_api_client() 함수 수정
+## 작업 정보
+- Task 번호: 8.3
+- Task 제목: setup_api_client() 함수 수정
+- GitHub Issue: #12
 - 작업 브랜치: issue-12
+- PR 번호: #18
 - 작업 날짜: 2026-01-31
 
 ## 작업 시간 상세
@@ -122,5 +137,6 @@
 ### FEATURE 문서 연동
 
 FEATURE-XXX.md의 진행 현황 테이블 업데이트 시:
-- **실제 시간** 컬럼: `docs/feature-execution-log/FEATURE-XXX-ISSUE-YY.log` 파일의 "총 작업 시간" 참조
+
+- **실제 시간** 컬럼: `docs/feature-execution-log/FEATURE-XXX-TASK-X.Y.log` 파일의 "총 작업 시간" 참조
 - 로그 파일이 없으면 대략적인 시간 기록 후 로그 생성 권장
