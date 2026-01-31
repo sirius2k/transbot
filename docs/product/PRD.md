@@ -104,12 +104,12 @@ TransBot은 Streamlit 기반의 영어-한국어 양방향 번역 웹 애플리�
 | ✅ 지우기 버튼 (입력 및 번역 결과 초기화) | **P1** | 사용성 개선, 빠른 재시작 |
 | ✅ FEATURE-004: [글자수/토큰수 실시간 표시](../feature-execution-plan/FEATURE-004.md) | **P2** | 비용 예측 보조 기능 |
 | ✅ FEATURE-007: [사이드바 UI (설정 섹션)](../feature-execution-plan/FEATURE-007.md) | **P2** | UI 레이아웃 구성 요소 |
+| ✅ FEATURE-008: [Azure OpenAI Service 지원](../feature-execution-plan/FEATURE-008.md) | **P1** | 기업 환경(Azure) 사용자 지원. OpenAI/Azure 간 유연한 전환 |
 
 ### 5.3 향후 개발 예정
 
 | 기능 | 우선순위 | 선정 이유 | Phase |
 | ---- | -------- | --------- | ----- |
-| 🔲 FEATURE-008: [Azure OpenAI Service 지원](../feature-execution-plan/FEATURE-008.md) | **P1** | 기업 환경(Azure) 사용자 지원. OpenAI/Azure 간 유연한 전환 | 2 |
 | 🔲 FEATURE-010: 번역 히스토리 저장 및 관리 | **P1** | Use Case 직접 충족. 즐겨찾기 등 후속 기능의 기반 인프라 | 2 |
 | 🔲 FEATURE-011: 사전 검색 기능 | **P1** | Use Case 직접 충족. 독립적 구현 가능 | 2 |
 | 🔲 FEATURE-012: 즐겨찾기 기능 | **P2** | 편의 기능. 히스토리 기능에 의존 | 2.5 |

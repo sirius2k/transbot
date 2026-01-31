@@ -164,6 +164,29 @@ TransBot은 OpenAI의 GPT-4o-mini 모델을 활용하여 빠르고 정확한 영
    MAX_INPUT_LENGTH=50000       # 최대 입력 길이 (문자 수), 기본값: 50000
    ```
 
+   **Azure OpenAI Service 설정 (선택사항)**
+
+   OpenAI API 대신 Azure OpenAI Service를 사용할 수 있습니다.
+
+   ```bash
+   # AI Provider 선택 (openai 또는 azure)
+   AI_PROVIDER=azure
+
+   # Azure OpenAI 필수 설정
+   AZURE_OPENAI_API_KEY=your_azure_api_key_here
+   AZURE_OPENAI_ENDPOINT=https://your-resource-name.openai.azure.com/
+   AZURE_OPENAI_API_VERSION=2024-02-15-preview
+
+   # Azure Deployment 매핑
+   # 형식: "모델명:deployment명,모델명:deployment명"
+   AZURE_DEPLOYMENTS=gpt-4o:my-gpt4o-deployment,gpt-4o-mini:my-mini-deployment
+   ```
+
+   > 💡 **Azure 사용 시 주의사항**:
+   > - `AZURE_OPENAI_API_KEY`와 `AZURE_OPENAI_ENDPOINT`는 필수입니다
+   > - `AZURE_DEPLOYMENTS`에 Azure Portal에서 생성한 deployment 이름을 매핑해야 합니다
+   > - Azure Portal의 "Keys and Endpoint" 섹션에서 필요한 정보를 확인할 수 있습니다
+
    **지원하는 AI 모델**
    - `gpt-4o`: 최고 품질
    - `gpt-4o-mini`: 가성비 우수 (권장)
@@ -275,6 +298,7 @@ transbot/
 ### 백엔드/API
 
 - **OpenAI API** 1.0.0+: GPT-4o-mini 모델 기반 번역 엔진
+- **Azure OpenAI Service**: Microsoft Azure에서 제공하는 OpenAI API (선택사항)
 - **Python** 3.x: 메인 개발 언어
 - **tiktoken**: 토큰 카운팅 라이브러리
 
