@@ -1,7 +1,6 @@
 """
 utils.py의 핵심 함수들에 대한 단위 테스트
 """
-import pytest
 from utils import detect_language, count_tokens, strip_markdown
 
 

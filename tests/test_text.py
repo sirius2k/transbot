@@ -1,5 +1,4 @@
 """TextAnalyzer 클래스 테스트"""
-import pytest
 from components.text import TextAnalyzer
 
 
