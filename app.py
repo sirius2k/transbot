@@ -1,6 +1,5 @@
 """영어-한국어 번역기 Streamlit 애플리케이션"""
 import streamlit as st
-from openai import OpenAI
 import os
 from dotenv import load_dotenv
 from utils import strip_markdown
@@ -160,20 +159,60 @@ def initialize_session_state() -> None:
         st.session_state.translation_result = None
 
 
-def setup_api_client() -> OpenAI:
-    """OpenAI API 클라이언트를 설정하고 반환합니다.
+def setup_api_client() -> tuple:
+    """OpenAI/Azure API 클라이언트를 설정하고 반환합니다.
 
     Returns:
-        OpenAI 클라이언트 인스턴스
+        (client, provider) 튜플
     """
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        api_key = st.sidebar.text_input("OpenAI API Key", type="password")
-        if not api_key:
-            st.warning("OpenAI API 키를 입력해주세요.")
+    # Config에서 Provider 로드
+    from config import Config
+    config = Config.load()
+    provider = config.AI_PROVIDER
+
+    if provider == "azure":
+        # Azure 필수 파라미터 검증
+        if not config.AZURE_OPENAI_API_KEY:
+            st.error("⚠️ AZURE_OPENAI_API_KEY가 설정되지 않았습니다.")
+            st.stop()
+        if not config.AZURE_OPENAI_ENDPOINT:
+            st.error("⚠️ AZURE_OPENAI_ENDPOINT가 설정되지 않았습니다.")
             st.stop()
 
-    return OpenAI(api_key=api_key)
+        # AzureOpenAI 클라이언트 생성
+        from openai import AzureOpenAI
+
+        client = AzureOpenAI(
+            api_key=config.AZURE_OPENAI_API_KEY,
+            azure_endpoint=config.AZURE_OPENAI_ENDPOINT,
+            api_version=config.AZURE_OPENAI_API_VERSION,
+            timeout=config.OPENAI_API_TIMEOUT,
+            max_retries=config.OPENAI_MAX_RETRIES
+        )
+
+        # Azure deployment 목록 로드
+        from components.translation import AzureTranslationManager
+        AzureTranslationManager.load_deployments(config)
+
+        return client, "azure"
+    else:
+        # OpenAI 클라이언트 생성
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            api_key = st.sidebar.text_input("OpenAI API Key", type="password")
+            if not api_key:
+                st.warning("OpenAI API 키를 입력해주세요.")
+                st.stop()
+
+        from openai import OpenAI
+
+        client = OpenAI(
+            api_key=api_key,
+            timeout=config.OPENAI_API_TIMEOUT,
+            max_retries=config.OPENAI_MAX_RETRIES
+        )
+
+        return client, "openai"
 
 
 def initialize_components() -> tuple[LanguageDetector, TextAnalyzer]:
@@ -464,7 +503,7 @@ def main() -> None:
     show_title()
 
     # 3. API 클라이언트 및 컴포넌트 초기화
-    client = setup_api_client()
+    client, provider = setup_api_client()
     language_detector, text_analyzer = initialize_components()
 
     # 4. 사이드바 설정 및 번역 관리자 초기화
