@@ -226,42 +226,94 @@ def initialize_components() -> tuple[LanguageDetector, TextAnalyzer]:
     return language_detector, text_analyzer
 
 
-def setup_sidebar() -> tuple[str, dict[str, str]]:
-    """사이드바를 설정하고 선택된 모델을 반환합니다.
+def setup_sidebar(provider: str) -> tuple[str, dict[str, str]]:
+    """사이드바를 설정하고 선택된 모델/deployment를 반환합니다.
 
-    Config에서 DEFAULT_MODEL을 로드하여 기본 선택 모델을 설정합니다.
+    Provider에 따라 모델 목록 또는 deployment 목록을 표시합니다.
+
+    Args:
+        provider: "openai" 또는 "azure"
 
     Returns:
-        (선택된 모델명, 모델 옵션 딕셔너리) 튜플
+        (선택된 모델/deployment명, 옵션 딕셔너리) 튜플
     """
     st.sidebar.header("⚙️ 영어-한국어 번역기 설정")
 
-    model_options = {
-        "GPT-4o Mini (추천 - 가성비)": "gpt-4o-mini",
-        "GPT-4o (최고 품질)": "gpt-4o",
-        "GPT-4 Turbo": "gpt-4-turbo",
-        "GPT-4": "gpt-4",
-        "GPT-3.5 Turbo (빠름)": "gpt-3.5-turbo"
-    }
+    # Provider 정보 표시
+    provider_display = "🔵 OpenAI" if provider == "openai" else "🟢 Azure OpenAI"
+    st.sidebar.markdown(f"**Provider:** {provider_display}")
+    st.sidebar.markdown("---")
 
-    # Config에서 기본 모델 가져오기
-    default_model = config.DEFAULT_MODEL
+    if provider == "azure":
+        # Azure: Deployment 목록 표시
+        from components.translation import AzureTranslationManager
 
-    # 기본 모델에 해당하는 인덱스 찾기
-    default_index = 0
-    for idx, (_, model_id) in enumerate(model_options.items()):
-        if model_id == default_model:
-            default_index = idx
-            break
+        deployments = AzureTranslationManager.SUPPORTED_DEPLOYMENTS
 
-    selected_model_name = st.sidebar.selectbox(
-        "AI 모델 선택:",
-        options=list(model_options.keys()),
-        index=default_index
-    )
-    selected_model = model_options[selected_model_name]
+        if not deployments:
+            st.sidebar.error(
+                "⚠️ **Azure Deployment 미설정**\n\n"
+                "`.env` 파일에 `AZURE_DEPLOYMENTS` 설정을 추가해주세요.\n\n"
+                "예시:\n"
+                "```\n"
+                "AZURE_DEPLOYMENTS=gpt-4o:my-gpt4o,gpt-4o-mini:my-mini\n"
+                "```"
+            )
+            st.stop()
 
-    return selected_model, model_options
+        # Deployment 옵션 생성 (모델명을 표시명으로 사용)
+        deployment_options = {
+            f"{model} (Azure)": deployment
+            for model, deployment in deployments.items()
+        }
+
+        # Config에서 기본 모델 가져오기
+        default_model = config.DEFAULT_MODEL
+
+        # 기본 모델에 해당하는 인덱스 찾기
+        default_index = 0
+        for idx, model_name in enumerate(deployments.keys()):
+            if model_name == default_model:
+                default_index = idx
+                break
+
+        selected_deployment_name = st.sidebar.selectbox(
+            "Azure Deployment 선택:",
+            options=list(deployment_options.keys()),
+            index=default_index
+        )
+        selected_deployment = deployment_options[selected_deployment_name]
+
+        return selected_deployment, deployment_options
+
+    else:
+        # OpenAI: 기존 모델 목록 표시
+        model_options = {
+            "GPT-4o Mini (추천 - 가성비)": "gpt-4o-mini",
+            "GPT-4o (최고 품질)": "gpt-4o",
+            "GPT-4 Turbo": "gpt-4-turbo",
+            "GPT-4": "gpt-4",
+            "GPT-3.5 Turbo (빠름)": "gpt-3.5-turbo"
+        }
+
+        # Config에서 기본 모델 가져오기
+        default_model = config.DEFAULT_MODEL
+
+        # 기본 모델에 해당하는 인덱스 찾기
+        default_index = 0
+        for idx, (_, model_id) in enumerate(model_options.items()):
+            if model_id == default_model:
+                default_index = idx
+                break
+
+        selected_model_name = st.sidebar.selectbox(
+            "AI 모델 선택:",
+            options=list(model_options.keys()),
+            index=default_index
+        )
+        selected_model = model_options[selected_model_name]
+
+        return selected_model, model_options
 
 
 # ============================================================================
@@ -507,8 +559,25 @@ def main() -> None:
     language_detector, text_analyzer = initialize_components()
 
     # 4. 사이드바 설정 및 번역 관리자 초기화
-    selected_model, _ = setup_sidebar()
-    translation_manager = TranslationManager(client, model=selected_model)
+    selected_model_or_deployment, _ = setup_sidebar(provider)
+
+    # Factory 패턴으로 TranslationManager 생성
+    from components.translation import TranslationManagerFactory
+
+    if provider == "azure":
+        # Azure: deployment 파라미터 전달
+        translation_manager = TranslationManagerFactory.create(
+            provider=provider,
+            client=client,
+            deployment=selected_model_or_deployment
+        )
+    else:
+        # OpenAI: model 파라미터 전달
+        translation_manager = TranslationManagerFactory.create(
+            provider=provider,
+            client=client,
+            model=selected_model_or_deployment
+        )
 
     # 5. 정보 메시지 표시
     show_info_messages()
@@ -523,7 +592,7 @@ def main() -> None:
         stats_placeholder,
         language_detector,
         text_analyzer,
-        selected_model
+        translation_manager.model  # TranslationManager의 model 속성 사용
     )
 
     # 8. 액션 버튼 렌더링
