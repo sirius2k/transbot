@@ -4,7 +4,7 @@ TransBot 설정 관리 모듈
 환경 변수를 통해 애플리케이션 설정을 관리합니다.
 """
 import os
-from typing import Optional
+from typing import Optional, Literal
 from dotenv import load_dotenv
 
 
@@ -56,7 +56,7 @@ class Config:
     # 지원하는 레이아웃 모드
     _SUPPORTED_LAYOUTS = ["centered", "wide"]
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Config 인스턴스를 초기화합니다."""
         # OpenAI API 설정
         self.OPENAI_API_KEY: Optional[str] = None
@@ -74,14 +74,14 @@ class Config:
         # 애플리케이션 설정
         self.APP_TITLE: str = self._DEFAULT_APP_TITLE
         self.APP_ICON: str = self._DEFAULT_APP_ICON
-        self.APP_LAYOUT: str = self._DEFAULT_APP_LAYOUT
+        self.APP_LAYOUT: Literal["centered", "wide"] = self._DEFAULT_APP_LAYOUT  # type: ignore
 
         # UI 설정
         self.TEXT_AREA_HEIGHT: int = self._DEFAULT_TEXT_AREA_HEIGHT
         self.MAX_INPUT_LENGTH: int = self._DEFAULT_MAX_INPUT_LENGTH
 
         # Azure OpenAI 설정
-        self.AI_PROVIDER: str = self._DEFAULT_AI_PROVIDER
+        self.AI_PROVIDER: Literal["openai", "azure"] = self._DEFAULT_AI_PROVIDER  # type: ignore
         self.AZURE_OPENAI_API_KEY: Optional[str] = None
         self.AZURE_OPENAI_ENDPOINT: Optional[str] = None
         self.AZURE_OPENAI_API_VERSION: str = self._DEFAULT_AZURE_API_VERSION
@@ -149,11 +149,12 @@ class Config:
             "APP_ICON",
             cls._DEFAULT_APP_ICON
         )
-        config.APP_LAYOUT = cls._get_str_env(
+        layout_str = cls._get_str_env(
             "APP_LAYOUT",
             cls._DEFAULT_APP_LAYOUT
         )
-        cls._validate_layout(config.APP_LAYOUT)
+        cls._validate_layout(layout_str)
+        config.APP_LAYOUT = layout_str  # type: ignore
 
         # UI 설정
         config.TEXT_AREA_HEIGHT = cls._get_int_env(
@@ -166,11 +167,12 @@ class Config:
         )
 
         # Azure OpenAI 설정
-        config.AI_PROVIDER = cls._get_str_env(
+        provider_str = cls._get_str_env(
             "AI_PROVIDER",
             cls._DEFAULT_AI_PROVIDER
         )
-        cls._validate_provider(config.AI_PROVIDER)
+        cls._validate_provider(provider_str)
+        config.AI_PROVIDER = provider_str  # type: ignore
 
         config.AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
         config.AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")

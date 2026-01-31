@@ -1,6 +1,7 @@
 """영어-한국어 번역기 Streamlit 애플리케이션"""
 import streamlit as st
 import os
+from typing import Any, Literal
 from dotenv import load_dotenv
 from utils import strip_markdown
 from components.language import LanguageDetector
@@ -98,7 +99,7 @@ def create_dual_copy_buttons(text_with_format: str, button_key_prefix: str = "du
         </button>
         <span id="feedback{button_key_prefix}" style="margin-left: 10px; color: green; display: none;">✅ 복사되었습니다!</span>
     </div>
-    <textarea id="copyTextWithFormat{button_key_prefix}" style="position: absolute; left: -9999px;">{text_with_format}</textarea>
+    <textarea id="copyTextWithFormat{button_key_prefix}" style="position: absolute; left: -9999px;">{text_with_format}</textarea>  # noqa: E501
     <textarea id="copyTextOnly{button_key_prefix}" style="position: absolute; left: -9999px;">{text_only}</textarea>
     <script>
     function copyWithFormat{button_key_prefix}() {{
@@ -159,7 +160,7 @@ def initialize_session_state() -> None:
         st.session_state.translation_result = None
 
 
-def setup_api_client() -> tuple:
+def setup_api_client() -> tuple[Any, Literal["openai", "azure"]]:
     """OpenAI/Azure API 클라이언트를 설정하고 반환합니다.
 
     Returns:
@@ -182,7 +183,7 @@ def setup_api_client() -> tuple:
         # AzureOpenAI 클라이언트 생성
         from openai import AzureOpenAI
 
-        client = AzureOpenAI(
+        azure_client: Any = AzureOpenAI(
             api_key=config.AZURE_OPENAI_API_KEY,
             azure_endpoint=config.AZURE_OPENAI_ENDPOINT,
             api_version=config.AZURE_OPENAI_API_VERSION,
@@ -194,7 +195,7 @@ def setup_api_client() -> tuple:
         from components.translation import AzureTranslationManager
         AzureTranslationManager.load_deployments(config)
 
-        return client, "azure"
+        return azure_client, "azure"
     else:
         # OpenAI 클라이언트 생성
         api_key = os.getenv("OPENAI_API_KEY")
@@ -206,13 +207,13 @@ def setup_api_client() -> tuple:
 
         from openai import OpenAI
 
-        client = OpenAI(
+        openai_client: Any = OpenAI(
             api_key=api_key,
             timeout=config.OPENAI_API_TIMEOUT,
             max_retries=config.OPENAI_MAX_RETRIES
         )
 
-        return client, "openai"
+        return openai_client, "openai"
 
 
 def initialize_components() -> tuple[LanguageDetector, TextAnalyzer]:
@@ -226,42 +227,94 @@ def initialize_components() -> tuple[LanguageDetector, TextAnalyzer]:
     return language_detector, text_analyzer
 
 
-def setup_sidebar() -> tuple[str, dict[str, str]]:
-    """사이드바를 설정하고 선택된 모델을 반환합니다.
+def setup_sidebar(provider: Literal["openai", "azure"]) -> tuple[str, dict[str, str]]:
+    """사이드바를 설정하고 선택된 모델/deployment를 반환합니다.
 
-    Config에서 DEFAULT_MODEL을 로드하여 기본 선택 모델을 설정합니다.
+    Provider에 따라 모델 목록 또는 deployment 목록을 표시합니다.
+
+    Args:
+        provider: "openai" 또는 "azure"
 
     Returns:
-        (선택된 모델명, 모델 옵션 딕셔너리) 튜플
+        (선택된 모델/deployment명, 옵션 딕셔너리) 튜플
     """
     st.sidebar.header("⚙️ 영어-한국어 번역기 설정")
 
-    model_options = {
-        "GPT-4o Mini (추천 - 가성비)": "gpt-4o-mini",
-        "GPT-4o (최고 품질)": "gpt-4o",
-        "GPT-4 Turbo": "gpt-4-turbo",
-        "GPT-4": "gpt-4",
-        "GPT-3.5 Turbo (빠름)": "gpt-3.5-turbo"
-    }
+    # Provider 정보 표시
+    provider_display = "🔵 OpenAI" if provider == "openai" else "🟢 Azure OpenAI"
+    st.sidebar.markdown(f"**Provider:** {provider_display}")
+    st.sidebar.markdown("---")
 
-    # Config에서 기본 모델 가져오기
-    default_model = config.DEFAULT_MODEL
+    if provider == "azure":
+        # Azure: Deployment 목록 표시
+        from components.translation import AzureTranslationManager
 
-    # 기본 모델에 해당하는 인덱스 찾기
-    default_index = 0
-    for idx, (_, model_id) in enumerate(model_options.items()):
-        if model_id == default_model:
-            default_index = idx
-            break
+        deployments = AzureTranslationManager.SUPPORTED_DEPLOYMENTS
 
-    selected_model_name = st.sidebar.selectbox(
-        "AI 모델 선택:",
-        options=list(model_options.keys()),
-        index=default_index
-    )
-    selected_model = model_options[selected_model_name]
+        if not deployments:
+            st.sidebar.error(
+                "⚠️ **Azure Deployment 미설정**\n\n"
+                "`.env` 파일에 `AZURE_DEPLOYMENTS` 설정을 추가해주세요.\n\n"
+                "예시:\n"
+                "```\n"
+                "AZURE_DEPLOYMENTS=gpt-4o:my-gpt4o,gpt-4o-mini:my-mini\n"
+                "```"
+            )
+            st.stop()
 
-    return selected_model, model_options
+        # Deployment 옵션 생성 (모델명을 표시명으로 사용)
+        deployment_options = {
+            f"{model} (Azure)": deployment
+            for model, deployment in deployments.items()
+        }
+
+        # Config에서 기본 모델 가져오기
+        default_model = config.DEFAULT_MODEL
+
+        # 기본 모델에 해당하는 인덱스 찾기
+        default_index = 0
+        for idx, model_name in enumerate(deployments.keys()):
+            if model_name == default_model:
+                default_index = idx
+                break
+
+        selected_deployment_name: str = st.sidebar.selectbox(
+            "Azure Deployment 선택:",
+            options=list(deployment_options.keys()),
+            index=default_index
+        )  # type: ignore
+        selected_deployment = deployment_options[selected_deployment_name]
+
+        return selected_deployment, deployment_options
+
+    else:
+        # OpenAI: 기존 모델 목록 표시
+        model_options = {
+            "GPT-4o Mini (추천 - 가성비)": "gpt-4o-mini",
+            "GPT-4o (최고 품질)": "gpt-4o",
+            "GPT-4 Turbo": "gpt-4-turbo",
+            "GPT-4": "gpt-4",
+            "GPT-3.5 Turbo (빠름)": "gpt-3.5-turbo"
+        }
+
+        # Config에서 기본 모델 가져오기
+        default_model = config.DEFAULT_MODEL
+
+        # 기본 모델에 해당하는 인덱스 찾기
+        default_index = 0
+        for idx, (_, model_id) in enumerate(model_options.items()):
+            if model_id == default_model:
+                default_index = idx
+                break
+
+        selected_model_name: str = st.sidebar.selectbox(
+            "AI 모델 선택:",
+            options=list(model_options.keys()),
+            index=default_index
+        )  # type: ignore
+        selected_model = model_options[selected_model_name]
+
+        return selected_model, model_options
 
 
 # ============================================================================
@@ -370,7 +423,7 @@ def render_translation_result() -> None:
 
         with tab1:
             # 번역문 복사 버튼 (포맷포함 / 텍스트만)
-            st.components.v1.html(
+            st.components.v1.html(  # type: ignore
                 create_dual_copy_buttons(result, "translation"),
                 height=60
             )
@@ -378,7 +431,7 @@ def render_translation_result() -> None:
 
         with tab2:
             # Markdown 원본 복사 버튼
-            st.components.v1.html(
+            st.components.v1.html(  # type: ignore
                 create_copy_button(result, "📋 Markdown 복사", "markdown"),
                 height=50
             )
@@ -427,7 +480,7 @@ def update_statistics(
             length_color = "#ff8800"  # 주황색: 경고
 
         # 통합된 통계 표시 HTML 생성
-        stats_html = f"<div style='text-align: right; color: {length_color};'>{input_length:,} / {max_length:,}자 <span style='font-size: 0.85em;'>({token_count:,} 토큰)</span></div>"
+        stats_html = f"<div style='text-align: right; color: {length_color};'>{input_length:,} / {max_length:,}자 <span style='font-size: 0.85em;'>({token_count:,} 토큰)</span></div>"  # noqa: E501
 
         stats_placeholder.markdown(stats_html, unsafe_allow_html=True)
     else:
@@ -435,7 +488,7 @@ def update_statistics(
         target_lang = "unknown"
         direction_arrow = ""
         stats_placeholder.markdown(
-            f"<div style='text-align: right; color: #888;'>0자 / 0 토큰<br/><span style='font-size: 0.9em;'>입력: 0 / {max_length:,}자</span></div>",
+            f"<div style='text-align: right; color: #888;'>0자 / 0 토큰<br/><span style='font-size: 0.9em;'>입력: 0 / {max_length:,}자</span></div>",  # noqa: E501
             unsafe_allow_html=True
         )
 
@@ -507,8 +560,25 @@ def main() -> None:
     language_detector, text_analyzer = initialize_components()
 
     # 4. 사이드바 설정 및 번역 관리자 초기화
-    selected_model, _ = setup_sidebar()
-    translation_manager = TranslationManager(client, model=selected_model)
+    selected_model_or_deployment, _ = setup_sidebar(provider)
+
+    # Factory 패턴으로 TranslationManager 생성
+    from components.translation import TranslationManagerFactory
+
+    if provider == "azure":
+        # Azure: deployment 파라미터 전달
+        translation_manager = TranslationManagerFactory.create(
+            provider=provider,
+            client=client,
+            deployment=selected_model_or_deployment
+        )
+    else:
+        # OpenAI: model 파라미터 전달
+        translation_manager = TranslationManagerFactory.create(
+            provider=provider,
+            client=client,
+            model=selected_model_or_deployment
+        )
 
     # 5. 정보 메시지 표시
     show_info_messages()
@@ -523,7 +593,7 @@ def main() -> None:
         stats_placeholder,
         language_detector,
         text_analyzer,
-        selected_model
+        translation_manager.model  # TranslationManager의 model 속성 사용
     )
 
     # 8. 액션 버튼 렌더링
