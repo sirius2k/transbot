@@ -280,7 +280,12 @@ transbot/
 │   │   └── PRD.md
 │   ├── feature-execution-plan/  # 기능 명세 및 실행 계획
 │   ├── templates/           # 프롬프트 템플릿
-│   └── guides/              # 개발 가이드
+│   └── guides/              # 개발 가이드 (계층적 구조)
+│       ├── development/     # 개발 가이드
+│       ├── infrastructure/  # 인프라 가이드
+│       ├── quality/         # 품질 가이드
+│       ├── workflows/       # 워크플로우 가이드
+│       └── general/         # 범용 가이드 (참고용)
 ├── .claude/                 # Claude AI 서브에이전트 및 커스텀 명령어
 │   ├── commands/            # 커스텀 명령어
 │   └── agents/              # 서브에이전트
@@ -440,15 +445,18 @@ pip install -r requirements.txt
 
 개발자를 위한 자세한 가이드는 [CLAUDE.md](CLAUDE.md)를 참고하세요.
 
-- 코딩 컨벤션
-- 개발 가이드라인
-- 문제 해결 가이드
-- Claude와의 협업 팁
+### 가이드 구조
+
+- **[개발 가이드](docs/guides/development/)** - 코딩 컨벤션, app.py 구조, 컴포넌트 모듈
+- **[인프라 가이드](docs/guides/infrastructure/)** - 환경 설정, Config 관리, Azure OpenAI
+- **[품질 가이드](docs/guides/quality/)** - 테스트 작성, 커버리지 관리
+- **[워크플로우 가이드](docs/guides/workflows/)** - 문서 작성, GitHub 이슈, 작업 시간 추적
 
 ## 관련 문서
 
 - [PRD.md](docs/product/PRD.md) - 제품 요구사항 문서
-- [CLAUDE.md](CLAUDE.md) - Claude AI 작업 가이드
+- [CLAUDE.md](CLAUDE.md) - Claude AI 작업 가이드 (통합 인덱스)
+- [개발 가이드](docs/guides/) - 계층적 개발 가이드 모음
 
 ## 라이선스
 
