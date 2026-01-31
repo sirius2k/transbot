@@ -8,19 +8,28 @@
 
 TransBot은 Streamlit 기반의 영어-한국어 양방향 번역 웹 애플리케이션입니다.
 
-번역을 원하는 텍스트나 파일 등의 원본을 입력하면 **즉시 번역하여 결과를 보여줍니다**. 번역이 완료되면 그 내용을 별도의 저장소에 기록하여 지속적으로 관리하고, 편리하게 재조회하거나 다른 도구로 전송하는 등의 방법으로 활용할 수 있도록 합니다.
+번역을 원하는 텍스트를 입력하면 **즉시 번역하여 결과를 보여줍니다**. OpenAI 및 Azure OpenAI Service를 지원하며, 다양한 AI 모델 선택과 Markdown 포맷 보존 기능을 제공합니다.
 
 ### 핵심 가치
+
+#### 현재 제공 중인 가치
 
 | 가치 | 설명 |
 | ---- | ---- |
 | **즉시 번역** | 원문 텍스트를 붙여넣기하면 즉시 번역본 확인 |
 | **빠른 복사** | 번역된 내용을 원클릭으로 복사하여 다른 곳에 활용 |
-| **직관적 UI** | 간단하고 직관적인 인터페이스로 빠른 번역 및 사전 검색 |
-| **글자 제한 확장** | 기존 번역 서비스의 글자 수 제한을 넘어선 긴 문서 번역 |
+| **직관적 UI** | 간단하고 직관적인 인터페이스로 빠른 번역 |
+| **Markdown 지원** | Markdown 포맷을 보존하여 기술 문서 번역에 최적화 |
+| **다중 Provider** | OpenAI와 Azure OpenAI Service 모두 지원 |
+
+#### 향후 제공 예정
+
+| 가치 | 설명 |
+| ---- | ---- |
 | **사전 검색** | 단어만 입력 시 사전을 검색하여 뜻을 빠르게 확인 |
 | **히스토리 관리** | 번역 및 사전 검색 내용의 이력 관리, 그룹핑, 조회 |
-| **외부 툴 연동** | Notion, Asana, Confluence 등 외부 도구에 저장 |
+| **파일 번역** | 로컬 파일을 업로드하여 일괄 번역 |
+| **외부 툴 연동** | Notion, Confluence 등 외부 도구에 저장 |
 | **관찰성 확보** | Langfuse를 통한 LLM 사용 내역 추적 |
 
 ## 2. 문제 정의 (Problem Definition)
@@ -123,8 +132,7 @@ TransBot은 Streamlit 기반의 영어-한국어 양방향 번역 웹 애플리�
 
 ```text
 Phase 2 (P1 기능)
-├── FEATURE-017: 구조화된 로깅 시스템          ← 설정 관리(FEATURE-009) 기반, 디버깅 인프라 우선 구축
-├── FEATURE-008: Azure OpenAI Service 지원      ← 설정 관리(FEATURE-009) 완료 후 구현
+├── FEATURE-017: 구조화된 로깅 시스템          ← 디버깅 인프라 우선 구축
 ├── FEATURE-010: 번역 히스토리 저장 및 관리    ← 다른 기능의 기반, 독립적 개발 가능
 └── FEATURE-011: 사전 검색 기능                ← 독립적, 병렬 개발 가능
 
@@ -170,64 +178,21 @@ Phase 3 (P2-P3 기능)
 - **테스트 용이성**: 각 컴포넌트별 독립적인 단위 테스트
 - **확장성 준비**: Azure OpenAI 지원 등 향후 기능 확장 기반 마련
 
-### 6.2 테스트 프레임워크
+### 6.2 테스트 및 품질 관리
 
-| 항목 | 기술 | 설명 |
-| ---- | ---- | ---- |
-| 테스트 프레임워크 | pytest 7.4.0+ | Python 단위 테스트 프레임워크 |
-| 커버리지 측정 | pytest-cov 4.1.0+ | 코드 커버리지 측정 도구 |
-| HTML 리포트 | pytest-html 4.1.0+ | 테스트 결과 HTML 리포트 생성 |
-| Mock 지원 | pytest-mock 3.12.0+ | Mock 객체를 사용한 테스트 |
+**테스트 프레임워크**: pytest 기반 단위 테스트
 
-### 6.3 코드 품질 기준
+**코드 품질 기준**:
 
-| 지표 | 목표 | 현재 상태 (2026-01-28) |
+| 지표 | 목표 | 현재 상태 (2026-01-31) |
 | ---- | ---- | ----------------------- |
 | 코드 커버리지 | 80% 이상 | ✅ **98%** 달성 |
 | 총 테스트 수 | 모든 핵심 함수 및 클래스 | ✅ **76개** 완료 |
-| 컴포넌트 커버리지 | 100% | ✅ 모든 컴포넌트 100% 달성 |
-| 테스트 리포트 | htmlcov/ 폴더 통합 관리 | ✅ 구현 완료 |
 
-### 6.4 테스트 대상 모듈
+**테스트 대상**: utils.py, components/ (language, text, translation), config.py
 
-#### utils.py (32개 테스트)
-
-- `detect_language()`: 언어 감지 함수 (8개 테스트)
-- `count_tokens()`: 토큰 카운팅 함수 (5개 테스트)
-- `strip_markdown()`: Markdown 제거 함수 (14개 테스트)
-- `translate()`: 번역 함수 (3개 Mock 테스트)
-- 기타 유틸리티 함수 (2개 테스트)
-
-#### components/language.py (16개 테스트)
-
-- `LanguageDetector.detect()`: 언어 감지
-- `LanguageDetector.get_translation_direction()`: 번역 방향 결정
-- `LanguageDetector.get_language_code()`: 언어 코드 변환
-- `LanguageDetector.get_language_flag()`: 플래그 이모지 반환
-
-#### components/text.py (16개 테스트)
-
-- `TextAnalyzer.count_tokens()`: 토큰 카운팅
-- `TextAnalyzer.get_statistics()`: 통계 정보 생성
-- `TextAnalyzer.strip_markdown()`: Markdown 제거
-- `TextAnalyzer.has_markdown()`: Markdown 포함 여부
-- `TextAnalyzer.format_statistics_display()`: UI 표시용 HTML 생성
-
-#### components/translation.py (15개 테스트)
-
-- `TranslationManager.translate()`: 번역 수행
-- `TranslationManager.set_model()`: 모델 변경
-- `TranslationManager.set_temperature()`: temperature 설정
-- `TranslationManager.validate_model()`: 모델 검증
-- `TranslationManager.get_model_list()`: 지원 모델 목록
-
-### 6.5 리포트 관리
-
-모든 테스트 및 커버리지 리포트는 `htmlcov/` 폴더에 통합 관리됩니다:
-
-- `index.html`: 코드 커버리지 리포트
-- `pytest-report.html`: pytest 실행 결과 리포트
+**리포트**: htmlcov/ 폴더에서 커버리지 및 테스트 결과 확인 가능
 
 ---
 
-**최종 수정일**: 2026-01-31 10:15
+**최종 수정일**: 2026-01-31 17:30
