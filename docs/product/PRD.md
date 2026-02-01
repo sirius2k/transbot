@@ -102,6 +102,10 @@ TransBot은 Streamlit 기반의 영어-한국어 양방향 번역 웹 애플리�
 
 ### 5.2 완료된 기능
 
+#### 주요 기능 (Feature-based Development)
+
+2시간 이상 소요되거나 여러 파일 수정이 필요한 기능은 FEATURE-XXX로 관리됩니다.
+
 | 기능 | 우선순위 | 선정 이유 |
 | ---- | -------- | --------- |
 | ✅ FEATURE-001: [영어 ↔ 한국어 양방향 번역](../feature-execution-plan/FEATURE-001.md) | **P0** | 서비스의 핵심 존재 이유 |
@@ -110,10 +114,17 @@ TransBot은 Streamlit 기반의 영어-한국어 양방향 번역 웹 애플리�
 | ✅ FEATURE-003: [다양한 AI 모델 선택](../feature-execution-plan/FEATURE-003.md) | **P1** | 비용/품질 선택권 제공 |
 | ✅ FEATURE-005: [Markdown 포맷 지원 및 보존](../feature-execution-plan/FEATURE-005.md) | **P1** | 개발자 대상 기술 문서에 필수 |
 | ✅ FEATURE-009: [환경 변수 기반 설정 관리 시스템](../feature-execution-plan/FEATURE-009.md) | **P1** | 하드코딩 제거, 환경별 설정 분리 |
-| ✅ 지우기 버튼 (입력 및 번역 결과 초기화) | **P1** | 사용성 개선, 빠른 재시작 |
+| ✅ FEATURE-008: [Azure OpenAI Service 지원](../feature-execution-plan/FEATURE-008.md) | **P1** | 기업 환경(Azure) 사용자 지원. OpenAI/Azure 간 유연한 전환 |
 | ✅ FEATURE-004: [글자수/토큰수 실시간 표시](../feature-execution-plan/FEATURE-004.md) | **P2** | 비용 예측 보조 기능 |
 | ✅ FEATURE-007: [사이드바 UI (설정 섹션)](../feature-execution-plan/FEATURE-007.md) | **P2** | UI 레이아웃 구성 요소 |
-| ✅ FEATURE-008: [Azure OpenAI Service 지원](../feature-execution-plan/FEATURE-008.md) | **P1** | 기업 환경(Azure) 사용자 지원. OpenAI/Azure 간 유연한 전환 |
+
+#### 마이너 개선사항 (Quick Wins)
+
+1-2시간 이내 완료 가능한 간단한 개선사항은 별도 FEATURE 문서 없이 관리됩니다.
+
+| 개선사항 | 우선순위 | 소요 시간 | 설명 |
+| -------- | -------- | --------- | ---- |
+| ✅ 지우기 버튼 | **P1** | 30분 | 입력 및 번역 결과 초기화, 사용성 개선 |
 
 ### 5.3 향후 개발 예정
 
@@ -195,4 +206,4 @@ Phase 3 (P2-P3 기능)
 
 ---
 
-**최종 수정일**: 2026-01-31 17:30
+**최종 수정일**: 2026-01-31 17:45

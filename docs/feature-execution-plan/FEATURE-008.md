@@ -705,7 +705,7 @@ AZURE_DEPLOYMENTS=gpt-4o:my-gpt4o-deployment,gpt-4o-mini:my-mini-deployment
 
 ### Task별 완료 상태
 
-> 💡 **실제 시간 출처**: 각 Task의 실제 시간은 `docs/feature-execution-log/FEATURE-008-TASK-X.Y.log` 파일에서 추출한 값입니다.
+> 💡 **실제 시간 출처**: 각 Task의 실제 시간은 `docs/feature-execution-log/FEATURE-008.log` 파일에서 추출한 값입니다.
 
 | Task | 제목 | 상태 | 예상 시간 | 실제 시간 | 완료일 | 커밋 | 이슈 |
 | ---- | ---- | ---- | --------- | --------- | ------ | ---- | ---- |
