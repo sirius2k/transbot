@@ -166,9 +166,7 @@ def setup_api_client() -> tuple[Any, Literal["openai", "azure"]]:
     Returns:
         (client, provider) 튜플
     """
-    # Config에서 Provider 로드
-    from config import Config
-    config = Config.load()
+    # 전역 config 사용
     provider = config.AI_PROVIDER
 
     if provider == "azure":
