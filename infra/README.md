@@ -15,8 +15,9 @@ TransBot의 로컬 개발 환경을 위한 Docker 기반 인프라 설정입니�
 ### 포함된 서비스
 
 | 서비스 | 이미지 | 포트 | 용도 |
-|--------|--------|------|------|
+| -------- | -------- | ------ | ------ |
 | **PostgreSQL** | postgres:15-alpine | 5432 | 데이터베이스 (번역 히스토리, 사용자 데이터) |
+| **ClickHouse** | clickhouse/clickhouse-server:24-alpine | 8123, 9000 | 분석 데이터베이스 (Langfuse 이벤트 저장) |
 | **Langfuse** | langfuse/langfuse:latest | 3000 | LLM 관찰성 플랫폼 (프롬프트 추적, 비용 분석) |
 | **Redis** | redis:7-alpine | 6379 | 캐싱 및 세션 관리 |
 

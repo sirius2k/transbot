@@ -22,6 +22,28 @@ services:
     networks:
       - transbot-network
 
+  # ClickHouse - Analytics Database for Langfuse
+  clickhouse:
+    image: clickhouse/clickhouse-server:24-alpine
+    container_name: transbot-clickhouse
+    environment:
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-langfuse}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-langfuse}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-langfuse_password}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    ports:
+      - "${CLICKHOUSE_PORT:-8123}:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - transbot-network
+
   # Langfuse - LLM Observability Platform
   langfuse:
     image: langfuse/langfuse:latest
@@ -29,8 +51,15 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      clickhouse:
+        condition: service_healthy
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-transbot_user}:${POSTGRES_PASSWORD:-transbot_password}@postgres:5432/${POSTGRES_DB:-transbot}
+      CLICKHOUSE_URL: http://clickhouse:8123
+      CLICKHOUSE_MIGRATION_URL: clickhouse://${CLICKHOUSE_USER:-langfuse}:${CLICKHOUSE_PASSWORD:-langfuse_password}@clickhouse:9000/${CLICKHOUSE_DB:-langfuse}
+      CLICKHOUSE_CLUSTER_ENABLED: "false"
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-langfuse}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-langfuse_password}
       NEXTAUTH_URL: ${LANGFUSE_URL:-http://localhost:3000}
       NEXTAUTH_SECRET: ${LANGFUSE_SECRET:-langfuse-secret-change-me}
       SALT: ${LANGFUSE_SALT:-langfuse-salt-change-me}
@@ -63,6 +92,8 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  clickhouse_data:
     driver: local
   redis_data:
     driver: local
