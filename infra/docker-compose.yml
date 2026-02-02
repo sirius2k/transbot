@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: transbot-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-transbot}
+      POSTGRES_USER: ${POSTGRES_USER:-transbot_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-transbot_password}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./services/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-transbot_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - transbot-network
+
+  # Langfuse - LLM Observability Platform
+  langfuse:
+    image: langfuse/langfuse:latest
+    container_name: transbot-langfuse
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-transbot_user}:${POSTGRES_PASSWORD:-transbot_password}@postgres:5432/${POSTGRES_DB:-transbot}
+      NEXTAUTH_URL: ${LANGFUSE_URL:-http://localhost:3000}
+      NEXTAUTH_SECRET: ${LANGFUSE_SECRET:-langfuse-secret-change-me}
+      SALT: ${LANGFUSE_SALT:-langfuse-salt-change-me}
+    ports:
+      - "${LANGFUSE_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - transbot-network
+
+  # Redis (캐싱 및 세션 관리용)
+  redis:
+    image: redis:7-alpine
+    container_name: transbot-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_password}
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - transbot-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  transbot-network:
+    driver: bridge

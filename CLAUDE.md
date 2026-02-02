@@ -96,12 +96,28 @@ transbot/
 │   ├── product/             # 제품 요구사항 문서
 │   │   └── PRD.md
 │   ├── feature-execution-plan/  # 기능 명세 및 실행 계획
+│   ├── feature-execution-log/   # 작업 시간 로그
 │   ├── templates/           # 프롬프트 템플릿
 │   └── guides/              # 개발 가이드
 │       ├── development/     # 개발 가이드
 │       ├── infrastructure/  # 인프라 가이드
 │       ├── quality/         # 품질 가이드
 │       └── workflows/       # 워크플로우 가이드
+├── infra/                   # 인프라 관리 (Docker Compose)
+│   ├── docker-compose.yml   # 서비스 통합 구성
+│   ├── .env.infra.example   # 인프라 환경 변수 템플릿
+│   ├── README.md            # 인프라 사용 가이드
+│   ├── services/            # 서비스별 설정
+│   │   ├── langfuse/        # Langfuse (LLM 관찰성)
+│   │   ├── postgres/        # PostgreSQL (데이터베이스)
+│   │   └── redis/           # Redis (캐싱)
+│   ├── scripts/             # 관리 스크립트
+│   │   ├── start.sh         # 서비스 시작
+│   │   ├── stop.sh          # 서비스 종료
+│   │   ├── logs.sh          # 로그 확인
+│   │   ├── health-check.sh  # 헬스 체크
+│   │   └── reset.sh         # 데이터 초기화
+│   └── volumes/             # 데이터 영속화 (Git 제외)
 ├── .claude/                 # Claude AI 서브에이전트 및 커스텀 명령어
 │   ├── commands/            # 커스텀 명령어
 │   └── agents/              # 서브에이전트

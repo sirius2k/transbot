@@ -279,6 +279,7 @@ transbot/
 │   ├── product/             # 제품 요구사항 문서
 │   │   └── PRD.md
 │   ├── feature-execution-plan/  # 기능 명세 및 실행 계획
+│   ├── feature-execution-log/   # 작업 시간 로그
 │   ├── templates/           # 프롬프트 템플릿
 │   └── guides/              # 개발 가이드 (계층적 구조)
 │       ├── development/     # 개발 가이드
@@ -286,6 +287,13 @@ transbot/
 │       ├── quality/         # 품질 가이드
 │       ├── workflows/       # 워크플로우 가이드
 │       └── general/         # 범용 가이드 (참고용)
+├── infra/                   # 인프라 관리 (Docker Compose)
+│   ├── docker-compose.yml   # 서비스 통합 구성
+│   ├── .env.infra.example   # 인프라 환경 변수 템플릿
+│   ├── README.md            # 인프라 사용 가이드
+│   ├── services/            # 서비스별 설정 (Langfuse, PostgreSQL, Redis)
+│   ├── scripts/             # 관리 스크립트 (start, stop, logs 등)
+│   └── volumes/             # 데이터 영속화 (Git 제외)
 ├── .claude/                 # Claude AI 서브에이전트 및 커스텀 명령어
 │   ├── commands/            # 커스텀 명령어
 │   └── agents/              # 서브에이전트
@@ -293,6 +301,31 @@ transbot/
 ├── CLAUDE.md                # Claude AI 작업 가이드
 └── README.md                # 프로젝트 소개 문서 (본 문서)
 ```
+
+## 로컬 개발 환경
+
+TransBot은 Docker Compose 기반 로컬 개발 인프라를 제공합니다.
+
+### 포함된 서비스
+
+- **PostgreSQL** (포트 5432): 번역 히스토리 및 사용자 데이터 저장
+- **Langfuse** (포트 3000): LLM 관찰성 플랫폼 (프롬프트 추적, 비용 분석)
+- **Redis** (포트 6379): 캐싱 및 세션 관리
+
+### 인프라 시작
+
+```bash
+cd infra
+./scripts/start.sh
+```
+
+서비스가 시작되면:
+
+1. **Langfuse** 접속: `http://localhost:3000`
+2. 계정 생성 및 프로젝트 생성
+3. API 키를 TransBot `.env` 파일에 추가
+
+자세한 사용법은 [infra/README.md](infra/README.md)를 참고하세요.
 
 ## 기술 스택
 
