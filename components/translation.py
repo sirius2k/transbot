@@ -79,9 +79,10 @@ class TranslationManager:
             번역된 텍스트
         """
         start_time = time.time()
-        input_tokens = count_tokens(text, self.model)
         error_msg = None
         result = ""
+        input_tokens = 0
+        output_tokens = 0
 
         try:
             response = self.client.chat.completions.create(
@@ -101,9 +102,13 @@ class TranslationManager:
                 timeout=self.timeout
             )
             result = response.choices[0].message.content
-            output_tokens = count_tokens(result, self.model)
+            # OpenAI API 응답에서 실제 토큰 수 사용 (더 정확함)
+            input_tokens = response.usage.prompt_tokens
+            output_tokens = response.usage.completion_tokens
         except Exception as e:
             error_msg = str(e)
+            # 에러 발생 시 입력 토큰만 추정 (응답 없음)
+            input_tokens = count_tokens(text, self.model)
             output_tokens = 0
             raise
         finally:
@@ -228,9 +233,10 @@ class AzureTranslationManager(TranslationManager):
             번역된 텍스트
         """
         start_time = time.time()
-        input_tokens = count_tokens(text, self.model)
         error_msg = None
         result = ""
+        input_tokens = 0
+        output_tokens = 0
 
         try:
             response = self.client.chat.completions.create(
@@ -250,9 +256,13 @@ class AzureTranslationManager(TranslationManager):
                 timeout=self.timeout
             )
             result = response.choices[0].message.content
-            output_tokens = count_tokens(result, self.model)
+            # OpenAI API 응답에서 실제 토큰 수 사용 (더 정확함)
+            input_tokens = response.usage.prompt_tokens
+            output_tokens = response.usage.completion_tokens
         except Exception as e:
             error_msg = str(e)
+            # 에러 발생 시 입력 토큰만 추정 (응답 없음)
+            input_tokens = count_tokens(text, self.model)
             output_tokens = 0
             raise
         finally:
