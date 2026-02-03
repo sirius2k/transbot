@@ -1,7 +1,10 @@
 """번역 관리 기능을 제공하는 모듈"""
 
+import time
 from typing import Optional, Any
 from config import Config
+from components.observability import LangfuseObserver
+from utils import count_tokens
 
 
 class TranslationManager:
@@ -22,6 +25,7 @@ class TranslationManager:
     def __init__(
         self,
         client: Any,
+        config: Optional[Config] = None,
         model: Optional[str] = None,
         temperature: Optional[float] = None,
         timeout: Optional[int] = None,
@@ -31,6 +35,7 @@ class TranslationManager:
         """
         Args:
             client: OpenAI 클라이언트 인스턴스
+            config: Config 인스턴스 (None이면 Config.load() 호출)
             model: 사용할 AI 모델 (None이면 config에서 로드)
             temperature: 번역 창의성 설정 (None이면 config에서 로드)
             timeout: API 타임아웃 초 (None이면 config에서 로드)
@@ -41,14 +46,14 @@ class TranslationManager:
             ValueError: 지원하지 않는 모델인 경우
         """
         # Config에서 기본값 로드
-        config = Config.load()
+        self.config = config if config is not None else Config.load()
 
         # 파라미터가 None이면 config 값 사용
-        self.model = model if model is not None else config.DEFAULT_MODEL
-        self.temperature = temperature if temperature is not None else config.DEFAULT_TEMPERATURE
-        self.timeout = timeout if timeout is not None else config.OPENAI_API_TIMEOUT
-        self.max_retries = max_retries if max_retries is not None else config.OPENAI_MAX_RETRIES
-        self.max_tokens = max_tokens if max_tokens is not None else config.MAX_TOKENS
+        self.model = model if model is not None else self.config.DEFAULT_MODEL
+        self.temperature = temperature if temperature is not None else self.config.DEFAULT_TEMPERATURE
+        self.timeout = timeout if timeout is not None else self.config.OPENAI_API_TIMEOUT
+        self.max_retries = max_retries if max_retries is not None else self.config.OPENAI_MAX_RETRIES
+        self.max_tokens = max_tokens if max_tokens is not None else self.config.MAX_TOKENS
 
         # 모델 검증
         if not self.validate_model(self.model):
@@ -56,7 +61,10 @@ class TranslationManager:
 
         self.client = client
 
-    def translate(self, text: str, source: str, target: str) -> str:
+        # Langfuse Observer 초기화
+        self.observer = LangfuseObserver(self.config)
+
+    def translate(self, text: str, source: str, target: str, session_id: str = "unknown") -> str:
         """텍스트를 번역합니다.
 
         OpenAI API를 사용하여 클래스의 설정(model, temperature, timeout, max_tokens)을 적용합니다.
@@ -65,27 +73,59 @@ class TranslationManager:
             text: 번역할 텍스트
             source: 원본 언어 (예: "Korean", "English")
             target: 대상 언어 (예: "English", "Korean")
+            session_id: 세션 ID (Langfuse 추적용)
 
         Returns:
             번역된 텍스트
         """
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[
-                {
-                    "role": "system",
-                    "content": f"You are a professional translator. Translate the following {source} text to {target}. IMPORTANT: Preserve all Markdown formatting (bold, italic, headings, lists, links, code blocks, blockquotes, tables, etc.) in the translation. Only respond with the translation, nothing else." # noqa: E501
-                },
-                {
-                    "role": "user",
-                    "content": text
-                }
-            ],
-            temperature=self.temperature,
-            max_tokens=self.max_tokens,
-            timeout=self.timeout
-        )
-        return response.choices[0].message.content
+        start_time = time.time()
+        input_tokens = count_tokens(text, self.model)
+        error_msg = None
+        result = ""
+
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": f"You are a professional translator. Translate the following {source} text to {target}. IMPORTANT: Preserve all Markdown formatting (bold, italic, headings, lists, links, code blocks, blockquotes, tables, etc.) in the translation. Only respond with the translation, nothing else." # noqa: E501
+                    },
+                    {
+                        "role": "user",
+                        "content": text
+                    }
+                ],
+                temperature=self.temperature,
+                max_tokens=self.max_tokens,
+                timeout=self.timeout
+            )
+            result = response.choices[0].message.content
+            output_tokens = count_tokens(result, self.model)
+        except Exception as e:
+            error_msg = str(e)
+            output_tokens = 0
+            raise
+        finally:
+            # 추적 로직 (성공/실패 모두)
+            latency_ms = (time.time() - start_time) * 1000
+            try:
+                self.observer.track_translation(
+                    source_text=text,
+                    target_text=result,
+                    source_lang=source,
+                    target_lang=target,
+                    model=self.model,
+                    input_tokens=input_tokens,
+                    output_tokens=output_tokens,
+                    latency_ms=latency_ms,
+                    session_id=session_id,
+                    error=error_msg
+                )
+            except Exception as track_error:
+                print(f"⚠️ 추적 실패 (번역은 성공): {track_error}")
+
+        return result
 
     def set_model(self, model: str) -> None:
         """사용할 AI 모델을 변경합니다.
@@ -135,6 +175,7 @@ class AzureTranslationManager(TranslationManager):
         self,
         client: Any,
         deployment: str,
+        config: Optional[Config] = None,
         model: Optional[str] = None,
         temperature: Optional[float] = None,
         timeout: Optional[int] = None,
@@ -146,6 +187,7 @@ class AzureTranslationManager(TranslationManager):
         Args:
             client: AzureOpenAI 클라이언트 인스턴스
             deployment: Azure deployment 이름 (필수)
+            config: Config 인스턴스 (None이면 Config.load() 호출)
             model: 원래 모델명 (표시용, 선택)
             temperature: 번역 창의성 설정 (None이면 config에서 로드)
             timeout: API 타임아웃 초 (None이면 config에서 로드)
@@ -153,7 +195,7 @@ class AzureTranslationManager(TranslationManager):
             max_tokens: 최대 출력 토큰 수 (None이면 config에서 로드)
         """
         # Config에서 기본값 로드
-        config = Config.load()
+        self.config = config if config is not None else Config.load()
 
         # deployment 저장 (필수)
         self.deployment = deployment
@@ -161,14 +203,17 @@ class AzureTranslationManager(TranslationManager):
         self.model = model if model is not None else deployment
 
         # 나머지 속성 초기화
-        self.temperature = temperature if temperature is not None else config.DEFAULT_TEMPERATURE
-        self.timeout = timeout if timeout is not None else config.OPENAI_API_TIMEOUT
-        self.max_retries = max_retries if max_retries is not None else config.OPENAI_MAX_RETRIES
-        self.max_tokens = max_tokens if max_tokens is not None else config.MAX_TOKENS
+        self.temperature = temperature if temperature is not None else self.config.DEFAULT_TEMPERATURE
+        self.timeout = timeout if timeout is not None else self.config.OPENAI_API_TIMEOUT
+        self.max_retries = max_retries if max_retries is not None else self.config.OPENAI_MAX_RETRIES
+        self.max_tokens = max_tokens if max_tokens is not None else self.config.MAX_TOKENS
 
         self.client = client
 
-    def translate(self, text: str, source: str, target: str) -> str:
+        # Langfuse Observer 초기화
+        self.observer = LangfuseObserver(self.config)
+
+    def translate(self, text: str, source: str, target: str, session_id: str = "unknown") -> str:
         """텍스트를 번역합니다 (Azure 전용).
 
         OpenAI와 다른 점: model 파라미터에 deployment 이름을 사용합니다.
@@ -177,27 +222,59 @@ class AzureTranslationManager(TranslationManager):
             text: 번역할 텍스트
             source: 원본 언어 (예: "Korean", "English")
             target: 대상 언어 (예: "English", "Korean")
+            session_id: 세션 ID (Langfuse 추적용)
 
         Returns:
             번역된 텍스트
         """
-        response = self.client.chat.completions.create(
-            model=self.deployment,  # Azure는 deployment 이름 사용
-            messages=[
-                {
-                    "role": "system",
-                    "content": f"You are a professional translator. Translate the following {source} text to {target}. IMPORTANT: Preserve all Markdown formatting (bold, italic, headings, lists, links, code blocks, blockquotes, tables, etc.) in the translation. Only respond with the translation, nothing else." # noqa: E501
-                },
-                {
-                    "role": "user",
-                    "content": text
-                }
-            ],
-            temperature=self.temperature,
-            max_tokens=self.max_tokens,
-            timeout=self.timeout
-        )
-        return response.choices[0].message.content
+        start_time = time.time()
+        input_tokens = count_tokens(text, self.model)
+        error_msg = None
+        result = ""
+
+        try:
+            response = self.client.chat.completions.create(
+                model=self.deployment,  # Azure는 deployment 이름 사용
+                messages=[
+                    {
+                        "role": "system",
+                        "content": f"You are a professional translator. Translate the following {source} text to {target}. IMPORTANT: Preserve all Markdown formatting (bold, italic, headings, lists, links, code blocks, blockquotes, tables, etc.) in the translation. Only respond with the translation, nothing else." # noqa: E501
+                    },
+                    {
+                        "role": "user",
+                        "content": text
+                    }
+                ],
+                temperature=self.temperature,
+                max_tokens=self.max_tokens,
+                timeout=self.timeout
+            )
+            result = response.choices[0].message.content
+            output_tokens = count_tokens(result, self.model)
+        except Exception as e:
+            error_msg = str(e)
+            output_tokens = 0
+            raise
+        finally:
+            # 추적 로직 (성공/실패 모두)
+            latency_ms = (time.time() - start_time) * 1000
+            try:
+                self.observer.track_translation(
+                    source_text=text,
+                    target_text=result,
+                    source_lang=source,
+                    target_lang=target,
+                    model=self.model,
+                    input_tokens=input_tokens,
+                    output_tokens=output_tokens,
+                    latency_ms=latency_ms,
+                    session_id=session_id,
+                    error=error_msg
+                )
+            except Exception as track_error:
+                print(f"⚠️ 추적 실패 (번역은 성공): {track_error}")
+
+        return result
 
     @classmethod
     def load_deployments(cls, config: Config) -> None:
