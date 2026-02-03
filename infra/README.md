@@ -14,12 +14,13 @@ TransBot의 로컬 개발 환경을 위한 Docker 기반 인프라 설정입니�
 
 ### 포함된 서비스
 
-| 서비스 | 이미지 | 포트 | 용도 |
-| -------- | -------- | ------ | ------ |
-| **PostgreSQL** | postgres:15-alpine | 5432 | 데이터베이스 (번역 히스토리, 사용자 데이터) |
-| **ClickHouse** | clickhouse/clickhouse-server:24-alpine | 8123, 9000 | 분석 데이터베이스 (Langfuse 이벤트 저장) |
-| **Langfuse** | langfuse/langfuse:latest | 3000 | LLM 관찰성 플랫폼 (프롬프트 추적, 비용 분석) |
-| **Redis** | redis:7-alpine | 6379 | 캐싱 및 세션 관리 |
+| 서비스 | 버전 | 이미지 | 포트 | 용도 |
+| -------- | -------- | -------- | ------ | ------ |
+| **PostgreSQL** | 15 | `postgres:15-alpine` | 5432 | 데이터베이스 (번역 히스토리, 사용자 데이터, Langfuse 메타데이터) |
+| **Langfuse** | 2 (Stable) | `langfuse/langfuse:2` | 3000 | LLM 관찰성 플랫폼 (프롬프트 추적, 비용 분석, 품질 모니터링) |
+| **Redis** | 7 | `redis:7-alpine` | 6379 | 캐싱 및 세션 관리 |
+
+> **참고**: Langfuse v3는 ClickHouse를 추가로 요구하지만, 현재는 안정성을 위해 v2를 사용합니다. v3 업그레이드는 향후 고려될 예정입니다.
 
 ### 디렉토리 구조
 
@@ -156,6 +157,16 @@ docker-compose exec redis redis-cli -a your_redis_password
 
 ### PostgreSQL
 
+#### 버전 정보
+
+현재 **PostgreSQL 15 (Alpine)** 를 사용합니다.
+
+- **이미지**: `postgres:15-alpine`
+- **용도**:
+  - TransBot 애플리케이션 데이터 (번역 히스토리, 사용자 정보 등)
+  - Langfuse 메타데이터 및 이벤트 저장
+- **선택 이유**: Alpine 이미지는 경량화되어 있어 로컬 개발에 적합하며, PostgreSQL 15는 안정적인 LTS 버전입니다.
+
 #### 데이터베이스 접속
 
 ```bash
@@ -188,12 +199,21 @@ cat backup.sql | docker-compose exec -T postgres psql -U transbot_user -d transb
 
 ### Langfuse
 
+#### 버전 정보
+
+현재 **Langfuse v2 (Stable)** 를 사용합니다.
+
+- **이미지**: `langfuse/langfuse:2`
+- **데이터베이스**: PostgreSQL 15 (메타데이터 및 이벤트 저장)
+- **v3와의 차이점**: v3는 ClickHouse를 추가로 요구하지만, v2는 PostgreSQL만으로 동작하여 설정이 간단하고 안정적입니다.
+
 #### 주요 기능
 
 - **프롬프트 추적**: OpenAI API 호출 자동 로깅
 - **비용 분석**: 토큰 사용량 및 비용 대시보드
 - **성능 모니터링**: 응답 시간, 에러율 추적
 - **프롬프트 버전 관리**: 프롬프트 변경 이력 관리
+- **세션 추적**: 사용자 세션별 LLM 호출 그룹핑
 
 #### TransBot 통합
 
@@ -212,6 +232,15 @@ trace = langfuse.trace(name="translation")
 ```
 
 ### Redis
+
+#### 버전 정보
+
+현재 **Redis 7 (Alpine)** 를 사용합니다.
+
+- **이미지**: `redis:7-alpine`
+- **용도**: 캐싱, 세션 관리, 임시 데이터 저장
+- **영속성**: AOF (Append Only File) 모드로 데이터 영속성 보장
+- **선택 이유**: Redis 7은 최신 안정 버전이며, Alpine 이미지로 경량화되어 있습니다.
 
 #### Redis CLI 접속
 
@@ -310,14 +339,46 @@ docker-compose down -v
    - Redis Cluster 구성
    - 로드 밸런서 추가
 
+## 버전 업그레이드
+
+### Langfuse v2 → v3 업그레이드 (향후 계획)
+
+Langfuse v3로 업그레이드하려면 ClickHouse를 추가로 설치해야 합니다.
+
+#### v3의 주요 변경사항
+
+- **ClickHouse 요구**: 분석 데이터베이스로 ClickHouse 추가
+- **성능 향상**: 대용량 이벤트 처리 성능 개선
+- **고급 분석**: 더 복잡한 쿼리 및 대시보드 지원
+
+#### 업그레이드 준비
+
+1. `docker-compose.yml`에서 ClickHouse 주석 해제
+2. `.env.infra`에 ClickHouse 환경 변수 설정
+3. Langfuse 이미지를 `langfuse/langfuse:3`으로 변경
+4. 데이터 마이그레이션 실행
+
+> **참고**: 현재는 안정성과 단순성을 위해 v2를 사용합니다. v3 업그레이드는 프로젝트가 성숙해진 후 고려될 예정입니다.
+
 ## 참고 자료
 
+### 공식 문서
+
 - [Docker Compose 공식 문서](https://docs.docker.com/compose/)
-- [PostgreSQL 공식 문서](https://www.postgresql.org/docs/)
-- [Langfuse 공식 문서](https://langfuse.com/docs)
-- [Redis 공식 문서](https://redis.io/documentation)
+- [PostgreSQL 15 문서](https://www.postgresql.org/docs/15/)
+- [Langfuse v2 문서](https://langfuse.com/docs)
+- [Langfuse v3 업그레이드 가이드](https://langfuse.com/docs/deployment/self-host#langfuse-v3)
+- [Redis 7 문서](https://redis.io/docs/about/redis-7-0/)
+
+### Docker Hub
+
+- [postgres:15-alpine](https://hub.docker.com/_/postgres)
+- [langfuse/langfuse:2](https://hub.docker.com/r/langfuse/langfuse)
+- [redis:7-alpine](https://hub.docker.com/_/redis)
+- [clickhouse/clickhouse-server:24-alpine](https://hub.docker.com/r/clickhouse/clickhouse-server) (v3 전용)
 
 ---
 
 **작성일**: 2026-02-03
+**최종 수정일**: 2026-02-04
 **작성자**: TransBot Development Team

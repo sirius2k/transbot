@@ -46,7 +46,7 @@ class TestTranslationManager:
 
         self.mock_client.chat.completions.create.return_value = mock_response
 
-        result = self.manager.translate("Hello", "English", "Korean")
+        result = self.manager.translate("Hello", "English", "Korean", "test-session")
         assert result == "Translated text"
 
     def test_translate_calls_api_with_correct_params(self):
@@ -57,7 +57,7 @@ class TestTranslationManager:
 
         self.mock_client.chat.completions.create.return_value = mock_response
 
-        self.manager.translate("Hello", "English", "Korean")
+        self.manager.translate("Hello", "English", "Korean", "test-session")
 
         # API 호출 확인
         self.mock_client.chat.completions.create.assert_called_once()
@@ -86,7 +86,7 @@ class TestTranslationManager:
 
         self.mock_client.chat.completions.create.return_value = mock_response
 
-        self.manager.translate("Test", "English", "Korean")
+        self.manager.translate("Test", "English", "Korean", "test-session")
 
         call_args = self.mock_client.chat.completions.create.call_args
         assert call_args.kwargs["temperature"] == 0.7
@@ -197,7 +197,7 @@ class TestAzureTranslationManager:
         )
 
         # 번역 실행
-        result = manager.translate("Hello", "English", "Korean")
+        result = manager.translate("Hello", "English", "Korean", "test-session")
 
         # deployment가 model 파라미터로 사용되었는지 확인
         self.mock_client.chat.completions.create.assert_called_once()
@@ -218,7 +218,7 @@ class TestAzureTranslationManager:
             deployment="my-gpt4o"
         )
 
-        result = manager.translate("Hello", "English", "Korean")
+        result = manager.translate("Hello", "English", "Korean", "test-session")
         assert result == "안녕하세요"
 
     def test_azure_translate_api_params(self):
@@ -236,7 +236,7 @@ class TestAzureTranslationManager:
             max_tokens=5000
         )
 
-        manager.translate("Test", "English", "Korean")
+        manager.translate("Test", "English", "Korean", "test-session")
 
         # API 호출 파라미터 검증
         call_args = self.mock_client.chat.completions.create.call_args

@@ -256,7 +256,7 @@ def setup_sidebar(provider: Literal["openai", "azure"]) -> tuple[str, dict[str, 
     Returns:
         (선택된 모델/deployment명, 옵션 딕셔너리) 튜플
     """
-    st.sidebar.header("⚙️ 영어-한국어 번역기 설정")
+    st.sidebar.header("⚙️ 설정")
 
     # Provider 정보 표시
     provider_display = "🔵 OpenAI" if provider == "openai" else "🟢 Azure OpenAI"
