@@ -87,6 +87,11 @@ class Config:
         self.AZURE_OPENAI_API_VERSION: str = self._DEFAULT_AZURE_API_VERSION
         self.AZURE_DEPLOYMENTS: Optional[str] = None
 
+        # Langfuse 설정
+        self.LANGFUSE_PUBLIC_KEY: Optional[str] = None
+        self.LANGFUSE_SECRET_KEY: Optional[str] = None
+        self.LANGFUSE_HOST: Optional[str] = None
+
     @classmethod
     def load(cls) -> 'Config':
         """환경 변수를 로드하고 Config 객체를 반환합니다.
@@ -181,6 +186,11 @@ class Config:
             cls._DEFAULT_AZURE_API_VERSION
         )
         config.AZURE_DEPLOYMENTS = os.getenv("AZURE_DEPLOYMENTS")
+
+        # Langfuse 설정
+        config.LANGFUSE_PUBLIC_KEY = os.getenv("LANGFUSE_PUBLIC_KEY")
+        config.LANGFUSE_SECRET_KEY = os.getenv("LANGFUSE_SECRET_KEY")
+        config.LANGFUSE_HOST = os.getenv("LANGFUSE_HOST")
 
         return config
 
@@ -332,6 +342,19 @@ class Config:
                 f"지원하지 않는 Provider입니다: {provider}. "
                 f"지원 Provider: openai, azure"
             )
+
+    @property
+    def langfuse_enabled(self) -> bool:
+        """Langfuse가 활성화되었는지 확인합니다.
+
+        Returns:
+            bool: 3개 환경 변수가 모두 설정된 경우 True, 그렇지 않으면 False
+        """
+        return all([
+            self.LANGFUSE_PUBLIC_KEY,
+            self.LANGFUSE_SECRET_KEY,
+            self.LANGFUSE_HOST
+        ])
 
     @staticmethod
     def parse_azure_deployments(deployments_str: Optional[str]) -> dict[str, str]:
