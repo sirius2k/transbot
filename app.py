@@ -137,6 +137,24 @@ def clear_inputs() -> None:
     st.session_state.translation_result = None
 
 
+def format_translation_result(text: str) -> str:
+    """번역 결과의 포맷을 보존합니다.
+
+    Markdown에서 줄바꿈을 올바르게 표시하기 위해
+    각 줄 끝에 두 개의 공백을 추가합니다.
+
+    Args:
+        text: 원본 텍스트
+
+    Returns:
+        포맷이 보존된 텍스트
+    """
+    # 각 줄 끝에 두 공백 추가 (Markdown 줄바꿈 규칙)
+    lines = text.split('\n')
+    formatted_lines = [line + '  ' if line.strip() else line for line in lines]
+    return '\n'.join(formatted_lines)
+
+
 # ============================================================================
 # Configuration Functions (설정 및 초기화)
 # ============================================================================
@@ -158,6 +176,8 @@ def initialize_session_state() -> None:
         st.session_state.input_text = ""
     if 'translation_result' not in st.session_state:
         st.session_state.translation_result = None
+    if 'preserve_format' not in st.session_state:
+        st.session_state.preserve_format = True
 
 
 def setup_api_client() -> tuple[Any, Literal["openai", "azure"]]:
@@ -241,6 +261,15 @@ def setup_sidebar(provider: Literal["openai", "azure"]) -> tuple[str, dict[str, 
     # Provider 정보 표시
     provider_display = "🔵 OpenAI" if provider == "openai" else "🟢 Azure OpenAI"
     st.sidebar.markdown(f"**Provider:** {provider_display}")
+    st.sidebar.markdown("---")
+
+    # 포맷 유지 옵션
+    st.sidebar.checkbox(
+        "📝 포맷 유지",
+        value=True,
+        key="preserve_format",
+        help="번역 결과의 줄바꿈과 들여쓰기를 보존합니다."
+    )
     st.sidebar.markdown("---")
 
     if provider == "azure":
@@ -425,7 +454,12 @@ def render_translation_result() -> None:
                 create_dual_copy_buttons(result, "translation"),
                 height=60
             )
-            st.markdown(result)
+            # 포맷 유지 옵션에 따라 표시
+            if st.session_state.preserve_format:
+                formatted_result = format_translation_result(result)
+                st.markdown(formatted_result)
+            else:
+                st.markdown(result)
 
         with tab2:
             # Markdown 원본 복사 버튼
