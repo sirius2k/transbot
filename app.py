@@ -1,6 +1,7 @@
 """영어-한국어 번역기 Streamlit 애플리케이션"""
 import streamlit as st
 import os
+import uuid
 from typing import Any, Literal
 from dotenv import load_dotenv
 from utils import strip_markdown
@@ -564,7 +565,12 @@ def handle_translation(
 
     with st.spinner("번역 중..."):
         try:
-            result = translation_manager.translate(input_text, source_lang, target_lang)
+            result = translation_manager.translate(
+                input_text,
+                source_lang,
+                target_lang,
+                st.session_state.session_id
+            )
             st.session_state.translation_result = {
                 "text": result,
                 "source": source_lang,
@@ -583,6 +589,10 @@ def main() -> None:
     # 1. 페이지 설정 및 초기화
     initialize_page_config()
     initialize_session_state()
+
+    # 세션 ID 생성 (Langfuse 추적용)
+    if "session_id" not in st.session_state:
+        st.session_state.session_id = str(uuid.uuid4())
 
     # 2. 타이틀 표시
     show_title()
