@@ -1,6 +1,118 @@
-"""app.py setup_sidebar() 함수 테스트"""
+"""app.py 함수 테스트"""
 import pytest
 from unittest.mock import Mock, patch
+
+
+class TestFormatTranslationResult:
+    """format_translation_result() 함수 테스트"""
+
+    def test_single_line_with_content(self):
+        """한 줄 텍스트에 두 공백 추가"""
+        from app import format_translation_result
+
+        text = "Hello World"
+        result = format_translation_result(text)
+
+        assert result == "Hello World  "
+
+    def test_multiple_lines_with_content(self):
+        """여러 줄 텍스트의 각 줄에 두 공백 추가"""
+        from app import format_translation_result
+
+        text = "Line 1\nLine 2\nLine 3"
+        result = format_translation_result(text)
+
+        expected = "Line 1  \nLine 2  \nLine 3  "
+        assert result == expected
+
+    def test_empty_lines_preserved(self):
+        """빈 줄은 공백 없이 보존"""
+        from app import format_translation_result
+
+        text = "Line 1\n\nLine 2"
+        result = format_translation_result(text)
+
+        expected = "Line 1  \n\nLine 2  "
+        assert result == expected
+
+    def test_whitespace_only_lines(self):
+        """공백만 있는 줄은 두 공백 추가하지 않음"""
+        from app import format_translation_result
+
+        text = "Line 1\n   \nLine 2"
+        result = format_translation_result(text)
+
+        expected = "Line 1  \n   \nLine 2  "
+        assert result == expected
+
+    def test_mixed_content_and_empty_lines(self):
+        """콘텐츠 줄과 빈 줄이 혼합된 경우"""
+        from app import format_translation_result
+
+        text = "Paragraph 1\n\nParagraph 2\n  \nParagraph 3"
+        result = format_translation_result(text)
+
+        expected = "Paragraph 1  \n\nParagraph 2  \n  \nParagraph 3  "
+        assert result == expected
+
+    def test_trailing_newline(self):
+        """끝에 개행이 있는 경우"""
+        from app import format_translation_result
+
+        text = "Line 1\nLine 2\n"
+        result = format_translation_result(text)
+
+        expected = "Line 1  \nLine 2  \n"
+        assert result == expected
+
+    def test_indented_lines(self):
+        """들여쓰기된 줄도 두 공백 추가"""
+        from app import format_translation_result
+
+        text = "Normal line\n    Indented line\n        Double indented"
+        result = format_translation_result(text)
+
+        expected = "Normal line  \n    Indented line  \n        Double indented  "
+        assert result == expected
+
+    def test_empty_string(self):
+        """빈 문자열은 빈 문자열 반환"""
+        from app import format_translation_result
+
+        text = ""
+        result = format_translation_result(text)
+
+        assert result == ""
+
+    def test_only_newlines(self):
+        """개행만 있는 경우"""
+        from app import format_translation_result
+
+        text = "\n\n\n"
+        result = format_translation_result(text)
+
+        expected = "\n\n\n"
+        assert result == expected
+
+    def test_markdown_list_preserved(self):
+        """마크다운 리스트 형식이 보존됨"""
+        from app import format_translation_result
+
+        text = "- Item 1\n- Item 2\n- Item 3"
+        result = format_translation_result(text)
+
+        expected = "- Item 1  \n- Item 2  \n- Item 3  "
+        assert result == expected
+
+    def test_code_block_preserved(self):
+        """코드 블록 형식이 보존됨"""
+        from app import format_translation_result
+
+        text = "```python\nprint('hello')\nprint('world')\n```"
+        result = format_translation_result(text)
+
+        expected = "```python  \nprint('hello')  \nprint('world')  \n```  "
+        assert result == expected
 
 
 class TestSetupSidebarOpenAI:
