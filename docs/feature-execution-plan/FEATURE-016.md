@@ -93,11 +93,11 @@ Langfuse를 통해 모든 LLM 요청을 추적하고, 다음 정보를 수집:
 - 환경 변수 미설정 시 None 반환 확인
 
 **완료 조건**:
-- [ ] requirements.txt에 langfuse 추가
-- [ ] .env.example 업데이트
-- [ ] config.py에 Langfuse 설정 추가
-- [ ] langfuse_enabled 프로퍼티 구현
-- [ ] 린팅 통과
+- [x] requirements.txt에 langfuse 추가
+- [x] .env.example 업데이트
+- [x] config.py에 Langfuse 설정 추가
+- [x] langfuse_enabled 프로퍼티 구현
+- [x] 린팅 통과
 
 **코드 예시**:
 
@@ -647,7 +647,7 @@ Task 16.8 (문서화)
 
 | Task | 상태 | 담당자 | 시작일 | 완료일 | 소요 시간 |
 |------|------|--------|--------|--------|-----------|
-| 16.1 | 🔲 예정 | - | - | - | - |
+| 16.1 | ✅ 완료 | Claude | 2026-02-03 | 2026-02-03 | ~30m |
 | 16.2 | 🔲 예정 | - | - | - | - |
 | 16.3 | 🔲 예정 | - | - | - | - |
 | 16.4 | 🔲 예정 | - | - | - | - |

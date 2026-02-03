@@ -410,3 +410,68 @@ class TestConfigAzure:
             "gpt-4-turbo": "deploy3"
         }
         assert len(result) == 3
+
+
+class TestLangfuseConfig:
+    """Langfuse 설정 테스트"""
+
+    def test_langfuse_init_default_values(self):
+        """Langfuse 환경 변수 기본값 테스트"""
+        config = Config()
+
+        assert config.LANGFUSE_PUBLIC_KEY is None
+        assert config.LANGFUSE_SECRET_KEY is None
+        assert config.LANGFUSE_HOST is None
+
+    def test_langfuse_enabled_all_set(self, monkeypatch):
+        """Langfuse 3개 환경 변수 모두 설정 시 활성화 테스트"""
+        monkeypatch.setenv("LANGFUSE_PUBLIC_KEY", "pk-test")
+        monkeypatch.setenv("LANGFUSE_SECRET_KEY", "sk-test")
+        monkeypatch.setenv("LANGFUSE_HOST", "http://localhost:3000")
+
+        config = Config.load()
+
+        assert config.LANGFUSE_PUBLIC_KEY == "pk-test"
+        assert config.LANGFUSE_SECRET_KEY == "sk-test"
+        assert config.LANGFUSE_HOST == "http://localhost:3000"
+        assert config.langfuse_enabled is True
+
+    def test_langfuse_enabled_partially_set(self, monkeypatch):
+        """Langfuse 일부만 설정 시 비활성화 테스트"""
+        monkeypatch.setenv("LANGFUSE_PUBLIC_KEY", "pk-test")
+        monkeypatch.setenv("LANGFUSE_SECRET_KEY", "sk-test")
+        # LANGFUSE_HOST 미설정
+
+        config = Config.load()
+
+        assert config.LANGFUSE_PUBLIC_KEY == "pk-test"
+        assert config.LANGFUSE_SECRET_KEY == "sk-test"
+        assert config.LANGFUSE_HOST is None
+        assert config.langfuse_enabled is False
+
+    def test_langfuse_enabled_none_set(self, monkeypatch):
+        """Langfuse 모두 미설정 시 비활성화 테스트"""
+        # 모든 Langfuse 환경 변수 제거
+        monkeypatch.delenv("LANGFUSE_PUBLIC_KEY", raising=False)
+        monkeypatch.delenv("LANGFUSE_SECRET_KEY", raising=False)
+        monkeypatch.delenv("LANGFUSE_HOST", raising=False)
+
+        config = Config.load()
+
+        assert config.LANGFUSE_PUBLIC_KEY is None
+        assert config.LANGFUSE_SECRET_KEY is None
+        assert config.LANGFUSE_HOST is None
+        assert config.langfuse_enabled is False
+
+    def test_langfuse_load_from_env(self, monkeypatch):
+        """환경 변수에서 Langfuse 설정 로드 테스트"""
+        monkeypatch.setenv("LANGFUSE_PUBLIC_KEY", "pk-production")
+        monkeypatch.setenv("LANGFUSE_SECRET_KEY", "sk-production")
+        monkeypatch.setenv("LANGFUSE_HOST", "https://langfuse.example.com")
+
+        config = Config.load()
+
+        assert config.LANGFUSE_PUBLIC_KEY == "pk-production"
+        assert config.LANGFUSE_SECRET_KEY == "sk-production"
+        assert config.LANGFUSE_HOST == "https://langfuse.example.com"
+        assert config.langfuse_enabled is True
