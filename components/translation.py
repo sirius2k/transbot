@@ -1,10 +1,13 @@
 """번역 관리 기능을 제공하는 모듈"""
 
+import logging
 import time
 from typing import Optional, Any
 from config import Config
 from components.observability import LangfuseObserver
 from utils import count_tokens
+
+logger = logging.getLogger("transbot.translation")
 
 
 class TranslationManager:
@@ -83,6 +86,20 @@ class TranslationManager:
         result = ""
         input_tokens = 0
         output_tokens = 0
+        input_length = len(text)
+
+        # API 호출 시작 로깅
+        logger.info(
+            "번역 API 호출 시작",
+            extra={
+                "provider": "openai" if not hasattr(self, 'deployment') else "azure",
+                "model": self.model,
+                "source_lang": source,
+                "target_lang": target,
+                "input_length": input_length,
+                "temperature": self.temperature
+            }
+        )
 
         try:
             response = self.client.chat.completions.create(
@@ -90,7 +107,7 @@ class TranslationManager:
                 messages=[
                     {
                         "role": "system",
-                        "content": f"You are a professional translator. Translate the following {source} text to {target}. IMPORTANT: Preserve all Markdown formatting (bold, italic, headings, lists, links, code blocks, blockquotes, tables, etc.) in the translation. Only respond with the translation, nothing else." # noqa: E501
+                        "content": f"You are a professional translator. Translate the following {source} text to {target}. IMPORTANT: Preserve all Markdown formatting (bold, italic, headings, lists, links, code blocks, blockquotes, tables, etc.) in the translation. Only respond with the translation, nothing else."  # noqa: E501
                     },
                     {
                         "role": "user",
@@ -105,11 +122,39 @@ class TranslationManager:
             # OpenAI API 응답에서 실제 토큰 수 사용 (더 정확함)
             input_tokens = response.usage.prompt_tokens
             output_tokens = response.usage.completion_tokens
+
+            # API 호출 성공 로깅
+            response_time_ms = int((time.time() - start_time) * 1000)
+            logger.info(
+                "번역 API 호출 성공",
+                extra={
+                    "provider": "openai" if not hasattr(self, 'deployment') else "azure",
+                    "model": self.model,
+                    "response_time_ms": response_time_ms,
+                    "output_length": len(result),
+                    "prompt_tokens": input_tokens,
+                    "completion_tokens": output_tokens,
+                    "total_tokens": input_tokens + output_tokens
+                }
+            )
         except Exception as e:
             error_msg = str(e)
             # 에러 발생 시 입력 토큰만 추정 (응답 없음)
             input_tokens = count_tokens(text, self.model)
             output_tokens = 0
+
+            # API 호출 실패 로깅
+            logger.error(
+                "번역 API 호출 실패",
+                extra={
+                    "provider": "openai" if not hasattr(self, 'deployment') else "azure",
+                    "model": self.model,
+                    "error_type": type(e).__name__,
+                    "error_message": str(e),
+                    "input_length": input_length
+                },
+                exc_info=True
+            )
             raise
         finally:
             # 추적 로직 (성공/실패 모두)
@@ -237,6 +282,21 @@ class AzureTranslationManager(TranslationManager):
         result = ""
         input_tokens = 0
         output_tokens = 0
+        input_length = len(text)
+
+        # API 호출 시작 로깅
+        logger.info(
+            "번역 API 호출 시작",
+            extra={
+                "provider": "azure",
+                "model": self.model,
+                "deployment": self.deployment,
+                "source_lang": source,
+                "target_lang": target,
+                "input_length": input_length,
+                "temperature": self.temperature
+            }
+        )
 
         try:
             response = self.client.chat.completions.create(
@@ -244,7 +304,7 @@ class AzureTranslationManager(TranslationManager):
                 messages=[
                     {
                         "role": "system",
-                        "content": f"You are a professional translator. Translate the following {source} text to {target}. IMPORTANT: Preserve all Markdown formatting (bold, italic, headings, lists, links, code blocks, blockquotes, tables, etc.) in the translation. Only respond with the translation, nothing else." # noqa: E501
+                        "content": f"You are a professional translator. Translate the following {source} text to {target}. IMPORTANT: Preserve all Markdown formatting (bold, italic, headings, lists, links, code blocks, blockquotes, tables, etc.) in the translation. Only respond with the translation, nothing else."  # noqa: E501
                     },
                     {
                         "role": "user",
@@ -259,11 +319,41 @@ class AzureTranslationManager(TranslationManager):
             # OpenAI API 응답에서 실제 토큰 수 사용 (더 정확함)
             input_tokens = response.usage.prompt_tokens
             output_tokens = response.usage.completion_tokens
+
+            # API 호출 성공 로깅
+            response_time_ms = int((time.time() - start_time) * 1000)
+            logger.info(
+                "번역 API 호출 성공",
+                extra={
+                    "provider": "azure",
+                    "model": self.model,
+                    "deployment": self.deployment,
+                    "response_time_ms": response_time_ms,
+                    "output_length": len(result),
+                    "prompt_tokens": input_tokens,
+                    "completion_tokens": output_tokens,
+                    "total_tokens": input_tokens + output_tokens
+                }
+            )
         except Exception as e:
             error_msg = str(e)
             # 에러 발생 시 입력 토큰만 추정 (응답 없음)
             input_tokens = count_tokens(text, self.model)
             output_tokens = 0
+
+            # API 호출 실패 로깅
+            logger.error(
+                "번역 API 호출 실패",
+                extra={
+                    "provider": "azure",
+                    "model": self.model,
+                    "deployment": self.deployment,
+                    "error_type": type(e).__name__,
+                    "error_message": str(e),
+                    "input_length": input_length
+                },
+                exc_info=True
+            )
             raise
         finally:
             # 추적 로직 (성공/실패 모두)

@@ -76,6 +76,8 @@ TransBot은 OpenAI GPT 모델을 활용한 영어-한국어 양방향 번역 웹
 transbot/
 ├── app.py                    # 메인 애플리케이션 파일
 ├── utils.py                  # 유틸리티 함수 모듈
+├── logger.py                 # 로깅 설정 모듈 (JSONFormatter, setup_logging)
+├── config.py                 # 설정 관리 모듈
 ├── components/               # 클래스 기반 컴포넌트 모듈
 │   ├── __init__.py
 │   ├── language.py          # LanguageDetector 클래스
@@ -169,6 +171,47 @@ pytest --cov=utils --cov-report=html
 ```
 
 ## 개발 가이드라인
+
+### 로깅 시스템 사용
+
+TransBot은 Python 표준 `logging` 모듈을 사용합니다. 새로운 기능 추가 시 적절한 로깅을 포함하세요.
+
+**로거 가져오기**:
+
+```python
+import logging
+
+logger = logging.getLogger("transbot.module_name")
+```
+
+**로깅 레벨 사용**:
+
+- `DEBUG`: 디버깅 정보 (개발 환경)
+- `INFO`: 정상 동작 (API 호출, 작업 완료)
+- `WARNING`: 주의 필요 (입력 길이 80% 초과)
+- `ERROR`: 에러 발생 (API 실패)
+- `CRITICAL`: 치명적 오류 (설정 로드 실패)
+
+**로깅 예시**:
+
+```python
+# API 호출 시작
+logger.info("API 호출 시작", extra={
+    "model": "gpt-4o-mini",
+    "input_length": 150
+})
+
+# 에러 로깅
+logger.error("API 호출 실패", extra={
+    "error_type": "TimeoutError"
+}, exc_info=True)
+```
+
+**주의사항**:
+
+- 민감정보(API 키)는 로깅하지 않음
+- extra 필드로 구조화된 데이터 전달
+- 에러 발생 시 `exc_info=True` 사용
 
 ### 파일 수정 시 주의사항
 
