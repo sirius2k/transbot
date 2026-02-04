@@ -105,7 +105,7 @@ def create_dual_copy_buttons(text_with_format: str, button_key_prefix: str = "du
         </button>
         <span id="feedback{button_key_prefix}" style="margin-left: 10px; color: green; display: none;">✅ 복사되었습니다!</span>
     </div>
-    <textarea id="copyTextWithFormat{button_key_prefix}" style="position: absolute; left: -9999px;">{text_with_format}</textarea>  # noqa: E501
+    <textarea id="copyTextWithFormat{button_key_prefix}" style="position: absolute; left: -9999px;">{text_with_format}</textarea>
     <textarea id="copyTextOnly{button_key_prefix}" style="position: absolute; left: -9999px;">{text_only}</textarea>
     <script>
     function copyWithFormat{button_key_prefix}() {{
