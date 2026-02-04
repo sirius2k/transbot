@@ -84,21 +84,26 @@ class LangfuseObserver:
             return
 
         try:
-            # Langfuse v2 API: trace 메서드 사용
-            self._client.trace(
+            # Langfuse v2 API: trace 객체 생성 후 generation 추가
+            trace = self._client.trace(
                 name="translation",
+                session_id=session_id,
+                metadata={
+                    "direction": f"{source_lang}→{target_lang}",
+                    "latency_ms": latency_ms,
+                },
+            )
+
+            # LLM 호출 정보를 generation으로 추가
+            trace.generation(
+                name="translation_llm_call",
+                model=model,
                 input={
                     "source_text": source_text,
                     "source_lang": source_lang,
                     "target_lang": target_lang,
                 },
                 output={"target_text": target_text},
-                metadata={
-                    "model": model,
-                    "direction": f"{source_lang}→{target_lang}",
-                    "session_id": session_id,
-                    "latency_ms": latency_ms,
-                },
                 usage={
                     "input": input_tokens,
                     "output": output_tokens,
