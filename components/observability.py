@@ -3,11 +3,14 @@
 Langfuse를 통한 LLM 사용 추적 및 모니터링 기능을 제공합니다.
 """
 
+import logging
 from typing import Optional
 
 from langfuse import Langfuse
 
 from config import Config
+
+logger = logging.getLogger("transbot.observability")
 
 
 class LangfuseObserver:
@@ -47,7 +50,10 @@ class LangfuseObserver:
             )
         except Exception as e:
             self._init_failed = True
-            print(f"⚠️ Langfuse 초기화 실패 (추적 비활성화): {e}")
+            logger.warning("Langfuse 초기화 실패 (추적 비활성화)", extra={
+                "error_type": type(e).__name__,
+                "error_message": str(e)
+            }, exc_info=True)
             self._client = None
 
     def track_translation(
@@ -113,9 +119,12 @@ class LangfuseObserver:
                 status_message=error,
             )
         except TimeoutError:
-            print("⚠️ Langfuse 전송 타임아웃 (추적 건너뜀)")
+            logger.warning("Langfuse 전송 타임아웃 (추적 건너뜀)")
         except Exception as e:
-            print(f"⚠️ Langfuse 추적 실패: {type(e).__name__}: {e}")
+            logger.error("Langfuse 추적 실패", extra={
+                "error_type": type(e).__name__,
+                "error_message": str(e)
+            }, exc_info=True)
 
     def flush(self) -> None:
         """Pending 데이터를 Langfuse로 전송
@@ -127,4 +136,7 @@ class LangfuseObserver:
             try:
                 self._client.flush()
             except Exception as e:
-                print(f"⚠️ Langfuse flush 실패: {e}")
+                logger.error("Langfuse flush 실패", extra={
+                    "error_type": type(e).__name__,
+                    "error_message": str(e)
+                }, exc_info=True)
