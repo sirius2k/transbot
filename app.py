@@ -182,8 +182,6 @@ def initialize_session_state() -> None:
         st.session_state.input_text = ""
     if 'translation_result' not in st.session_state:
         st.session_state.translation_result = None
-    if 'preserve_format' not in st.session_state:
-        st.session_state.preserve_format = True
 
 
 def setup_api_client() -> tuple[Any, Literal["openai", "azure"]]:
