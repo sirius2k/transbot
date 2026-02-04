@@ -46,6 +46,49 @@ TransBot은 OpenAI의 GPT-4o-mini 모델을 활용하여 빠르고 정확한 영
 - ✅ API 키 안전 관리 (환경 변수 또는 사이드바 입력)
 - ✅ 에러 처리 및 사용자 친화적 메시지
 
+## LLM 관찰성 (Langfuse)
+
+TransBot은 Langfuse를 통해 LLM 사용 내역을 추적하고 분석할 수 있습니다.
+
+### Langfuse 주요 기능
+
+- **프롬프트 추적**: 모든 번역 요청 자동 로깅
+- **비용 분석**: 토큰 사용량 및 비용 대시보드
+- **성능 모니터링**: 응답 시간, 에러율 추적
+- **세션 추적**: 사용자 세션별 번역 요청 그룹핑
+- **자체 호스팅**: Docker Compose 기반 로컬 실행
+
+### 설정 방법
+
+1. **인프라 시작**:
+
+   ```bash
+   cd infra
+   ./scripts/start.sh
+   ```
+
+2. **Langfuse 접속**: `http://localhost:3000`
+
+3. **API 키 발급**: Settings > API Keys
+
+4. **환경 변수 설정** (`.env` 파일):
+
+   ```bash
+   LANGFUSE_PUBLIC_KEY=pk-lf-xxx
+   LANGFUSE_SECRET_KEY=sk-lf-xxx
+   LANGFUSE_HOST=http://localhost:3000
+   ```
+
+자세한 설정 방법은 [Langfuse 설정 가이드](docs/guides/infrastructure/langfuse/setup.md)를 참고하세요.
+
+### 사용 가이드
+
+- [Langfuse 설정 가이드](docs/guides/infrastructure/langfuse/setup.md) - 설치 및 API 키 생성
+- [Langfuse 사용 가이드](docs/guides/infrastructure/langfuse/usage.md) - 대시보드 사용법 및 데이터 분석
+- [Langfuse 에러 핸들링](docs/guides/infrastructure/langfuse/error-handling.md) - 에러 시나리오 및 문제 해결
+
+> **참고**: Langfuse는 선택적 기능이며, 설정하지 않아도 번역 기능은 정상 동작합니다.
+
 ## 시작하기
 
 ### 필수 요구사항
@@ -503,4 +546,4 @@ pip install -r requirements.txt
 
 Made with ❤️ by TransBot Team
 
-Last Updated: 2026-01-30 00:19
+Last Updated: 2026-02-04

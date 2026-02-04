@@ -16,6 +16,9 @@
 - [Azure OpenAI 설정](docs/guides/infrastructure/azure-openai/setup.md) - Azure vs OpenAI 비교, 환경 변수 설정
 - [Azure Deployment 매핑](docs/guides/infrastructure/azure-openai/deployment.md) - Deployment 매핑, 테스트 작성
 - [Azure 에러 핸들링](docs/guides/infrastructure/azure-openai/error-handling.md) - 에러 시나리오 및 처리 방법
+- [Langfuse 설정](docs/guides/infrastructure/langfuse/setup.md) - Langfuse v2 설치, API 키 생성
+- [Langfuse 사용](docs/guides/infrastructure/langfuse/usage.md) - 대시보드 사용법, 추적 데이터 확인
+- [Langfuse 에러 핸들링](docs/guides/infrastructure/langfuse/error-handling.md) - 에러 시나리오 및 처리 방법
 
 ### 품질 가이드 (Quality)
 
@@ -77,6 +80,7 @@ transbot/
 │   ├── language.py          # LanguageDetector 클래스
 │   ├── text.py              # TextAnalyzer 클래스
 │   ├── translation.py       # TranslationManager 클래스
+│   ├── observability.py     # LangfuseObserver 클래스 (LLM 관찰성)
 │   └── ui/                  # UI 컴포넌트 (향후 확장)
 │       └── __init__.py
 ├── requirements.txt          # Python 의존성
@@ -185,6 +189,17 @@ pytest --cov=utils --cov-report=html
 - 클래스에 docstring 및 모든 메서드에 상세한 설명 작성
 - 타입 힌트 명시 (예: `def method(text: str) -> str:`)
 - 새로운 클래스/메서드 추가 시 반드시 단위 테스트 작성
+
+#### components/observability.py 수정 시
+
+Langfuse 관찰성 모듈을 수정할 때는 다음 사항을 준수하세요:
+
+- **번역 기능 우선**: Langfuse 에러가 번역 기능을 중단해서는 안 됨
+- **Graceful Degradation**: Langfuse 실패 시 모든 메서드는 no-op으로 동작
+- **조용한 실패**: 에러는 콘솔에만 출력, UI에는 표시하지 않음
+- **에러 핸들링**: 모든 Langfuse 호출을 try-except로 감싸기
+
+자세한 내용은 [Langfuse 에러 핸들링 가이드](docs/guides/infrastructure/langfuse/error-handling.md)를 참고하세요.
 
 #### utils.py 수정 시
 
@@ -348,6 +363,15 @@ git commit -m "docs: 기술 스택 정보 업데이트 (README, PRD, CLAUDE)"
 - [ ] 지우기 버튼 동작 확인
 - [ ] 에러 핸들링 동작 확인
 
+### LLM 관찰성 (Langfuse)
+
+- [ ] Langfuse 인프라 시작 (`infra/scripts/start.sh`)
+- [ ] Langfuse 대시보드 접속 (`http://localhost:3000`)
+- [ ] API 키 발급 (Settings > API Keys)
+- [ ] `.env` 파일에 Langfuse 환경 변수 설정
+- [ ] 번역 수행 후 Langfuse에 추적 데이터 표시 확인
+- [ ] 에러 핸들링 테스트 (API 키 오류, 서버 다운 등)
+
 ### 테스트 및 품질
 
 - [ ] **모든 단위 테스트 통과 확인** (`pytest`)
@@ -404,6 +428,6 @@ git commit -m "docs: 기술 스택 정보 업데이트 (README, PRD, CLAUDE)"
 
 ---
 
-마지막 업데이트: 2026-01-31
+마지막 업데이트: 2026-02-04
 
 작성자: TransBot Development Team
