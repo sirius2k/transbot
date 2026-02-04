@@ -21,6 +21,7 @@ TransBot은 Streamlit 기반의 영어-한국어 양방향 번역 웹 애플리�
 | **직관적 UI** | 간단하고 직관적인 인터페이스로 빠른 번역 |
 | **Markdown 지원** | Markdown 포맷을 보존하여 기술 문서 번역에 최적화 |
 | **다중 Provider** | OpenAI와 Azure OpenAI Service 모두 지원 |
+| **관찰성 확보** | Langfuse를 통한 LLM 사용 내역 추적, 비용 분석, 품질 모니터링 |
 
 #### 향후 제공 예정
 
@@ -30,7 +31,6 @@ TransBot은 Streamlit 기반의 영어-한국어 양방향 번역 웹 애플리�
 | **히스토리 관리** | 번역 및 사전 검색 내용의 이력 관리, 그룹핑, 조회 |
 | **파일 번역** | 로컬 파일을 업로드하여 일괄 번역 |
 | **외부 툴 연동** | Notion, Confluence 등 외부 도구에 저장 |
-| **관찰성 확보** | Langfuse를 통한 LLM 사용 내역 추적 |
 
 ## 2. 문제 정의 (Problem Definition)
 
@@ -117,6 +117,7 @@ TransBot은 Streamlit 기반의 영어-한국어 양방향 번역 웹 애플리�
 | ✅ FEATURE-008: [Azure OpenAI Service 지원](../feature-execution-plan/FEATURE-008.md) | **P1** | 기업 환경(Azure) 사용자 지원. OpenAI/Azure 간 유연한 전환 |
 | ✅ FEATURE-004: [글자수/토큰수 실시간 표시](../feature-execution-plan/FEATURE-004.md) | **P2** | 비용 예측 보조 기능 |
 | ✅ FEATURE-007: [사이드바 UI (설정 섹션)](../feature-execution-plan/FEATURE-007.md) | **P2** | UI 레이아웃 구성 요소 |
+| ✅ FEATURE-016: [Langfuse 연동 (LLM 관찰성)](../feature-execution-plan/FEATURE-016.md) | **P1** | LLM 사용 추적, 비용 분석, 품질 모니터링, 프롬프트 최적화. 운영 인사이트 확보 |
 
 #### 마이너 개선사항 (Quick Wins)
 
@@ -144,7 +145,6 @@ TransBot은 Streamlit 기반의 영어-한국어 양방향 번역 웹 애플리�
 | 🔲 FEATURE-013: 파일 업로드 일괄 번역 | **P2** | "글자 수 제한 없이 번역" Use Case 충족 | 2.5 |
 | 🔲 FEATURE-014: 외부 툴 연동 (Notion, Confluence 등) | **P2** | Use Case 직접 충족. 각 플랫폼 API 연동 필요로 복잡도 높음 | 3 |
 | 🔲 FEATURE-015: 용어집(Glossary) 기능 | **P3** | 고급 사용자 대상. 번역 품질 향상 | 3 |
-| 🔲 FEATURE-016: Langfuse 연동 (LLM 관찰성) | **P1** | LLM 사용 추적, 비용 분석, 품질 모니터링, 프롬프트 최적화. 운영 인사이트 확보 | 2 |
 | 🔲 FEATURE-017: [구조화된 로깅 시스템](../feature-execution-plan/FEATURE-017.md) | **P1** | 디버깅, 모니터링, 문제 해결을 위한 필수 인프라. 운영 안정성 확보 | 2 |
 | 🔲 FEATURE-018: 중국어 번역 지원 (간체자, 단방향) | **P2** | 중국어 문서 읽기 지원. 중국어→한국어/영어 번역만 제공. 입력 언어 확장 | 2.5 |
 | 🔲 FEATURE-019: UI 다국어 지원 (한국어/영어) | **P3** | 브라우저 언어 자동 감지 + 수동 전환. 쿠키 저장으로 설정 유지. 전역 사용자 경험 개선 | 2.5 |
