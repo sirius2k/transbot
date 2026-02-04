@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh:*)",
+      "Bash(git:*)",
+      "Bash(chmod:*)",
+      "Bash(source:*)",
+      "Bash(pytest:*)",
+      "Bash(python:*)"
+    ]
+  }
+}
