@@ -29,6 +29,7 @@
 - [문서 작성 가이드](docs/guides/workflows/documentation.md) - Markdown 규칙, 문서 역할 구분
 - [GitHub 이슈 관리](docs/guides/workflows/github-issues.md) - 레이블 생성, 이슈 관리
 - [작업 시간 추적](docs/guides/workflows/time-tracking.md) - 작업 분류, 로그 작성법
+- [FEATURE 완료 워크플로우](docs/guides/workflows/feature-completion.md) - FEATURE 완료 시 문서 업데이트 절차
 
 ### 범용 가이드 (General) - 참고용
 
