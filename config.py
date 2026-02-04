@@ -32,7 +32,7 @@ class Config:
     _DEFAULT_LANGUAGE_DETECTION_THRESHOLD = 0.5
 
     # 애플리케이션 설정
-    _DEFAULT_APP_TITLE = "영어-한국어 번역기"
+    _DEFAULT_APP_TITLE = "TransBot"
     _DEFAULT_APP_ICON = "🌐"
     _DEFAULT_APP_LAYOUT = "centered"
 
