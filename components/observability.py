@@ -84,6 +84,7 @@ class LangfuseObserver:
             return
 
         try:
+            # Langfuse v2 API: trace 메서드 사용
             self._client.trace(
                 name="translation",
                 input={
