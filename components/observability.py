@@ -90,19 +90,9 @@ class LangfuseObserver:
             return
 
         try:
-            # Langfuse v2 API: trace 객체 생성 후 generation 추가
-            trace = self._client.trace(
+            # Langfuse v2 API: generation으로 직접 기록
+            self._client.generation(
                 name="translation",
-                session_id=session_id,
-                metadata={
-                    "direction": f"{source_lang}→{target_lang}",
-                    "latency_ms": latency_ms,
-                },
-            )
-
-            # LLM 호출 정보를 generation으로 추가
-            trace.generation(
-                name="translation_llm_call",
                 model=model,
                 input={
                     "source_text": source_text,
@@ -114,6 +104,11 @@ class LangfuseObserver:
                     "input": input_tokens,
                     "output": output_tokens,
                     "total": input_tokens + output_tokens,
+                },
+                metadata={
+                    "direction": f"{source_lang}→{target_lang}",
+                    "latency_ms": latency_ms,
+                    "session_id": session_id,
                 },
                 level="ERROR" if error else "DEFAULT",
                 status_message=error,
