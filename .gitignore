@@ -37,6 +37,10 @@ htmlcov/
 .hypothesis/
 .tox/
 
+# Logs
+logs/
+*.log
+
 # Infrastructure
 infra/.env.infra
 infra/volumes/
