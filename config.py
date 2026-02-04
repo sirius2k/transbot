@@ -4,6 +4,7 @@ TransBot 설정 관리 모듈
 환경 변수를 통해 애플리케이션 설정을 관리합니다.
 """
 import os
+import logging
 from typing import Optional, Literal
 from dotenv import load_dotenv
 
@@ -39,6 +40,14 @@ class Config:
     # UI 설정
     _DEFAULT_TEXT_AREA_HEIGHT = 200
     _DEFAULT_MAX_INPUT_LENGTH = 50000
+
+    # 로깅 설정
+    _DEFAULT_LOG_LEVEL = "INFO"
+    _DEFAULT_LOG_FORMAT = "json"
+    _DEFAULT_LOG_FILE_PATH = "logs/transbot.log"
+    _DEFAULT_LOG_FILE_MAX_BYTES = 10485760  # 10MB
+    _DEFAULT_LOG_FILE_BACKUP_COUNT = 5
+    _DEFAULT_LOG_CONSOLE_OUTPUT = True
 
     # Azure OpenAI 설정
     _DEFAULT_AI_PROVIDER = "openai"
@@ -91,6 +100,14 @@ class Config:
         self.LANGFUSE_PUBLIC_KEY: Optional[str] = None
         self.LANGFUSE_SECRET_KEY: Optional[str] = None
         self.LANGFUSE_HOST: Optional[str] = None
+
+        # 로깅 설정
+        self.LOG_LEVEL: str = self._DEFAULT_LOG_LEVEL
+        self.LOG_FORMAT: str = self._DEFAULT_LOG_FORMAT
+        self.LOG_FILE_PATH: Optional[str] = self._DEFAULT_LOG_FILE_PATH
+        self.LOG_FILE_MAX_BYTES: int = self._DEFAULT_LOG_FILE_MAX_BYTES
+        self.LOG_FILE_BACKUP_COUNT: int = self._DEFAULT_LOG_FILE_BACKUP_COUNT
+        self.LOG_CONSOLE_OUTPUT: bool = self._DEFAULT_LOG_CONSOLE_OUTPUT
 
     @classmethod
     def load(cls) -> 'Config':
@@ -192,6 +209,39 @@ class Config:
         config.LANGFUSE_SECRET_KEY = os.getenv("LANGFUSE_SECRET_KEY")
         config.LANGFUSE_HOST = os.getenv("LANGFUSE_HOST")
 
+        # 로깅 설정
+        config.LOG_LEVEL = cls._get_str_env(
+            "LOG_LEVEL",
+            cls._DEFAULT_LOG_LEVEL
+        )
+        config.LOG_FORMAT = cls._get_str_env(
+            "LOG_FORMAT",
+            cls._DEFAULT_LOG_FORMAT
+        )
+        config.LOG_FILE_PATH = os.getenv("LOG_FILE_PATH", cls._DEFAULT_LOG_FILE_PATH)
+        config.LOG_FILE_MAX_BYTES = cls._get_int_env(
+            "LOG_FILE_MAX_BYTES",
+            cls._DEFAULT_LOG_FILE_MAX_BYTES
+        )
+        config.LOG_FILE_BACKUP_COUNT = cls._get_int_env(
+            "LOG_FILE_BACKUP_COUNT",
+            cls._DEFAULT_LOG_FILE_BACKUP_COUNT
+        )
+        config.LOG_CONSOLE_OUTPUT = cls._get_bool_env(
+            "LOG_CONSOLE_OUTPUT",
+            cls._DEFAULT_LOG_CONSOLE_OUTPUT
+        )
+
+        # 설정 로드 완료 로깅 (로깅 시스템 초기화 전이므로 간단히 처리)
+        logger = logging.getLogger("transbot.config")
+        logger.info("설정 로드 완료", extra={
+            "provider": config.AI_PROVIDER,
+            "default_model": config.DEFAULT_MODEL,
+            "max_input_length": config.MAX_INPUT_LENGTH,
+            "log_level": config.LOG_LEVEL,
+            "langfuse_enabled": config.langfuse_enabled
+        })
+
         return config
 
     # ========================================================================
@@ -260,6 +310,23 @@ class Config:
             raise ValueError(
                 f"환경 변수 '{key}'의 값 '{value}'은(는) 실수여야 합니다."
             )
+
+    @staticmethod
+    def _get_bool_env(key: str, default: bool) -> bool:
+        """불리언 환경 변수를 가져옵니다.
+
+        Args:
+            key: 환경 변수 키
+            default: 기본값
+
+        Returns:
+            환경 변수 값 (불리언) 또는 기본값
+        """
+        value = os.getenv(key)
+        if value is None:
+            return default
+
+        return value.lower() in ("true", "1", "yes", "on")
 
     # ========================================================================
     # 검증 메서드

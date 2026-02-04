@@ -9,11 +9,16 @@ from components.language import LanguageDetector
 from components.text import TextAnalyzer
 from components.translation import TranslationManager
 from config import Config
+from logger import setup_logging, get_logger
 
 load_dotenv()
 
 # 설정 로드
 config = Config.load()
+
+# 로깅 시스템 초기화
+setup_logging(config)
+logger = get_logger("transbot.app")
 
 
 # ============================================================================
@@ -190,6 +195,8 @@ def setup_api_client() -> tuple[Any, Literal["openai", "azure"]]:
     # 전역 config 사용
     provider = config.AI_PROVIDER
 
+    logger.info("API 클라이언트 초기화 시작", extra={"provider": provider})
+
     if provider == "azure":
         # Azure 필수 파라미터 검증
         if not config.AZURE_OPENAI_API_KEY:
@@ -214,6 +221,11 @@ def setup_api_client() -> tuple[Any, Literal["openai", "azure"]]:
         from components.translation import AzureTranslationManager
         AzureTranslationManager.load_deployments(config)
 
+        logger.info("Azure API 클라이언트 생성 성공", extra={
+            "provider": "azure",
+            "api_version": config.AZURE_OPENAI_API_VERSION
+        })
+
         return azure_client, "azure"
     else:
         # OpenAI 클라이언트 생성
@@ -231,6 +243,8 @@ def setup_api_client() -> tuple[Any, Literal["openai", "azure"]]:
             timeout=config.OPENAI_API_TIMEOUT,
             max_retries=config.OPENAI_MAX_RETRIES
         )
+
+        logger.info("OpenAI API 클라이언트 생성 성공", extra={"provider": "openai"})
 
         return openai_client, "openai"
 

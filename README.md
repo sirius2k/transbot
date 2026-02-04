@@ -89,6 +89,36 @@ TransBot은 Langfuse를 통해 LLM 사용 내역을 추적하고 분석할 수 �
 
 > **참고**: Langfuse는 선택적 기능이며, 설정하지 않아도 번역 기능은 정상 동작합니다.
 
+## 구조화된 로깅
+
+TransBot은 Python 표준 `logging` 모듈을 사용하여 API 호출, 에러, 사용자 행동을 체계적으로 기록합니다.
+
+### 로깅 주요 기능
+
+- **API 호출 추적**: 번역 요청, 응답 시간, 토큰 사용량 기록
+- **에러 로깅**: 에러 유형, 메시지, 스택 트레이스 자동 저장
+- **구조화된 포맷**: JSON 또는 텍스트 형식 지원
+- **자동 로테이션**: 파일 크기 기반 자동 로그 백업
+- **민감정보 보호**: API 키, Endpoint 자동 마스킹
+
+### 로깅 설정 (`.env` 파일)
+
+```bash
+# 로그 레벨 (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+LOG_LEVEL=INFO
+
+# 로그 포맷 (json 또는 text)
+LOG_FORMAT=json
+
+# 로그 파일 경로
+LOG_FILE_PATH=logs/transbot.log
+
+# 콘솔 출력 여부
+LOG_CONSOLE_OUTPUT=true
+```
+
+> **참고**: 로그 파일은 `logs/` 디렉토리에 자동 저장되며, 10MB마다 자동 로테이션됩니다.
+
 ## 시작하기
 
 ### 필수 요구사항
