@@ -67,11 +67,11 @@ class TranslationManager:
 
         self.client = client
 
-    @observe(name="translation")
+    @observe(name="translation", as_type="generation")
     def translate(self, text: str, source: str, target: str, session_id: str = "unknown") -> str:
         """텍스트를 번역합니다.
 
-        Langfuse에서 SPAN 타입으로 추적되며, 입력/출력, 사용량, 타이밍, 에러 상태가 기록됩니다.
+        Langfuse에서 GENERATION 타입으로 추적되며, 입력/출력, 사용량, 비용, 타이밍이 기록됩니다.
 
         Args:
             text: 번역할 텍스트
@@ -276,11 +276,11 @@ class AzureTranslationManager(TranslationManager):
 
         self.client = client
 
-    @observe(name="translation")
+    @observe(name="translation", as_type="generation")
     def translate(self, text: str, source: str, target: str, session_id: str = "unknown") -> str:
         """텍스트를 번역합니다 (Azure 전용).
 
-        Langfuse에서 SPAN 타입으로 추적되며, 입력/출력, 사용량, 타이밍, 에러 상태가 기록됩니다.
+        Langfuse에서 GENERATION 타입으로 추적되며, 입력/출력, 사용량, 비용, 타이밍이 기록됩니다.
         OpenAI와 다른 점: model 파라미터에 deployment 이름을 사용합니다.
 
         Args:
