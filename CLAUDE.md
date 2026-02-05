@@ -128,9 +128,9 @@ transbot/
 │   │   ├── health-check.sh  # 헬스 체크
 │   │   └── reset.sh         # 데이터 초기화
 │   └── volumes/             # 데이터 영속화 (Git 제외)
-├── .claude/                 # Claude AI 서브에이전트 및 커스텀 명령어
-│   ├── commands/            # 커스텀 명령어
-│   └── agents/              # 서브에이전트
+├── .claude/                 # Claude AI Skills 및 설정
+│   ├── commands/            # Skills (자동화된 워크플로우)
+│   └── agents/              # 에이전트 (고급 기능)
 ├── create-labels.sh         # GitHub 레이블 생성 스크립트
 ├── README.md                # 프로젝트 소개 및 사용 가이드
 ├── CLAUDE.md                # Claude AI 작업 가이드 (본 문서)
@@ -301,7 +301,7 @@ Langfuse 관찰성 모듈을 수정할 때는 다음 사항을 준수하세요:
 ### Git 및 배포
 
 - [ ] Git 커밋 메시지 명확하게 작성
-- [ ] commit-and-push 서브에이전트 사용 (권장)
+- [ ] commit-and-push skill 사용 (권장)
 - [ ] GitHub 푸시 완료 확인
 
 ## 문제 해결 (Troubleshooting)
@@ -417,14 +417,14 @@ app.py의 번역 함수를 리뷰해줘. 특히 다음 사항을 확인해줘:
 
 ### Git 커밋 및 푸시 요청 시
 
-#### commit-and-push 서브에이전트 사용 (권장)
+#### commit-and-push skill 사용 (권장)
 
-이 프로젝트는 `.claude/commands/commit-and-push.md` 서브에이전트를 제공합니다.
+이 프로젝트는 `.claude/commands/commit-and-push.md` skill을 제공합니다.
 
 **사용 방법**:
 
 ```text
-"앞으로 커밋하고 푸시할 때는 commit-and-push 서브에이전트를 사용해줘"
+"앞으로 커밋하고 푸시할 때는 commit-and-push skill을 사용해줘"
 ```
 
 이렇게 요청하면 Claude가 자동으로:
@@ -446,7 +446,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
 
 #### 직접 커밋 요청 (대안)
 
-서브에이전트를 사용하지 않는 경우:
+skill을 사용하지 않는 경우:
 
 ```text
 좋은 예: "지금까지의 변경사항을 커밋하고 푸시해줘"
