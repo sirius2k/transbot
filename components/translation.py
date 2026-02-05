@@ -140,6 +140,9 @@ class TranslationManager:
                 }
             )
 
+            # Langfuse trace에 output 업데이트
+            langfuse_context.update_current_trace(output=result)
+
             # API 호출 성공 로깅
             response_time_ms = int((time.time() - start_time) * 1000)
             logger.info(
@@ -354,6 +357,9 @@ class AzureTranslationManager(TranslationManager):
                     "deployment": self.deployment,
                 }
             )
+
+            # Langfuse trace에 output 업데이트
+            langfuse_context.update_current_trace(output=result)
 
             # API 호출 성공 로깅
             response_time_ms = int((time.time() - start_time) * 1000)
