@@ -9,6 +9,7 @@ from components.language import LanguageDetector
 from components.text import TextAnalyzer
 from components.translation import TranslationManager
 from config import Config
+from components.observability import configure_langfuse
 from logger import setup_logging, get_logger
 
 load_dotenv()
@@ -19,6 +20,9 @@ config = Config.load()
 # 로깅 시스템 초기화
 setup_logging(config)
 logger = get_logger("transbot.app")
+
+# Langfuse 관찰성 초기화
+configure_langfuse(config)
 
 
 # ============================================================================

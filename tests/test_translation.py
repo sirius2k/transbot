@@ -43,6 +43,8 @@ class TestTranslationManager:
         mock_response = Mock()
         mock_response.choices = [Mock()]
         mock_response.choices[0].message.content = "Translated text"
+        mock_response.usage.prompt_tokens = 10
+        mock_response.usage.completion_tokens = 15
 
         self.mock_client.chat.completions.create.return_value = mock_response
 
@@ -54,6 +56,8 @@ class TestTranslationManager:
         mock_response = Mock()
         mock_response.choices = [Mock()]
         mock_response.choices[0].message.content = "번역된 텍스트"
+        mock_response.usage.prompt_tokens = 10
+        mock_response.usage.completion_tokens = 15
 
         self.mock_client.chat.completions.create.return_value = mock_response
 
@@ -83,6 +87,8 @@ class TestTranslationManager:
         mock_response = Mock()
         mock_response.choices = [Mock()]
         mock_response.choices[0].message.content = "Translated"
+        mock_response.usage.prompt_tokens = 5
+        mock_response.usage.completion_tokens = 5
 
         self.mock_client.chat.completions.create.return_value = mock_response
 
@@ -189,6 +195,8 @@ class TestAzureTranslationManager:
         mock_response = Mock()
         mock_response.choices = [Mock()]
         mock_response.choices[0].message.content = "번역 결과"
+        mock_response.usage.prompt_tokens = 10
+        mock_response.usage.completion_tokens = 15
         self.mock_client.chat.completions.create.return_value = mock_response
 
         manager = AzureTranslationManager(
@@ -211,6 +219,8 @@ class TestAzureTranslationManager:
         mock_response = Mock()
         mock_response.choices = [Mock()]
         mock_response.choices[0].message.content = "안녕하세요"
+        mock_response.usage.prompt_tokens = 10
+        mock_response.usage.completion_tokens = 15
         self.mock_client.chat.completions.create.return_value = mock_response
 
         manager = AzureTranslationManager(
@@ -227,6 +237,8 @@ class TestAzureTranslationManager:
         mock_response = Mock()
         mock_response.choices = [Mock()]
         mock_response.choices[0].message.content = "번역됨"
+        mock_response.usage.prompt_tokens = 5
+        mock_response.usage.completion_tokens = 5
         self.mock_client.chat.completions.create.return_value = mock_response
 
         manager = AzureTranslationManager(

@@ -197,7 +197,7 @@ def test_scenario_1_no_env_vars() -> bool:
 
     Langfuse 환경 변수가 설정되지 않은 경우:
     - Config.langfuse_enabled가 False여야 함
-    - LangfuseObserver._client가 None이어야 함
+    - configure_langfuse가 False를 반환해야 함
     - 번역 기능은 정상 동작해야 함
     """
     print_header("시나리오 1: 환경 변수 미설정 테스트")
@@ -236,35 +236,15 @@ def test_scenario_1_no_env_vars() -> bool:
             print_error("Config.langfuse_enabled가 True임 (예상: False)")
             return False
 
-        # 4. LangfuseObserver 초기화 및 검증
-        from components.observability import LangfuseObserver
-        observer = LangfuseObserver(config)
+        # 4. configure_langfuse 호출 및 검증
+        from components.observability import configure_langfuse
+        result = configure_langfuse(config)
 
-        if observer._client is None:
-            print_success("LangfuseObserver._client가 None으로 설정됨")
+        if not result:
+            print_success("configure_langfuse가 False를 반환함 (비활성화)")
         else:
-            print_error("LangfuseObserver._client가 None이 아님")
+            print_error("configure_langfuse가 True를 반환함 (예상: False)")
             return False
-
-        if not observer._init_failed:
-            print_success("LangfuseObserver._init_failed가 False임 (초기화 실패 없음)")
-        else:
-            print_warning("LangfuseObserver._init_failed가 True임")
-
-        # 5. track_translation 호출 (no-op으로 동작해야 함)
-        print_info("track_translation 호출 테스트 (no-op 동작 확인)...")
-        observer.track_translation(
-            source_text="Hello, World!",
-            target_text="안녕하세요, 세계!",
-            source_lang="en",
-            target_lang="ko",
-            model="gpt-4o-mini",
-            input_tokens=10,
-            output_tokens=8,
-            latency_ms=500.0,
-            session_id="test-session-1"
-        )
-        print_success("track_translation이 에러 없이 실행됨 (no-op)")
 
         print_success("\n시나리오 1 테스트 통과!")
         return True
@@ -284,8 +264,8 @@ def test_scenario_2_invalid_api_key() -> bool:
     """시나리오 2: 잘못된 API 키 테스트
 
     잘못된 API 키로 Langfuse 초기화 시:
-    - LangfuseObserver._init_failed가 True여야 함
-    - LangfuseObserver._client가 None이어야 함
+    - configure_langfuse가 graceful degradation으로 동작해야 함
+    - configure_langfuse가 False를 반환해야 함
     - 에러 메시지가 출력되어야 함
     - 번역 기능은 정상 동작해야 함
     """
@@ -325,29 +305,14 @@ def test_scenario_2_invalid_api_key() -> bool:
             print_error("Config.langfuse_enabled가 False임 (예상: True)")
             return False
 
-        # 4. LangfuseObserver 초기화 (에러 핸들링 확인)
-        print_info("LangfuseObserver 초기화 중... (에러 메시지가 출력될 수 있음)")
-        from components.observability import LangfuseObserver
-        observer = LangfuseObserver(config)
+        # 4. configure_langfuse 호출 (에러 핸들링 확인)
+        print_info("configure_langfuse 호출 중... (에러 메시지가 출력될 수 있음)")
+        from components.observability import configure_langfuse
+        result = configure_langfuse(config)
 
         # 초기화는 성공할 수 있음 (인증은 나중에 실패할 수 있음)
-        print_info(f"_client: {observer._client}")
-        print_info(f"_init_failed: {observer._init_failed}")
-
-        # 5. track_translation 호출 (실패해도 앱은 정상 동작해야 함)
-        print_info("track_translation 호출 테스트 (에러가 발생할 수 있음)...")
-        observer.track_translation(
-            source_text="Hello, World!",
-            target_text="안녕하세요, 세계!",
-            source_lang="en",
-            target_lang="ko",
-            model="gpt-4o-mini",
-            input_tokens=10,
-            output_tokens=8,
-            latency_ms=500.0,
-            session_id="test-session-2"
-        )
-        print_success("track_translation이 앱을 중단시키지 않음")
+        print_info(f"configure_langfuse 결과: {result}")
+        print_success("configure_langfuse가 앱을 중단시키지 않음")
 
         print_success("\n시나리오 2 테스트 통과!")
         return True
@@ -367,7 +332,7 @@ def test_scenario_3_server_down() -> bool:
     """시나리오 3: Langfuse 서버 다운 테스트
 
     Langfuse 컨테이너가 중지된 경우:
-    - LangfuseObserver 초기화는 성공할 수 있음
+    - configure_langfuse는 성공할 수 있음
     - track_translation 호출 시 연결 에러 발생
     - 에러가 적절히 처리되어야 함
     - 번역 기능은 정상 동작해야 함
@@ -405,25 +370,14 @@ def test_scenario_3_server_down() -> bool:
             print_info("이 시나리오는 환경 변수가 설정된 상태에서 서버만 다운된 경우를 테스트합니다.")
             return True
 
-        # 5. LangfuseObserver 초기화
-        print_info("LangfuseObserver 초기화...")
-        from components.observability import LangfuseObserver
-        observer = LangfuseObserver(config)
+        # 5. configure_langfuse 호출
+        print_info("configure_langfuse 호출...")
+        from components.observability import configure_langfuse
+        result = configure_langfuse(config)
 
-        # 6. track_translation 호출 (연결 에러 발생 예상)
-        print_info("track_translation 호출 테스트 (연결 에러 발생 예상)...")
-        observer.track_translation(
-            source_text="Hello, World!",
-            target_text="안녕하세요, 세계!",
-            source_lang="en",
-            target_lang="ko",
-            model="gpt-4o-mini",
-            input_tokens=10,
-            output_tokens=8,
-            latency_ms=500.0,
-            session_id="test-session-3"
-        )
-        print_success("track_translation이 앱을 중단시키지 않음")
+        # 6. 연결 에러 발생 시에도 앱은 정상 동작해야 함
+        print_info(f"configure_langfuse 결과: {result}")
+        print_success("configure_langfuse가 앱을 중단시키지 않음")
 
         print_success("\n시나리오 3 테스트 통과!")
         return True
@@ -485,27 +439,13 @@ def test_scenario_4_network_timeout() -> bool:
             print_error("Config.langfuse_enabled가 False임 (예상: True)")
             return False
 
-        # 4. LangfuseObserver 초기화 (타임아웃 에러 발생 예상)
-        print_info("LangfuseObserver 초기화 중... (타임아웃 에러가 발생할 수 있음)")
-        from components.observability import LangfuseObserver
-        observer = LangfuseObserver(config)
+        # 4. configure_langfuse 호출 (타임아웃 에러 발생 예상)
+        print_info("configure_langfuse 호출 중... (타임아웃 에러가 발생할 수 있음)")
+        from components.observability import configure_langfuse
+        result = configure_langfuse(config)
 
-        print_info(f"_init_failed: {observer._init_failed}")
-
-        # 5. track_translation 호출 (타임아웃 에러 발생 예상)
-        print_info("track_translation 호출 테스트 (타임아웃 에러 발생 예상)...")
-        observer.track_translation(
-            source_text="Hello, World!",
-            target_text="안녕하세요, 세계!",
-            source_lang="en",
-            target_lang="ko",
-            model="gpt-4o-mini",
-            input_tokens=10,
-            output_tokens=8,
-            latency_ms=500.0,
-            session_id="test-session-4"
-        )
-        print_success("track_translation이 앱을 중단시키지 않음")
+        print_info(f"configure_langfuse 결과: {result}")
+        print_success("configure_langfuse가 앱을 중단시키지 않음")
 
         print_success("\n시나리오 4 테스트 통과!")
         return True
