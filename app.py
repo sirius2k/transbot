@@ -274,37 +274,9 @@ def setup_sidebar(provider: Literal["openai", "azure"]) -> tuple[str, dict[str, 
         (선택된 모델/deployment명, 옵션 딕셔너리) 튜플
     """
     st.sidebar.header("⚙️ 설정")
-
-    # Provider 정보 표시
-    provider_display = "🔵 OpenAI" if provider == "openai" else "🟢 Azure OpenAI"
-    st.sidebar.markdown(f"**Provider:** {provider_display}")
     st.sidebar.markdown("---")
 
-    # 포맷 유지 옵션
-    st.sidebar.checkbox(
-        "📝 포맷 유지",
-        value=True,
-        key="preserve_format",
-        help="번역 결과의 줄바꿈과 들여쓰기를 보존합니다."
-    )
-    st.sidebar.markdown("---")
-
-    # 도움말 섹션
-    with st.sidebar.expander("💡 도움말", expanded=False):
-        st.markdown("""
-        **🌐 자동 번역**
-        입력하신 언어를 자동으로 감지하여 번역합니다.
-
-        **📝 Markdown 지원**
-        다음 Markdown 문법을 사용할 수 있습니다:
-        - **볼드**, *이탤릭*, `코드`
-        - [링크](URL)
-        - 리스트 (- 또는 1.)
-        - > 인용문
-        - 표
-        """)
-    st.sidebar.markdown("---")
-
+    # 모델 선택을 먼저 표시
     if provider == "azure":
         # Azure: Deployment 목록 표시
         from components.translation import AzureTranslationManager
@@ -343,9 +315,8 @@ def setup_sidebar(provider: Literal["openai", "azure"]) -> tuple[str, dict[str, 
             options=list(deployment_options.keys()),
             index=default_index
         )  # type: ignore
-        selected_deployment = deployment_options[selected_deployment_name]
-
-        return selected_deployment, deployment_options
+        selected_model_or_deployment = deployment_options[selected_deployment_name]
+        options = deployment_options
 
     else:
         # OpenAI: 기존 모델 목록 표시
@@ -372,9 +343,43 @@ def setup_sidebar(provider: Literal["openai", "azure"]) -> tuple[str, dict[str, 
             options=list(model_options.keys()),
             index=default_index
         )  # type: ignore
-        selected_model = model_options[selected_model_name]
+        selected_model_or_deployment = model_options[selected_model_name]
+        options = model_options
 
-        return selected_model, model_options
+    # 포맷 유지 옵션
+    st.sidebar.checkbox(
+        "📝 포맷 유지",
+        value=True,
+        key="preserve_format",
+        help="번역 결과의 줄바꿈과 들여쓰기를 보존합니다."
+    )
+
+    st.sidebar.markdown("---")
+
+    # 정보 및 도움말 섹션
+    st.sidebar.markdown("#### ℹ️ 정보 및 도움말")
+
+    # 시스템 정보
+    with st.sidebar.expander("🔧 시스템 정보", expanded=False):
+        provider_display = "🔵 OpenAI" if provider == "openai" else "🟢 Azure OpenAI"
+        st.markdown(f"**Provider:** {provider_display}")
+
+    # 도움말
+    with st.sidebar.expander("💡 도움말", expanded=False):
+        st.markdown("""
+        **🌐 자동 번역**
+        입력하신 언어를 자동으로 감지하여 번역합니다.
+
+        **📝 Markdown 지원**
+        다음 Markdown 문법을 사용할 수 있습니다:
+        - **볼드**, *이탤릭*, `코드`
+        - [링크](URL)
+        - 리스트 (- 또는 1.)
+        - > 인용문
+        - 표
+        """)
+
+    return selected_model_or_deployment, options
 
 
 # ============================================================================
