@@ -289,6 +289,22 @@ def setup_sidebar(provider: Literal["openai", "azure"]) -> tuple[str, dict[str, 
     )
     st.sidebar.markdown("---")
 
+    # 도움말 섹션
+    with st.sidebar.expander("💡 도움말", expanded=False):
+        st.markdown("""
+        **🌐 자동 번역**
+        입력하신 언어를 자동으로 감지하여 번역합니다.
+
+        **📝 Markdown 지원**
+        다음 Markdown 문법을 사용할 수 있습니다:
+        - **볼드**, *이탤릭*, `코드`
+        - [링크](URL)
+        - 리스트 (- 또는 1.)
+        - > 인용문
+        - 표
+        """)
+    st.sidebar.markdown("---")
+
     if provider == "azure":
         # Azure: Deployment 목록 표시
         from components.translation import AzureTranslationManager
@@ -371,11 +387,6 @@ def show_title() -> None:
     Config에서 APP_ICON과 APP_TITLE을 로드하여 표시합니다.
     """
     st.title(f"{config.APP_ICON} {config.APP_TITLE}")
-
-
-def show_info_messages() -> None:
-    st.info("🌐 **자동 번역**: 입력하신 언어를 자동으로 감지하여 번역합니다.")
-    st.info("💡 **Markdown 지원**: **볼드**, *이탤릭*, `코드`, [링크](URL), 리스트(- 또는 1.), > 인용문, 표 등 사용 가능")
 
 
 def render_input_area() -> st.delta_generator.DeltaGenerator:
@@ -647,13 +658,10 @@ def main() -> None:
             model=selected_model_or_deployment
         )
 
-    # 5. 정보 메시지 표시
-    show_info_messages()
-
-    # 6. 입력 영역 렌더링
+    # 5. 입력 영역 렌더링
     stats_placeholder = render_input_area()
 
-    # 7. 통계 업데이트 및 언어 감지
+    # 6. 통계 업데이트 및 언어 감지
     input_text = st.session_state.input_text
     source_lang, target_lang, _ = update_statistics(
         input_text,
@@ -663,10 +671,10 @@ def main() -> None:
         translation_manager.model  # TranslationManager의 model 속성 사용
     )
 
-    # 8. 액션 버튼 렌더링
+    # 7. 액션 버튼 렌더링
     render_action_buttons(input_text, source_lang, target_lang, translation_manager)
 
-    # 9. 번역 결과 표시
+    # 8. 번역 결과 표시
     render_translation_result()
 
 
