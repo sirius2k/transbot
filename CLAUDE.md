@@ -30,23 +30,26 @@
 - [GitHub 이슈 관리](docs/guides/workflows/github-issues.md) - 레이블 생성, 이슈 관리
 - [작업 시간 추적](docs/guides/workflows/time-tracking.md) - 작업 분류, 로그 작성법
 - [FEATURE 완료 워크플로우](docs/guides/workflows/feature-completion.md) - FEATURE 완료 시 문서 업데이트 절차
+- [문제 해결 가이드](docs/guides/workflows/troubleshooting.md) - 일반적인 문제 및 해결 방법, FAQ
 
 ### 범용 가이드 (General) - 참고용
 
 - [Claude 기반 개발 프로젝트 가이드라인](docs/guides/general/claude-development-guide.md) - 모든 Claude 프로젝트 적용 가능
+- [Claude 개발 프로세스 가이드](docs/guides/general/claude-development-process.md) - 4단계 FEATURE 개발 워크플로우 (Phase 1-4), WORKLOG 작성 가이드, 에이전트 활용법
 - [가이드 작성 사고 과정 (CoT)](docs/guides/general/claude-development-guide-cot.md) - 메타 문서
 
 > **참고**: 범용 가이드는 TransBot에 특화되지 않은 일반적인 Claude 협업 베스트 프랙티스입니다. TransBot 개발 시에는 위의 프로젝트 특화 가이드를 우선 사용하세요.
 
 ## 프로젝트 개요
 
-TransBot은 OpenAI GPT 모델을 활용한 영어-한국어 양방향 번역 웹 애플리케이션입니다.
+TransBot은 **OpenAI 및 Azure OpenAI 서비스**를 활용한 영어-한국어 양방향 번역 웹 애플리케이션입니다.
 
 ### 주요 기능
 
 - 영어 → 한국어 번역
 - 한국어 → 영어 번역
 - AI 모델 선택 (GPT-4o, GPT-4o Mini, GPT-4 Turbo, GPT-4, GPT-3.5 Turbo)
+- **OpenAI / Azure OpenAI 이중 지원**
 - Streamlit 기반 웹 인터페이스
 - OpenAI API 연동
 
@@ -252,6 +255,108 @@ Langfuse 관찰성 모듈을 수정할 때는 다음 사항을 준수하세요:
 - 타입 힌트 명시 (예: `def func(text: str) -> str:`)
 - 새로운 함수 추가 시 반드시 단위 테스트 작성
 
+## 배포 체크리스트
+
+### 개발 환경
+
+- [ ] 가상환경 설정 완료 (`venv/` 디렉토리 존재)
+- [ ] 가상환경 활성화 확인 (프롬프트에 `(venv)` 표시)
+- [ ] requirements.txt 의존성 설치 확인
+- [ ] requirements-dev.txt 의존성 설치 확인 (개발 환경)
+
+### 애플리케이션
+
+- [ ] `.env` 파일에 유효한 API 키 설정
+- [ ] 모든 AI 모델 선택 옵션 테스트 완료
+- [ ] 양방향 번역 기능 테스트 (영어↔한국어)
+- [ ] Markdown 포맷 보존 테스트
+- [ ] 복사 버튼 동작 확인
+- [ ] 지우기 버튼 동작 확인
+- [ ] 에러 핸들링 동작 확인
+
+### LLM 관찰성 (Langfuse)
+
+- [ ] Langfuse 인프라 시작 (`infra/scripts/start.sh`)
+- [ ] Langfuse 대시보드 접속 (`http://localhost:3000`)
+- [ ] API 키 발급 (Settings > API Keys)
+- [ ] `.env` 파일에 Langfuse 환경 변수 설정
+- [ ] 번역 수행 후 Langfuse에 추적 데이터 표시 확인
+- [ ] 에러 핸들링 테스트 (API 키 오류, 서버 다운 등)
+
+### 테스트 및 품질
+
+- [ ] **모든 단위 테스트 통과 확인** (`pytest`)
+- [ ] **코드 커버리지 80% 이상 확인** (`pytest --cov`)
+- [ ] 테스트 리포트 생성 확인 (`htmlcov/`)
+- [ ] 새로운 함수에 대한 테스트 작성 완료
+
+### 문서
+
+- [ ] PRD.md 업데이트 (변경사항 반영)
+- [ ] README.md 업데이트 (사용자 가이드)
+- [ ] CLAUDE.md 업데이트 (개발 가이드)
+- [ ] 모든 문서 markdownlint 규칙 준수 확인
+- [ ] 모든 문서의 "최종 수정일" 업데이트 (날짜 + 시간)
+
+### Git 및 배포
+
+- [ ] Git 커밋 메시지 명확하게 작성
+- [ ] commit-and-push 서브에이전트 사용 (권장)
+- [ ] GitHub 푸시 완료 확인
+
+## 문제 해결 (Troubleshooting)
+
+일반적인 문제 및 해결 방법은 [문제 해결 가이드](docs/guides/workflows/troubleshooting.md)를 참고하세요.
+
+### 주요 문제 시나리오
+
+- **API 키 오류**: `OPENAI_API_KEY not found` 등
+- **Langfuse 연결 실패**: 대시보드에 데이터 표시 안 됨
+- **테스트 실패**: pytest 실행 시 오류 발생
+- **가상환경 문제**: 활성화 실패 또는 의존성 오류
+
+자세한 해결 방법과 FAQ는 [문제 해결 가이드](docs/guides/workflows/troubleshooting.md)를 확인하세요.
+
+## 버전 관리
+
+### 커밋 메시지 컨벤션
+
+```text
+feat: 새로운 기능 추가
+fix: 버그 수정
+docs: 문서 수정
+style: 코드 포맷팅
+refactor: 코드 리팩토링
+test: 테스트 추가
+chore: 빌드 설정 등
+```
+
+### 코드 커밋 예시
+
+```bash
+git commit -m "feat: 번역 결과 복사 버튼 추가"
+git commit -m "fix: API 키 미입력 시 오류 처리 개선"
+git commit -m "refactor: translate 함수 모듈화"
+```
+
+### 문서 커밋 메시지
+
+#### 단일 문서 수정
+
+```bash
+git commit -m "docs(readme): 설치 방법 섹션 업데이트"
+git commit -m "docs(prd): Phase 2 기능 목록 추가"
+git commit -m "docs(claude): markdownlint 규칙 가이드 추가"
+```
+
+#### 여러 문서 동시 수정
+
+```bash
+git commit -m "docs: 프로젝트 구조를 세 문서에 동기화"
+git commit -m "docs: markdownlint 규칙을 모든 문서에 적용"
+git commit -m "docs: 기술 스택 정보 업데이트 (README, PRD, CLAUDE)"
+```
+
 ## Claude와의 협업 팁
 
 ### 효과적인 요청 방법
@@ -348,95 +453,6 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
 더 좋은 예: "AI 모델 선택 기능을 추가했으니 이 변경사항을 커밋하고 푸시해줘"
 ```
 
-## 버전 관리
-
-### 커밋 메시지 컨벤션
-
-```text
-feat: 새로운 기능 추가
-fix: 버그 수정
-docs: 문서 수정
-style: 코드 포맷팅
-refactor: 코드 리팩토링
-test: 테스트 추가
-chore: 빌드 설정 등
-```
-
-### 코드 커밋 예시
-
-```bash
-git commit -m "feat: 번역 결과 복사 버튼 추가"
-git commit -m "fix: API 키 미입력 시 오류 처리 개선"
-git commit -m "refactor: translate 함수 모듈화"
-```
-
-### 문서 커밋 메시지
-
-#### 단일 문서 수정
-
-```bash
-git commit -m "docs(readme): 설치 방법 섹션 업데이트"
-git commit -m "docs(prd): Phase 2 기능 목록 추가"
-git commit -m "docs(claude): markdownlint 규칙 가이드 추가"
-```
-
-#### 여러 문서 동시 수정
-
-```bash
-git commit -m "docs: 프로젝트 구조를 세 문서에 동기화"
-git commit -m "docs: markdownlint 규칙을 모든 문서에 적용"
-git commit -m "docs: 기술 스택 정보 업데이트 (README, PRD, CLAUDE)"
-```
-
-## 배포 체크리스트
-
-### 개발 환경
-
-- [ ] 가상환경 설정 완료 (`venv/` 디렉토리 존재)
-- [ ] 가상환경 활성화 확인 (프롬프트에 `(venv)` 표시)
-- [ ] requirements.txt 의존성 설치 확인
-- [ ] requirements-dev.txt 의존성 설치 확인 (개발 환경)
-
-### 애플리케이션
-
-- [ ] `.env` 파일에 유효한 API 키 설정
-- [ ] 모든 AI 모델 선택 옵션 테스트 완료
-- [ ] 양방향 번역 기능 테스트 (영어↔한국어)
-- [ ] Markdown 포맷 보존 테스트
-- [ ] 복사 버튼 동작 확인
-- [ ] 지우기 버튼 동작 확인
-- [ ] 에러 핸들링 동작 확인
-
-### LLM 관찰성 (Langfuse)
-
-- [ ] Langfuse 인프라 시작 (`infra/scripts/start.sh`)
-- [ ] Langfuse 대시보드 접속 (`http://localhost:3000`)
-- [ ] API 키 발급 (Settings > API Keys)
-- [ ] `.env` 파일에 Langfuse 환경 변수 설정
-- [ ] 번역 수행 후 Langfuse에 추적 데이터 표시 확인
-- [ ] 에러 핸들링 테스트 (API 키 오류, 서버 다운 등)
-
-### 테스트 및 품질
-
-- [ ] **모든 단위 테스트 통과 확인** (`pytest`)
-- [ ] **코드 커버리지 80% 이상 확인** (`pytest --cov`)
-- [ ] 테스트 리포트 생성 확인 (`htmlcov/`)
-- [ ] 새로운 함수에 대한 테스트 작성 완료
-
-### 문서
-
-- [ ] PRD.md 업데이트 (변경사항 반영)
-- [ ] README.md 업데이트 (사용자 가이드)
-- [ ] CLAUDE.md 업데이트 (개발 가이드)
-- [ ] 모든 문서 markdownlint 규칙 준수 확인
-- [ ] 모든 문서의 "최종 수정일" 업데이트 (날짜 + 시간)
-
-### Git 및 배포
-
-- [ ] Git 커밋 메시지 명확하게 작성
-- [ ] commit-and-push 서브에이전트 사용 (권장)
-- [ ] GitHub 푸시 완료 확인
-
 ## 향후 개발 방향
 
 ### Phase 2 고려사항
@@ -472,6 +488,6 @@ git commit -m "docs: 기술 스택 정보 업데이트 (README, PRD, CLAUDE)"
 
 ---
 
-마지막 업데이트: 2026-02-04
+마지막 업데이트: 2026-02-05
 
 작성자: TransBot Development Team
