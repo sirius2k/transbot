@@ -9,6 +9,9 @@ from utils import count_tokens
 
 logger = logging.getLogger("transbot.translation")
 
+# 상수 정의
+ERROR_OUTPUT_MESSAGE = "[Error occurred]"
+
 
 class TranslationManager:
     """번역 작업을 관리하는 클래스
@@ -64,12 +67,11 @@ class TranslationManager:
 
         self.client = client
 
-    @observe(as_type="generation", name="translation")
+    @observe(name="translation")
     def translate(self, text: str, source: str, target: str, session_id: str = "unknown") -> str:
         """텍스트를 번역합니다.
 
-        @observe(as_type="generation")로 Langfuse에 자동 추적됩니다.
-        입력/출력, 타이밍, 에러 상태가 자동으로 기록됩니다.
+        Langfuse에서 SPAN 타입으로 추적되며, 입력/출력, 사용량, 타이밍, 에러 상태가 기록됩니다.
 
         Args:
             text: 번역할 텍스트
@@ -83,8 +85,12 @@ class TranslationManager:
         start_time = time.time()
         input_length = len(text)
 
-        # Langfuse trace에 session_id 설정
-        langfuse_context.update_current_trace(session_id=session_id)
+        # Langfuse trace에 session_id, input, metadata 설정
+        langfuse_context.update_current_trace(
+            session_id=session_id,
+            input=text,
+            metadata={"direction": f"{source}→{target}"}
+        )
 
         # API 호출 시작 로깅
         logger.info(
@@ -120,15 +126,18 @@ class TranslationManager:
             input_tokens = response.usage.prompt_tokens
             output_tokens = response.usage.completion_tokens
 
-            # Langfuse observation에 모델/사용량/메타데이터 업데이트
-            langfuse_context.update_current_observation(
-                model=self.model,
-                usage={
-                    "input": input_tokens,
-                    "output": output_tokens,
-                    "total": input_tokens + output_tokens,
-                },
-                metadata={"direction": f"{source}→{target}"},
+            # Langfuse trace에 output, model 정보 업데이트 (usage는 metadata에 포함)
+            langfuse_context.update_current_trace(
+                output=result,
+                metadata={
+                    "direction": f"{source}→{target}",
+                    "model": self.model,
+                    "usage": {
+                        "input": input_tokens,
+                        "output": output_tokens,
+                        "total": input_tokens + output_tokens,
+                    }
+                }
             )
 
             # API 호출 성공 로깅
@@ -152,14 +161,20 @@ class TranslationManager:
         except Exception as e:
             # 에러 발생 시 입력 토큰 추정 (Langfuse에 usage 정보 제공)
             estimated_input_tokens = count_tokens(text, self.model)
-            langfuse_context.update_current_observation(
-                model=self.model,
-                usage={
-                    "input": estimated_input_tokens,
-                    "output": 0,
-                    "total": estimated_input_tokens,
-                },
-                metadata={"direction": f"{source}→{target}"},
+
+            # Langfuse trace에 output, model 정보 업데이트 (에러 상태, usage는 metadata에 포함)
+            langfuse_context.update_current_trace(
+                output=ERROR_OUTPUT_MESSAGE,
+                metadata={
+                    "direction": f"{source}→{target}",
+                    "model": self.model,
+                    "error": str(e),
+                    "usage": {
+                        "input": estimated_input_tokens,
+                        "output": 0,
+                        "total": estimated_input_tokens,
+                    }
+                }
             )
 
             # API 호출 실패 로깅
@@ -261,11 +276,11 @@ class AzureTranslationManager(TranslationManager):
 
         self.client = client
 
-    @observe(as_type="generation", name="translation")
+    @observe(name="translation")
     def translate(self, text: str, source: str, target: str, session_id: str = "unknown") -> str:
         """텍스트를 번역합니다 (Azure 전용).
 
-        @observe(as_type="generation")로 Langfuse에 자동 추적됩니다.
+        Langfuse에서 SPAN 타입으로 추적되며, 입력/출력, 사용량, 타이밍, 에러 상태가 기록됩니다.
         OpenAI와 다른 점: model 파라미터에 deployment 이름을 사용합니다.
 
         Args:
@@ -280,8 +295,15 @@ class AzureTranslationManager(TranslationManager):
         start_time = time.time()
         input_length = len(text)
 
-        # Langfuse trace에 session_id 설정
-        langfuse_context.update_current_trace(session_id=session_id)
+        # Langfuse trace에 session_id, input, metadata 설정
+        langfuse_context.update_current_trace(
+            session_id=session_id,
+            input=text,
+            metadata={
+                "direction": f"{source}→{target}",
+                "deployment": self.deployment,
+            }
+        )
 
         # API 호출 시작 로깅
         logger.info(
@@ -318,18 +340,19 @@ class AzureTranslationManager(TranslationManager):
             input_tokens = response.usage.prompt_tokens
             output_tokens = response.usage.completion_tokens
 
-            # Langfuse observation에 모델/사용량/메타데이터 업데이트
-            langfuse_context.update_current_observation(
-                model=self.model,
-                usage={
-                    "input": input_tokens,
-                    "output": output_tokens,
-                    "total": input_tokens + output_tokens,
-                },
+            # Langfuse trace에 output, model 정보 업데이트 (usage는 metadata에 포함)
+            langfuse_context.update_current_trace(
+                output=result,
                 metadata={
                     "direction": f"{source}→{target}",
                     "deployment": self.deployment,
-                },
+                    "model": self.model,
+                    "usage": {
+                        "input": input_tokens,
+                        "output": output_tokens,
+                        "total": input_tokens + output_tokens,
+                    }
+                }
             )
 
             # API 호출 성공 로깅
@@ -354,17 +377,21 @@ class AzureTranslationManager(TranslationManager):
         except Exception as e:
             # 에러 발생 시 입력 토큰 추정 (Langfuse에 usage 정보 제공)
             estimated_input_tokens = count_tokens(text, self.model)
-            langfuse_context.update_current_observation(
-                model=self.model,
-                usage={
-                    "input": estimated_input_tokens,
-                    "output": 0,
-                    "total": estimated_input_tokens,
-                },
+
+            # Langfuse trace에 output, model 정보 업데이트 (에러 상태, usage는 metadata에 포함)
+            langfuse_context.update_current_trace(
+                output=ERROR_OUTPUT_MESSAGE,
                 metadata={
                     "direction": f"{source}→{target}",
                     "deployment": self.deployment,
-                },
+                    "model": self.model,
+                    "error": str(e),
+                    "usage": {
+                        "input": estimated_input_tokens,
+                        "output": 0,
+                        "total": estimated_input_tokens,
+                    }
+                }
             )
 
             # API 호출 실패 로깅

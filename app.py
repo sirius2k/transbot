@@ -624,11 +624,20 @@ def main() -> None:
     from components.translation import TranslationManagerFactory
 
     if provider == "azure":
-        # Azure: deployment 파라미터 전달
+        # Azure: deployment 및 model 파라미터 전달
+        # deployment → model 역매핑 (SUPPORTED_DEPLOYMENTS에서 찾기)
+        from components.translation import AzureTranslationManager
+        model_name = None
+        for model, deployment in AzureTranslationManager.SUPPORTED_DEPLOYMENTS.items():
+            if deployment == selected_model_or_deployment:
+                model_name = model
+                break
+
         translation_manager = TranslationManagerFactory.create(
             provider=provider,
             client=client,
-            deployment=selected_model_or_deployment
+            deployment=selected_model_or_deployment,
+            model=model_name  # 실제 모델명 전달
         )
     else:
         # OpenAI: model 파라미터 전달
