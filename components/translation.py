@@ -126,17 +126,17 @@ class TranslationManager:
             input_tokens = response.usage.prompt_tokens
             output_tokens = response.usage.completion_tokens
 
-            # Langfuse trace에 output, model 정보 업데이트 (usage는 metadata에 포함)
-            langfuse_context.update_current_trace(
+            # Langfuse observation에 output, model, usage 정보 업데이트
+            langfuse_context.update_current_observation(
                 output=result,
+                model=self.model,
+                usage={
+                    "input": input_tokens,
+                    "output": output_tokens,
+                    "total": input_tokens + output_tokens,
+                },
                 metadata={
                     "direction": f"{source}→{target}",
-                    "model": self.model,
-                    "usage": {
-                        "input": input_tokens,
-                        "output": output_tokens,
-                        "total": input_tokens + output_tokens,
-                    }
                 }
             )
 
@@ -162,18 +162,18 @@ class TranslationManager:
             # 에러 발생 시 입력 토큰 추정 (Langfuse에 usage 정보 제공)
             estimated_input_tokens = count_tokens(text, self.model)
 
-            # Langfuse trace에 output, model 정보 업데이트 (에러 상태, usage는 metadata에 포함)
-            langfuse_context.update_current_trace(
+            # Langfuse observation에 output, model, usage 정보 업데이트 (에러 상태)
+            langfuse_context.update_current_observation(
                 output=ERROR_OUTPUT_MESSAGE,
+                model=self.model,
+                usage={
+                    "input": estimated_input_tokens,
+                    "output": 0,
+                    "total": estimated_input_tokens,
+                },
                 metadata={
                     "direction": f"{source}→{target}",
-                    "model": self.model,
                     "error": str(e),
-                    "usage": {
-                        "input": estimated_input_tokens,
-                        "output": 0,
-                        "total": estimated_input_tokens,
-                    }
                 }
             )
 
@@ -340,18 +340,18 @@ class AzureTranslationManager(TranslationManager):
             input_tokens = response.usage.prompt_tokens
             output_tokens = response.usage.completion_tokens
 
-            # Langfuse trace에 output, model 정보 업데이트 (usage는 metadata에 포함)
-            langfuse_context.update_current_trace(
+            # Langfuse observation에 output, model, usage 정보 업데이트
+            langfuse_context.update_current_observation(
                 output=result,
+                model=self.model,
+                usage={
+                    "input": input_tokens,
+                    "output": output_tokens,
+                    "total": input_tokens + output_tokens,
+                },
                 metadata={
                     "direction": f"{source}→{target}",
                     "deployment": self.deployment,
-                    "model": self.model,
-                    "usage": {
-                        "input": input_tokens,
-                        "output": output_tokens,
-                        "total": input_tokens + output_tokens,
-                    }
                 }
             )
 
@@ -378,19 +378,19 @@ class AzureTranslationManager(TranslationManager):
             # 에러 발생 시 입력 토큰 추정 (Langfuse에 usage 정보 제공)
             estimated_input_tokens = count_tokens(text, self.model)
 
-            # Langfuse trace에 output, model 정보 업데이트 (에러 상태, usage는 metadata에 포함)
-            langfuse_context.update_current_trace(
+            # Langfuse observation에 output, model, usage 정보 업데이트 (에러 상태)
+            langfuse_context.update_current_observation(
                 output=ERROR_OUTPUT_MESSAGE,
+                model=self.model,
+                usage={
+                    "input": estimated_input_tokens,
+                    "output": 0,
+                    "total": estimated_input_tokens,
+                },
                 metadata={
                     "direction": f"{source}→{target}",
                     "deployment": self.deployment,
-                    "model": self.model,
                     "error": str(e),
-                    "usage": {
-                        "input": estimated_input_tokens,
-                        "output": 0,
-                        "total": estimated_input_tokens,
-                    }
                 }
             )
 
