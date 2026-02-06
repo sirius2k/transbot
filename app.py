@@ -336,14 +336,17 @@ def setup_sidebar(provider: Literal["openai", "azure"]) -> tuple[str, dict[str, 
         options = deployment_options
 
     else:
-        # OpenAI: 기존 모델 목록 표시
-        model_options = {
-            "GPT-4o Mini (추천 - 가성비)": "gpt-4o-mini",
-            "GPT-4o (최고 품질)": "gpt-4o",
-            "GPT-4 Turbo": "gpt-4-turbo",
-            "GPT-4": "gpt-4",
-            "GPT-3.5 Turbo (빠름)": "gpt-3.5-turbo"
-        }
+        # OpenAI: 환경 변수 기반 모델 목록 표시
+        model_options = config.get_available_openai_models()
+
+        # 모델이 하나도 없는 경우 에러 표시
+        if not model_options:
+            st.sidebar.error(
+                "⚠️ **사용 가능한 모델 없음**\n\n"
+                "환경 변수 `OPENAI_MODELS`에 유효한 모델을 설정해주세요.\n\n"
+                "지원 모델: gpt-4o, gpt-4o-mini, gpt-4-turbo, gpt-4, gpt-3.5-turbo"
+            )
+            st.stop()
 
         # Config에서 기본 모델 가져오기
         default_model = config.DEFAULT_MODEL
