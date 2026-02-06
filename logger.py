@@ -15,6 +15,8 @@ class JSONFormatter(logging.Formatter):
             "timestamp": self.formatTime(record, self.datefmt),
             "level": record.levelname,
             "logger": record.name,
+            "filename": record.filename,
+            "lineno": record.lineno,
             "message": record.getMessage(),
         }
 
@@ -80,7 +82,7 @@ def setup_logging(config: Config) -> None:
 
     # 콘솔용 포맷터 (항상 사람이 읽기 쉬운 포맷)
     console_formatter = ConsoleFormatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        "%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S"
     )
 
@@ -89,7 +91,7 @@ def setup_logging(config: Config) -> None:
         file_formatter = JSONFormatter()
     else:
         file_formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+            "%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s"
         )
 
     # 콘솔 핸들러
