@@ -150,6 +150,7 @@ def clear_inputs() -> None:
     st.session_state.source_language = ""
     st.session_state.target_language = ""
     st.session_state.selected_styles = []
+    st.session_state.multi_style_results = None
 
 
 def format_translation_result(text: str) -> str:
@@ -200,6 +201,8 @@ def initialize_session_state() -> None:
         st.session_state.target_language = ""
     if 'selected_styles' not in st.session_state:
         st.session_state.selected_styles = []
+    if 'multi_style_results' not in st.session_state:
+        st.session_state.multi_style_results = None
 
 
 def setup_api_client() -> tuple[Any, Literal["openai", "azure"]]:
@@ -632,6 +635,55 @@ def render_translation_result() -> None:
             )
             st.code(result, language="markdown", line_numbers=False)
 
+        # FEATURE-023: 다중 스타일 번역 결과 표시 (한국어→영어만)
+        if st.session_state.multi_style_results:
+            st.markdown("---")
+            st.subheader("🎨 다양한 스타일 번역")
+
+            from components.style_translator import StyleTranslator
+
+            multi_results = st.session_state.multi_style_results
+
+            # 각 스타일별로 세로 목록 표시
+            for style_key, style_result in multi_results.items():
+                # 스타일 레이블 가져오기
+                style_label = StyleTranslator.STYLE_LABELS.get(style_key, style_key)
+
+                # 스타일 제목 표시
+                st.markdown(f"### {style_label}")
+
+                # 결과가 딕셔너리인 경우 (include_alternatives=True)
+                if isinstance(style_result, dict):
+                    primary_translation = style_result.get("primary", "")
+                    alternatives = style_result.get("alternatives", [])
+
+                    # 주 번역 표시
+                    st.markdown("**주 번역:**")
+                    st.components.v1.html(  # type: ignore
+                        create_copy_button(primary_translation, "📋 복사", f"style_{style_key}"),
+                        height=50
+                    )
+                    st.markdown(primary_translation)
+
+                    # 대안 표현 표시
+                    if alternatives:
+                        st.markdown("**대안 표현:**")
+                        for idx, alt in enumerate(alternatives, 1):
+                            st.markdown(f"{idx}. {alt}")
+                            st.components.v1.html(  # type: ignore
+                                create_copy_button(alt, "📋", f"alt_{style_key}_{idx}"),
+                                height=50
+                            )
+                else:
+                    # 결과가 문자열인 경우 (include_alternatives=False)
+                    st.components.v1.html(  # type: ignore
+                        create_copy_button(style_result, "📋 복사", f"style_{style_key}"),
+                        height=50
+                    )
+                    st.markdown(style_result)
+
+                st.markdown("")  # 스타일 간 간격
+
 
 # ============================================================================
 # Logic Functions (비즈니스 로직)
@@ -742,6 +794,51 @@ def handle_translation(
             st.session_state.translation_completed = True
             st.session_state.source_language = source_lang
             st.session_state.target_language = target_lang
+
+            # FEATURE-023: 한국어→영어 번역인 경우 다중 스타일 번역 수행
+            if source_lang == "Korean" and target_lang == "English":
+                from components.style_translator import StyleTranslator
+                from utils import is_short_text
+
+                # StyleTranslator 인스턴스 생성
+                style_translator = StyleTranslator(
+                    client=translation_manager.client,
+                    model=translation_manager.model,
+                    temperature=0.3,
+                    max_tokens=2000,
+                    timeout=30
+                )
+
+                # 짧은/긴 텍스트 판별 후 스타일 선택
+                if is_short_text(input_text):
+                    # 짧은 텍스트: 자동 선택
+                    selected_styles = style_translator.auto_select_styles_for_short_text(input_text)
+                else:
+                    # 긴 텍스트: 사용자 선택 (최소 1개 이상)
+                    selected_styles = st.session_state.selected_styles
+                    if not selected_styles:
+                        # 기본값: 비즈니스 스타일
+                        selected_styles = [StyleTranslator.STYLE_BUSINESS]
+
+                # 다중 스타일 번역 수행
+                preserve_proper_nouns = st.session_state.get("preserve_proper_nouns", False)
+                include_alternatives = st.session_state.get("include_alternatives", False)
+
+                multi_style_results = style_translator.translate_multi_style(
+                    text=input_text,
+                    styles=selected_styles,
+                    source_lang=source_lang,
+                    target_lang=target_lang,
+                    preserve_proper_nouns=preserve_proper_nouns,
+                    include_alternatives=include_alternatives
+                )
+
+                # 결과 저장
+                st.session_state.multi_style_results = multi_style_results
+            else:
+                # 영어→한국어는 다중 스타일 미지원
+                st.session_state.multi_style_results = None
+
         except Exception as e:
             st.error(f"번역 중 오류가 발생했습니다: {str(e)}")
 
