@@ -475,3 +475,105 @@ class TestLangfuseConfig:
         assert config.LANGFUSE_SECRET_KEY == "sk-production"
         assert config.LANGFUSE_HOST == "https://langfuse.example.com"
         assert config.langfuse_enabled is True
+
+
+class TestConfigOpenAIModels:
+    """Config 클래스 OpenAI 모델 필터링 테스트"""
+
+    def test_get_available_openai_models_no_filter(self, monkeypatch):
+        """OPENAI_MODELS 미설정 시 전체 모델 반환 테스트"""
+        # OPENAI_MODELS 환경 변수 제거
+        monkeypatch.delenv("OPENAI_MODELS", raising=False)
+
+        config = Config.load()
+        models = config.get_available_openai_models()
+
+        # 전체 5개 모델이 반환되어야 함
+        assert len(models) == 5
+        assert "GPT-4o (최고 품질)" in models
+        assert "GPT-4o Mini (추천 - 가성비)" in models
+        assert "GPT-4 Turbo" in models
+        assert "GPT-4" in models
+        assert "GPT-3.5 Turbo (빠름)" in models
+
+        # 모델 ID 확인
+        assert models["GPT-4o (최고 품질)"] == "gpt-4o"
+        assert models["GPT-4o Mini (추천 - 가성비)"] == "gpt-4o-mini"
+        assert models["GPT-4 Turbo"] == "gpt-4-turbo"
+        assert models["GPT-4"] == "gpt-4"
+        assert models["GPT-3.5 Turbo (빠름)"] == "gpt-3.5-turbo"
+
+    def test_get_available_openai_models_single_model(self, monkeypatch):
+        """OPENAI_MODELS에 단일 모델 설정 시 테스트"""
+        monkeypatch.setenv("OPENAI_MODELS", "gpt-4o-mini")
+
+        config = Config.load()
+        models = config.get_available_openai_models()
+
+        # 1개 모델만 반환되어야 함
+        assert len(models) == 1
+        assert "GPT-4o Mini (추천 - 가성비)" in models
+        assert models["GPT-4o Mini (추천 - 가성비)"] == "gpt-4o-mini"
+
+    def test_get_available_openai_models_multiple_models(self, monkeypatch):
+        """OPENAI_MODELS에 여러 모델 설정 시 테스트"""
+        monkeypatch.setenv("OPENAI_MODELS", "gpt-4o,gpt-4o-mini,gpt-3.5-turbo")
+
+        config = Config.load()
+        models = config.get_available_openai_models()
+
+        # 3개 모델이 반환되어야 함
+        assert len(models) == 3
+        assert "GPT-4o (최고 품질)" in models
+        assert "GPT-4o Mini (추천 - 가성비)" in models
+        assert "GPT-3.5 Turbo (빠름)" in models
+
+        # 설정하지 않은 모델은 없어야 함
+        assert "GPT-4 Turbo" not in models
+        assert "GPT-4" not in models
+
+    def test_get_available_openai_models_with_spaces(self, monkeypatch):
+        """OPENAI_MODELS에 공백 포함 시 파싱 테스트"""
+        monkeypatch.setenv("OPENAI_MODELS", "gpt-4o, gpt-4o-mini , gpt-3.5-turbo")
+
+        config = Config.load()
+        models = config.get_available_openai_models()
+
+        # 공백은 제거되고 3개 모델이 반환되어야 함
+        assert len(models) == 3
+        assert "GPT-4o (최고 품질)" in models
+        assert "GPT-4o Mini (추천 - 가성비)" in models
+        assert "GPT-3.5 Turbo (빠름)" in models
+
+    def test_get_available_openai_models_invalid_model(self, monkeypatch):
+        """OPENAI_MODELS에 지원하지 않는 모델 포함 시 무시 테스트"""
+        monkeypatch.setenv("OPENAI_MODELS", "gpt-4o,invalid-model,gpt-4o-mini")
+
+        config = Config.load()
+        models = config.get_available_openai_models()
+
+        # 유효한 2개 모델만 반환되어야 함
+        assert len(models) == 2
+        assert "GPT-4o (최고 품질)" in models
+        assert "GPT-4o Mini (추천 - 가성비)" in models
+
+    def test_get_available_openai_models_empty_string(self, monkeypatch):
+        """OPENAI_MODELS가 빈 문자열인 경우 전체 모델 반환 테스트"""
+        monkeypatch.setenv("OPENAI_MODELS", "")
+
+        config = Config.load()
+        models = config.get_available_openai_models()
+
+        # 전체 5개 모델이 반환되어야 함
+        assert len(models) == 5
+
+    def test_get_available_openai_models_all_invalid(self, monkeypatch):
+        """OPENAI_MODELS에 모두 유효하지 않은 모델인 경우 빈 딕셔너리 반환 테스트"""
+        monkeypatch.setenv("OPENAI_MODELS", "invalid-1,invalid-2")
+
+        config = Config.load()
+        models = config.get_available_openai_models()
+
+        # 빈 딕셔너리가 반환되어야 함
+        assert len(models) == 0
+        assert models == {}

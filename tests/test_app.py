@@ -134,6 +134,14 @@ class TestSetupSidebarOpenAI:
         """Config mock"""
         with patch('app.config') as mock_cfg:
             mock_cfg.DEFAULT_MODEL = "gpt-4o-mini"
+            # get_available_openai_models() mock 추가
+            mock_cfg.get_available_openai_models.return_value = {
+                "GPT-4o Mini (추천 - 가성비)": "gpt-4o-mini",
+                "GPT-4o (최고 품질)": "gpt-4o",
+                "GPT-4 Turbo": "gpt-4-turbo",
+                "GPT-4": "gpt-4",
+                "GPT-3.5 Turbo (빠름)": "gpt-3.5-turbo"
+            }
             yield mock_cfg
 
     def test_openai_returns_model_and_options(self, mock_streamlit, mock_config):
@@ -346,6 +354,14 @@ class TestSetupSidebarEdgeCases:
         """Config mock"""
         with patch('app.config') as mock_cfg:
             mock_cfg.DEFAULT_MODEL = "gpt-4o-mini"
+            # get_available_openai_models() mock 추가
+            mock_cfg.get_available_openai_models.return_value = {
+                "GPT-4o Mini (추천 - 가성비)": "gpt-4o-mini",
+                "GPT-4o (최고 품질)": "gpt-4o",
+                "GPT-4 Turbo": "gpt-4-turbo",
+                "GPT-4": "gpt-4",
+                "GPT-3.5 Turbo (빠름)": "gpt-3.5-turbo"
+            }
             yield mock_cfg
 
     def test_openai_unknown_default_model(self, mock_streamlit, mock_config):

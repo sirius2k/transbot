@@ -62,6 +62,15 @@ class Config:
         "gpt-3.5-turbo"
     ]
 
+    # 모델 표시명 매핑
+    _MODEL_DISPLAY_NAMES = {
+        "gpt-4o": "GPT-4o (최고 품질)",
+        "gpt-4o-mini": "GPT-4o Mini (추천 - 가성비)",
+        "gpt-4-turbo": "GPT-4 Turbo",
+        "gpt-4": "GPT-4",
+        "gpt-3.5-turbo": "GPT-3.5 Turbo (빠름)"
+    }
+
     # 지원하는 레이아웃 모드
     _SUPPORTED_LAYOUTS = ["centered", "wide"]
 
@@ -95,6 +104,9 @@ class Config:
         self.AZURE_OPENAI_ENDPOINT: Optional[str] = None
         self.AZURE_OPENAI_API_VERSION: str = self._DEFAULT_AZURE_API_VERSION
         self.AZURE_DEPLOYMENTS: Optional[str] = None
+
+        # OpenAI 모델 필터링 설정
+        self.OPENAI_MODELS: Optional[str] = None
 
         # Langfuse 설정
         self.LANGFUSE_PUBLIC_KEY: Optional[str] = None
@@ -203,6 +215,9 @@ class Config:
             cls._DEFAULT_AZURE_API_VERSION
         )
         config.AZURE_DEPLOYMENTS = os.getenv("AZURE_DEPLOYMENTS")
+
+        # OpenAI 모델 필터링 설정
+        config.OPENAI_MODELS = os.getenv("OPENAI_MODELS")
 
         # Langfuse 설정
         config.LANGFUSE_PUBLIC_KEY = os.getenv("LANGFUSE_PUBLIC_KEY")
@@ -446,3 +461,37 @@ class Config:
                 result[model.strip()] = deployment.strip()
 
         return result
+
+    def get_available_openai_models(self) -> dict[str, str]:
+        """사용 가능한 OpenAI 모델 목록을 반환합니다.
+
+        OPENAI_MODELS 환경 변수가 설정된 경우 해당 모델만 반환하고,
+        설정되지 않은 경우 전체 지원 모델을 반환합니다.
+
+        Returns:
+            {표시명: 모델ID} 형식의 딕셔너리
+            예: {"GPT-4o Mini (추천 - 가성비)": "gpt-4o-mini", ...}
+        """
+        # 환경 변수로 지정된 모델 목록 (없으면 전체)
+        if self.OPENAI_MODELS:
+            # 쉼표로 구분된 모델 목록 파싱
+            specified_models = [
+                model.strip()
+                for model in self.OPENAI_MODELS.split(",")
+                if model.strip()
+            ]
+            # 지원 모델 중에서 필터링
+            available_models = [
+                model for model in specified_models
+                if model in self._SUPPORTED_MODELS
+            ]
+        else:
+            # 환경 변수가 없으면 전체 모델 사용
+            available_models = self._SUPPORTED_MODELS
+
+        # {표시명: 모델ID} 딕셔너리 생성
+        return {
+            self._MODEL_DISPLAY_NAMES[model]: model
+            for model in available_models
+            if model in self._MODEL_DISPLAY_NAMES
+        }

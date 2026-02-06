@@ -276,38 +276,150 @@ class TestTranslateMultiStyle:
         assert len(result["conversational"]["alternatives"]) == 2
 
 
-class TestAutoSelectStyles:
-    """자동 스타일 선택 테스트"""
+class TestTranslateEnglishToKorean:
+    """영어→한국어 번역 스타일 테스트"""
 
-    def test_auto_select_default_styles(self, style_translator):
-        """기본 스타일 선택 테스트 (비즈니스 키워드 없음)"""
-        result = style_translator.auto_select_styles_for_short_text("안녕하세요!")
+    def test_translate_en_to_ko_conversational(self, style_translator, mock_openai_client):
+        """영→한 자연스러운 구어체 번역 테스트"""
+        mock_openai_client.chat.completions.create.return_value.choices[0].message.content = "안녕, 어떻게 지내?"
 
-        assert len(result) == 2
-        assert StyleTranslator.STYLE_CONVERSATIONAL in result
-        assert StyleTranslator.STYLE_CONCISE in result
+        result = style_translator.translate_single_style(
+            text="Hey, how's it going?",
+            style=StyleTranslator.STYLE_CONVERSATIONAL,
+            source_lang="English",
+            target_lang="Korean"
+        )
 
-    def test_auto_select_with_business_keyword(self, style_translator):
-        """비즈니스 키워드 감지 시 스타일 선택 테스트"""
-        result = style_translator.auto_select_styles_for_short_text("회의 일정을 확인해주세요.")
+        assert result == "안녕, 어떻게 지내?"
 
-        assert len(result) == 3
-        assert StyleTranslator.STYLE_CONVERSATIONAL in result
-        assert StyleTranslator.STYLE_CONCISE in result
-        assert StyleTranslator.STYLE_BUSINESS in result
+        # API 호출 시 한국어 지침이 사용되었는지 확인
+        call_args = mock_openai_client.chat.completions.create.call_args
+        system_message = call_args[1]['messages'][0]['content']
+        assert "구어체 한국어" in system_message
 
-    def test_auto_select_multiple_keywords(self, style_translator):
-        """여러 비즈니스 키워드 테스트"""
-        business_texts = [
-            "보고서 작성",
-            "프로젝트 진행",
-            "업무 일정",
-            "회의 참석"
+    def test_translate_en_to_ko_literal(self, style_translator, mock_openai_client):
+        """영→한 직역 번역 테스트"""
+        mock_openai_client.chat.completions.create.return_value.choices[0].message.content = "나는 행복하다."
+
+        result = style_translator.translate_single_style(
+            text="I am happy.",
+            style=StyleTranslator.STYLE_LITERAL,
+            source_lang="English",
+            target_lang="Korean"
+        )
+
+        assert result == "나는 행복하다."
+
+        # 직역 지침 확인
+        call_args = mock_openai_client.chat.completions.create.call_args
+        system_message = call_args[1]['messages'][0]['content']
+        assert "직역" in system_message
+
+    def test_translate_en_to_ko_business(self, style_translator, mock_openai_client):
+        """영→한 비즈니스 번역 테스트"""
+        mock_openai_client.chat.completions.create.return_value.choices[0].message.content = "문의해 주셔서 감사합니다."
+
+        result = style_translator.translate_single_style(
+            text="Thank you for your inquiry.",
+            style=StyleTranslator.STYLE_BUSINESS,
+            source_lang="English",
+            target_lang="Korean"
+        )
+
+        assert result == "문의해 주셔서 감사합니다."
+
+    def test_translate_en_to_ko_formal(self, style_translator, mock_openai_client):
+        """영→한 공식/문서용 번역 테스트"""
+        mock_openai_client.chat.completions.create.return_value.choices[0].message.content = "귀하의 신청서를 수령하였음을 확인합니다."
+
+        result = style_translator.translate_single_style(
+            text="We hereby acknowledge receipt of your application.",
+            style=StyleTranslator.STYLE_FORMAL,
+            source_lang="English",
+            target_lang="Korean"
+        )
+
+        assert result == "귀하의 신청서를 수령하였음을 확인합니다."
+
+    def test_translate_en_to_ko_concise(self, style_translator, mock_openai_client):
+        """영→한 간결하게 번역 테스트"""
+        mock_openai_client.chat.completions.create.return_value.choices[0].message.content = "알겠습니다."
+
+        result = style_translator.translate_single_style(
+            text="I understand what you're saying.",
+            style=StyleTranslator.STYLE_CONCISE,
+            source_lang="English",
+            target_lang="Korean"
+        )
+
+        assert result == "알겠습니다."
+
+    def test_translate_multi_style_en_to_ko(self, style_translator, mock_openai_client):
+        """영→한 다중 스타일 동시 번역 테스트"""
+        responses = ["안녕!", "안녕하세요.", "안녕하십니까."]
+        mock_openai_client.chat.completions.create.side_effect = [
+            Mock(choices=[Mock(message=Mock(content=resp))]) for resp in responses
         ]
 
-        for text in business_texts:
-            result = style_translator.auto_select_styles_for_short_text(text)
-            assert StyleTranslator.STYLE_BUSINESS in result
+        styles = [
+            StyleTranslator.STYLE_CONVERSATIONAL,
+            StyleTranslator.STYLE_BUSINESS,
+            StyleTranslator.STYLE_FORMAL
+        ]
+
+        result = style_translator.translate_multi_style(
+            text="Hello",
+            styles=styles,
+            source_lang="English",
+            target_lang="Korean"
+        )
+
+        assert len(result) == 3
+        assert "conversational" in result
+        assert "business" in result
+        assert "formal" in result
+
+    def test_translate_target_lang_variations(self, style_translator, mock_openai_client):
+        """target_lang의 다양한 표기 테스트 (Korean, 한국어)"""
+        mock_openai_client.chat.completions.create.return_value.choices[0].message.content = "안녕하세요"
+
+        # "Korean" 표기
+        result1 = style_translator.translate_single_style(
+            text="Hello",
+            style=StyleTranslator.STYLE_BUSINESS,
+            source_lang="English",
+            target_lang="Korean"
+        )
+
+        # "한국어" 표기
+        result2 = style_translator.translate_single_style(
+            text="Hello",
+            style=StyleTranslator.STYLE_BUSINESS,
+            source_lang="English",
+            target_lang="한국어"
+        )
+
+        # 두 표기 모두 영→한 지침 사용
+        assert result1 == "안녕하세요"
+        assert result2 == "안녕하세요"
+
+
+class TestStyleInstructionsEnToKo:
+    """영→한 스타일 지침 상수 테스트"""
+
+    def test_style_instructions_en_to_ko_complete(self):
+        """영→한 스타일 지침 완전성 테스트"""
+        instructions = StyleTranslator.STYLE_INSTRUCTIONS_EN_TO_KO
+
+        assert "conversational" in instructions
+        assert "business" in instructions
+        assert "formal" in instructions
+        assert "literal" in instructions
+        assert "concise" in instructions
+
+        # 지침이 한국어로 작성되어 있는지 확인
+        assert "한국어" in instructions["conversational"]
+        assert "직역" in instructions["literal"]
 
 
 class TestGenerateAlternatives:
