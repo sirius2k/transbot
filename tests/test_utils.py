@@ -1,7 +1,7 @@
 """
 utils.py의 핵심 함수들에 대한 단위 테스트
 """
-from utils import detect_language, count_tokens, strip_markdown
+from utils import detect_language, count_tokens, strip_markdown, count_sentences, is_short_text
 
 
 class TestDetectLanguage:
@@ -186,3 +186,107 @@ class TestStripMarkdown:
         text = "This is plain text with no markdown."
         result = strip_markdown(text)
         assert result == text
+
+
+class TestCountSentences:
+    """문장 수 계산 함수 테스트"""
+
+    def test_count_sentences_single(self):
+        """단일 문장 카운트 테스트"""
+        result = count_sentences("Hello world.")
+        assert result == 1
+
+    def test_count_sentences_multiple(self):
+        """다중 문장 카운트 테스트"""
+        result = count_sentences("Hello. How are you? I am fine.")
+        assert result == 3
+
+    def test_count_sentences_no_punctuation(self):
+        """문장 부호 없는 텍스트 테스트"""
+        result = count_sentences("Hello world")
+        assert result == 1
+
+    def test_count_sentences_korean(self):
+        """한국어 문장 카운트 테스트"""
+        result = count_sentences("안녕하세요. 오늘 날씨가 좋네요!")
+        assert result == 2
+
+    def test_count_sentences_empty(self):
+        """빈 문자열 테스트"""
+        result = count_sentences("")
+        assert result == 0
+
+    def test_count_sentences_whitespace_only(self):
+        """공백만 있는 문자열 테스트"""
+        result = count_sentences("   \n\t  ")
+        assert result == 0
+
+    def test_count_sentences_consecutive_punctuation(self):
+        """연속된 문장 부호 테스트"""
+        result = count_sentences("What?! Really?! Amazing!")
+        assert result == 3
+
+    def test_count_sentences_mixed_punctuation(self):
+        """다양한 문장 부호 혼합 테스트"""
+        result = count_sentences("Hello. How are you? I'm fine! Great.")
+        assert result == 4
+
+    def test_count_sentences_korean_period(self):
+        """한국어 마침표(。) 테스트"""
+        result = count_sentences("안녕하세요。반갑습니다。")
+        assert result == 2
+
+    def test_count_sentences_long_text(self):
+        """긴 텍스트 테스트"""
+        text = "First sentence. Second sentence. Third sentence. Fourth sentence. Fifth sentence."
+        result = count_sentences(text)
+        assert result == 5
+
+
+class TestIsShortText:
+    """짧은 텍스트 판단 함수 테스트"""
+
+    def test_is_short_text_true(self):
+        """짧은 텍스트 판단 (True) 테스트"""
+        result = is_short_text("Hello. How are you?")  # 2 sentences
+        assert result is True
+
+    def test_is_short_text_false(self):
+        """긴 텍스트 판단 (False) 테스트"""
+        result = is_short_text("One. Two. Three. Four.")  # 4 sentences
+        assert result is False
+
+    def test_is_short_text_boundary(self):
+        """경계값 (정확히 3문장) 테스트"""
+        result = is_short_text("One. Two. Three.")  # 3 sentences
+        assert result is False  # 3 >= 3, so False
+
+    def test_is_short_text_custom_threshold(self):
+        """커스텀 threshold 테스트"""
+        text = "One. Two. Three."  # 3 sentences
+        assert is_short_text(text, threshold=3) is False
+        assert is_short_text(text, threshold=4) is True
+        assert is_short_text(text, threshold=2) is False
+
+    def test_is_short_text_empty(self):
+        """빈 텍스트 테스트"""
+        result = is_short_text("")
+        assert result is True  # 0 < 3
+
+    def test_is_short_text_single_sentence(self):
+        """단일 문장 테스트"""
+        result = is_short_text("Hello world!")
+        assert result is True
+
+    def test_is_short_text_exactly_threshold(self):
+        """정확히 threshold 문장 테스트"""
+        text = "A. B. C. D. E."  # 5 sentences
+        assert is_short_text(text, threshold=5) is False
+        assert is_short_text(text, threshold=6) is True
+
+    def test_is_short_text_korean(self):
+        """한국어 텍스트 테스트"""
+        short_text = "안녕하세요. 반갑습니다."  # 2 sentences
+        long_text = "안녕하세요. 반갑습니다. 오늘 날씨가 좋네요. 기분이 좋습니다."  # 4 sentences
+        assert is_short_text(short_text) is True
+        assert is_short_text(long_text) is False

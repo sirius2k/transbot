@@ -88,3 +88,61 @@ def strip_markdown(text: str) -> str:
     text = _MARKDOWN_QUOTE_PATTERN.sub('', text)
     text = _MARKDOWN_HORIZONTAL_RULE_PATTERN.sub('', text)
     return text.strip()
+
+
+# ============================================================================
+# 문장 수 감지 함수
+# ============================================================================
+
+def count_sentences(text: str) -> int:
+    """텍스트의 문장 수를 계산합니다.
+
+    문장 종결 부호 (`.`, `!`, `?`, `。`)를 기준으로 문장을 분리하고 개수를 세어 반환합니다.
+
+    Args:
+        text: 분석할 텍스트
+
+    Returns:
+        문장 수 (0 이상의 정수)
+
+    Examples:
+        >>> count_sentences("Hello. How are you?")
+        2
+        >>> count_sentences("안녕하세요!")
+        1
+        >>> count_sentences("")
+        0
+    """
+    if not text or not text.strip():
+        return 0
+
+    # 문장 종결 부호로 분리 (영어: . ! ?, 한국어: . ! ? 。)
+    sentences = re.split(r'[.!?。]+', text)
+
+    # 빈 문자열 제거
+    sentences = [s.strip() for s in sentences if s.strip()]
+
+    return len(sentences)
+
+
+def is_short_text(text: str, threshold: int = 3) -> bool:
+    """텍스트가 짧은지 판단합니다 (문장 수 기준).
+
+    Args:
+        text: 분석할 텍스트
+        threshold: 짧은 텍스트 기준 (기본값: 3문장)
+
+    Returns:
+        True if 문장 수 < threshold, False otherwise
+
+    Examples:
+        >>> is_short_text("Hello. How are you?")  # 2 sentences
+        True
+        >>> is_short_text("One. Two. Three. Four.")  # 4 sentences
+        False
+        >>> is_short_text("One. Two. Three.", threshold=3)  # 3 sentences
+        False
+        >>> is_short_text("One. Two. Three.", threshold=4)  # 3 sentences
+        True
+    """
+    return count_sentences(text) < threshold
