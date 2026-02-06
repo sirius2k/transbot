@@ -1,6 +1,6 @@
 """다양한 스타일로 번역을 생성하는 모듈
 
-이 모듈은 한국어→영어 번역 시 다양한 번역 스타일(구어체, 비즈니스, 공식, 원문 유지, 간결)을
+이 모듈은 양방향 번역(한국어↔영어) 시 다양한 번역 스타일(구어체, 비즈니스, 공식, 직역, 간결)을
 제공하는 StyleTranslator 클래스를 포함합니다.
 """
 
@@ -29,12 +29,22 @@ class StyleTranslator:
         STYLE_CONCISE: "✂️ 간결하게"
     }
 
+    # 한국어→영어 번역을 위한 스타일 지침
     STYLE_INSTRUCTIONS = {
         STYLE_CONVERSATIONAL: "Use natural, conversational English as if speaking with a friend.",
         STYLE_BUSINESS: "Use standard business English, professional but not overly formal.",
         STYLE_FORMAL: "Use formal, official English suitable for documents and reports.",
         STYLE_LITERAL: "Translate literally, preserving the original structure and meaning as much as possible.",
         STYLE_CONCISE: "Translate concisely, conveying only the core message."
+    }
+
+    # 영어→한국어 번역을 위한 스타일 지침
+    STYLE_INSTRUCTIONS_EN_TO_KO = {
+        STYLE_CONVERSATIONAL: "자연스러운 구어체 한국어로 번역하세요. 친구와 대화하듯이 편안한 말투를 사용합니다.",
+        STYLE_BUSINESS: "표준 비즈니스 한국어로 번역하세요. 전문적이지만 지나치게 격식을 차리지 않습니다.",
+        STYLE_FORMAL: "공식적이고 격식 있는 한국어로 번역하세요. 문서나 보고서에 적합한 표현을 사용합니다.",
+        STYLE_LITERAL: "원문의 구조와 의미를 최대한 보존하여 직역하세요.",
+        STYLE_CONCISE: "핵심 메시지만 전달하는 간결한 한국어로 번역하세요."
     }
 
     def __init__(
@@ -89,9 +99,19 @@ class StyleTranslator:
             if custom_instruction:
                 style_instruction = custom_instruction
             else:
-                style_instruction = self.STYLE_INSTRUCTIONS.get(
+                # 번역 방향에 따라 적절한 스타일 지침 선택
+                if target_lang == "Korean" or target_lang == "한국어":
+                    # 영→한 번역
+                    instructions_dict = self.STYLE_INSTRUCTIONS_EN_TO_KO
+                    default_style = self.STYLE_BUSINESS
+                else:
+                    # 한→영 번역 (기본값)
+                    instructions_dict = self.STYLE_INSTRUCTIONS
+                    default_style = self.STYLE_BUSINESS
+
+                style_instruction = instructions_dict.get(
                     style,
-                    self.STYLE_INSTRUCTIONS[self.STYLE_BUSINESS]  # 기본값
+                    instructions_dict[default_style]  # 기본값
                 )
 
             # 고유명사 유지 옵션
@@ -218,39 +238,6 @@ Only respond with the translation, nothing else."""
                 results[style] = f"[{style} 번역 실패]"
 
         return results
-
-    def auto_select_styles_for_short_text(self, text: str) -> List[str]:
-        """짧은 텍스트에 적합한 스타일 자동 선택
-
-        Args:
-            text: 분석할 텍스트
-
-        Returns:
-            추천 스타일 리스트 (2-3개)
-        """
-        # 간단한 휴리스틱: 대화체는 구어체 + 간결하게 추천
-        # 향후 AI 기반 분석으로 개선 가능
-
-        # 기본 추천
-        recommended = [
-            self.STYLE_CONVERSATIONAL,
-            self.STYLE_CONCISE
-        ]
-
-        # 비즈니스 키워드 감지 시 비즈니스 스타일 추가
-        business_keywords = ["회의", "보고", "프로젝트", "일정", "업무"]
-        if any(keyword in text for keyword in business_keywords):
-            recommended.append(self.STYLE_BUSINESS)
-        else:
-            # 일반 대화는 구어체 + 간결하게만
-            pass
-
-        logger.info(
-            "자동 스타일 선택 완료",
-            extra={"recommended_styles": recommended}
-        )
-
-        return recommended
 
     def _generate_alternatives(
         self,
