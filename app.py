@@ -487,6 +487,13 @@ def setup_sidebar(provider: Literal["openai", "azure"]) -> tuple[str, dict[str, 
                 help="예: \"유머러스한 톤으로 번역해주세요\""
             )
 
+            # 스타일 재생성 버튼 (긴 텍스트만)
+            if st.sidebar.button("🔄 스타일 재생성", use_container_width=True):
+                if not selected_styles:
+                    st.sidebar.error("⚠️ 스타일을 하나 이상 선택해주세요.")
+                else:
+                    regenerate_multi_style_translation()
+
     st.sidebar.markdown("---")
 
     # 정보 및 도움말 섹션
@@ -823,15 +830,45 @@ def handle_translation(
                 # 다중 스타일 번역 수행
                 preserve_proper_nouns = st.session_state.get("preserve_proper_nouns", False)
                 include_alternatives = st.session_state.get("include_alternatives", False)
+                custom_instruction = st.session_state.get("custom_style_instruction", "")
 
-                multi_style_results = style_translator.translate_multi_style(
-                    text=input_text,
-                    styles=selected_styles,
-                    source_lang=source_lang,
-                    target_lang=target_lang,
-                    preserve_proper_nouns=preserve_proper_nouns,
-                    include_alternatives=include_alternatives
-                )
+                # 커스텀 지침이 있으면 각 스타일마다 개별 번역
+                if custom_instruction.strip():
+                    multi_style_results = {}
+                    for style in selected_styles:
+                        translation = style_translator.translate_single_style(
+                            text=input_text,
+                            style=style,
+                            source_lang=source_lang,
+                            target_lang=target_lang,
+                            preserve_proper_nouns=preserve_proper_nouns,
+                            custom_instruction=custom_instruction
+                        )
+
+                        if include_alternatives:
+                            alternatives = style_translator._generate_alternatives(
+                                text=input_text,
+                                base_translation=translation,
+                                style=style,
+                                source_lang=source_lang,
+                                target_lang=target_lang
+                            )
+                            multi_style_results[style] = {
+                                "primary": translation,
+                                "alternatives": alternatives
+                            }
+                        else:
+                            multi_style_results[style] = translation
+                else:
+                    # 일반 다중 스타일 번역
+                    multi_style_results = style_translator.translate_multi_style(
+                        text=input_text,
+                        styles=selected_styles,
+                        source_lang=source_lang,
+                        target_lang=target_lang,
+                        preserve_proper_nouns=preserve_proper_nouns,
+                        include_alternatives=include_alternatives
+                    )
 
                 # 결과 저장
                 st.session_state.multi_style_results = multi_style_results
@@ -841,6 +878,106 @@ def handle_translation(
 
         except Exception as e:
             st.error(f"번역 중 오류가 발생했습니다: {str(e)}")
+
+
+def regenerate_multi_style_translation() -> None:
+    """선택된 스타일로 다중 스타일 번역을 재생성합니다.
+
+    사용자가 스타일 옵션을 변경한 후 재생성 버튼을 클릭했을 때 호출됩니다.
+    """
+    # 번역 결과가 없으면 에러
+    if not st.session_state.translation_result:
+        st.error("먼저 번역을 수행해주세요.")
+        return
+
+    # 한국어→영어가 아니면 에러
+    source_lang = st.session_state.source_language
+    target_lang = st.session_state.target_language
+    if source_lang != "Korean" or target_lang != "English":
+        st.error("다중 스타일 번역은 한국어→영어에서만 지원됩니다.")
+        return
+
+    # 입력 텍스트 가져오기
+    input_text = st.session_state.input_text
+    if not input_text:
+        st.error("입력 텍스트가 없습니다.")
+        return
+
+    # 선택된 스타일 가져오기
+    selected_styles = st.session_state.selected_styles
+    if not selected_styles:
+        st.error("최소 하나의 스타일을 선택해주세요.")
+        return
+
+    # API 클라이언트와 모델 정보 가져오기
+    client = st.session_state.get("api_client")
+    model = st.session_state.get("selected_model")
+    if not client or not model:
+        st.error("API 클라이언트 정보를 찾을 수 없습니다.")
+        return
+
+    with st.spinner("스타일 재생성 중..."):
+        try:
+            from components.style_translator import StyleTranslator
+
+            # StyleTranslator 인스턴스 생성
+            style_translator = StyleTranslator(
+                client=client,
+                model=model,
+                temperature=0.3,
+                max_tokens=2000,
+                timeout=30
+            )
+
+            # 옵션 가져오기
+            preserve_proper_nouns = st.session_state.get("preserve_proper_nouns", False)
+            include_alternatives = st.session_state.get("include_alternatives", False)
+            custom_instruction = st.session_state.get("custom_style_instruction", "")
+
+            # 커스텀 지침이 있으면 모든 스타일에 적용
+            if custom_instruction.strip():
+                multi_style_results = {}
+                for style in selected_styles:
+                    translation = style_translator.translate_single_style(
+                        text=input_text,
+                        style=style,
+                        source_lang=source_lang,
+                        target_lang=target_lang,
+                        preserve_proper_nouns=preserve_proper_nouns,
+                        custom_instruction=custom_instruction
+                    )
+
+                    if include_alternatives:
+                        alternatives = style_translator._generate_alternatives(
+                            text=input_text,
+                            base_translation=translation,
+                            style=style,
+                            source_lang=source_lang,
+                            target_lang=target_lang
+                        )
+                        multi_style_results[style] = {
+                            "primary": translation,
+                            "alternatives": alternatives
+                        }
+                    else:
+                        multi_style_results[style] = translation
+            else:
+                # 일반 다중 스타일 번역
+                multi_style_results = style_translator.translate_multi_style(
+                    text=input_text,
+                    styles=selected_styles,
+                    source_lang=source_lang,
+                    target_lang=target_lang,
+                    preserve_proper_nouns=preserve_proper_nouns,
+                    include_alternatives=include_alternatives
+                )
+
+            # 결과 저장
+            st.session_state.multi_style_results = multi_style_results
+            st.success("✅ 스타일 재생성 완료!")
+
+        except Exception as e:
+            st.error(f"스타일 재생성 중 오류가 발생했습니다: {str(e)}")
 
 
 # ============================================================================
@@ -867,6 +1004,9 @@ def main() -> None:
     # 4. 사이드바 설정 및 번역 관리자 초기화
     selected_model_or_deployment, _ = setup_sidebar(provider)
 
+    # FEATURE-023: API 클라이언트 및 모델 정보를 session_state에 저장 (스타일 재생성 버튼용)
+    st.session_state.api_client = client
+
     # Factory 패턴으로 TranslationManager 생성
     from components.translation import TranslationManagerFactory
 
@@ -886,6 +1026,8 @@ def main() -> None:
             deployment=selected_model_or_deployment,
             model=model_name  # 실제 모델명 전달
         )
+        # FEATURE-023: 실제 모델명 저장
+        st.session_state.selected_model = model_name if model_name else selected_model_or_deployment
     else:
         # OpenAI: model 파라미터 전달
         translation_manager = TranslationManagerFactory.create(
@@ -893,6 +1035,8 @@ def main() -> None:
             client=client,
             model=selected_model_or_deployment
         )
+        # FEATURE-023: 모델명 저장
+        st.session_state.selected_model = selected_model_or_deployment
 
     # 5. 입력 영역 렌더링
     stats_placeholder = render_input_area()
