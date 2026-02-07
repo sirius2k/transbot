@@ -106,18 +106,21 @@ class TranslationManager:
         )
 
         try:
+            # messages 배열 준비 (Langfuse input으로 사용)
+            messages = [
+                {
+                    "role": "system",
+                    "content": f"You are a professional translator. Translate the following {source} text to {target}. IMPORTANT: Preserve all Markdown formatting (bold, italic, headings, lists, links, code blocks, blockquotes, tables, etc.) in the translation. Only respond with the translation, nothing else."  # noqa: E501
+                },
+                {
+                    "role": "user",
+                    "content": text
+                }
+            ]
+
             response = self.client.chat.completions.create(
                 model=self.model,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": f"You are a professional translator. Translate the following {source} text to {target}. IMPORTANT: Preserve all Markdown formatting (bold, italic, headings, lists, links, code blocks, blockquotes, tables, etc.) in the translation. Only respond with the translation, nothing else."  # noqa: E501
-                    },
-                    {
-                        "role": "user",
-                        "content": text
-                    }
-                ],
+                messages=messages,
                 temperature=self.temperature,
                 max_tokens=self.max_tokens,
                 timeout=self.timeout
@@ -126,8 +129,9 @@ class TranslationManager:
             input_tokens = response.usage.prompt_tokens
             output_tokens = response.usage.completion_tokens
 
-            # Langfuse observation에 output, model, usage 정보 업데이트
+            # Langfuse observation에 input, output, model, usage 정보 업데이트
             langfuse_context.update_current_observation(
+                input=messages,  # Prompt 표시를 위해 messages 추가
                 output=result,
                 model=self.model,
                 usage={
@@ -323,18 +327,21 @@ class AzureTranslationManager(TranslationManager):
         )
 
         try:
+            # messages 배열 준비 (Langfuse input으로 사용)
+            messages = [
+                {
+                    "role": "system",
+                    "content": f"You are a professional translator. Translate the following {source} text to {target}. IMPORTANT: Preserve all Markdown formatting (bold, italic, headings, lists, links, code blocks, blockquotes, tables, etc.) in the translation. Only respond with the translation, nothing else."  # noqa: E501
+                },
+                {
+                    "role": "user",
+                    "content": text
+                }
+            ]
+
             response = self.client.chat.completions.create(
                 model=self.deployment,  # Azure는 deployment 이름 사용
-                messages=[
-                    {
-                        "role": "system",
-                        "content": f"You are a professional translator. Translate the following {source} text to {target}. IMPORTANT: Preserve all Markdown formatting (bold, italic, headings, lists, links, code blocks, blockquotes, tables, etc.) in the translation. Only respond with the translation, nothing else."  # noqa: E501
-                    },
-                    {
-                        "role": "user",
-                        "content": text
-                    }
-                ],
+                messages=messages,
                 temperature=self.temperature,
                 max_tokens=self.max_tokens,
                 timeout=self.timeout
@@ -343,8 +350,9 @@ class AzureTranslationManager(TranslationManager):
             input_tokens = response.usage.prompt_tokens
             output_tokens = response.usage.completion_tokens
 
-            # Langfuse observation에 output, model, usage 정보 업데이트
+            # Langfuse observation에 input, output, model, usage 정보 업데이트
             langfuse_context.update_current_observation(
+                input=messages,  # Prompt 표시를 위해 messages 추가
                 output=result,
                 model=self.model,
                 usage={
