@@ -646,8 +646,9 @@ def render_translation_result() -> None:
                 # 스타일 레이블 가져오기
                 style_label = StyleTranslator.STYLE_LABELS.get(style_key, style_key)
 
-                # 스타일 제목 표시
-                st.markdown(f"### {style_label}")
+                # 스타일 제목 표시 (원문 유지만 선택한 경우 제외)
+                if not is_single_literal:
+                    st.markdown(f"### {style_label}")
 
                 # 결과가 딕셔너리인 경우 (include_alternatives=True)
                 if isinstance(style_result, dict):
