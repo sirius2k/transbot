@@ -638,49 +638,49 @@ def render_translation_result() -> None:
             # 다중 스타일인 경우만 헤더 표시 (원문 유지만 선택한 경우 제외)
             is_single_literal = (len(multi_results) == 1 and StyleTranslator.STYLE_LITERAL in multi_results)
 
+            # 원문 유지만 선택한 경우 다중 스타일 섹션 전체를 표시하지 않음
             if not is_single_literal:
                 st.subheader("🎨 다양한 스타일 번역")
 
-            # 각 스타일별로 세로 목록 표시
-            for style_key, style_result in multi_results.items():
-                # 스타일 레이블 가져오기
-                style_label = StyleTranslator.STYLE_LABELS.get(style_key, style_key)
+                # 각 스타일별로 세로 목록 표시
+                for style_key, style_result in multi_results.items():
+                    # 스타일 레이블 가져오기
+                    style_label = StyleTranslator.STYLE_LABELS.get(style_key, style_key)
 
-                # 스타일 제목 표시 (원문 유지만 선택한 경우 제외)
-                if not is_single_literal:
+                    # 스타일 제목 표시
                     st.markdown(f"### {style_label}")
 
-                # 결과가 딕셔너리인 경우 (include_alternatives=True)
-                if isinstance(style_result, dict):
-                    primary_translation = style_result.get("primary", "")
-                    alternatives = style_result.get("alternatives", [])
+                    # 결과가 딕셔너리인 경우 (include_alternatives=True)
+                    if isinstance(style_result, dict):
+                        primary_translation = style_result.get("primary", "")
+                        alternatives = style_result.get("alternatives", [])
 
-                    # 주 번역 표시
-                    st.markdown("**주 번역:**")
-                    st.components.v1.html(  # type: ignore
-                        create_copy_button(primary_translation, "📋 복사", f"style_{style_key}"),
-                        height=50
-                    )
-                    st.markdown(primary_translation)
+                        # 주 번역 표시
+                        st.markdown("**주 번역:**")
+                        st.components.v1.html(  # type: ignore
+                            create_copy_button(primary_translation, "📋 복사", f"style_{style_key}"),
+                            height=50
+                        )
+                        st.markdown(primary_translation)
 
-                    # 대안 표현 표시
-                    if alternatives:
-                        st.markdown("**대안 표현:**")
-                        for idx, alt in enumerate(alternatives, 1):
-                            st.markdown(f"{idx}. {alt}")
-                            st.components.v1.html(  # type: ignore
-                                create_copy_button(alt, "📋", f"alt_{style_key}_{idx}"),
-                                height=50
-                            )
-                else:
-                    # 결과가 문자열인 경우 (include_alternatives=False)
-                    st.components.v1.html(  # type: ignore
-                        create_copy_button(style_result, "📋 복사", f"style_{style_key}"),
-                        height=50
-                    )
-                    st.markdown(style_result)
+                        # 대안 표현 표시
+                        if alternatives:
+                            st.markdown("**대안 표현:**")
+                            for idx, alt in enumerate(alternatives, 1):
+                                st.markdown(f"{idx}. {alt}")
+                                st.components.v1.html(  # type: ignore
+                                    create_copy_button(alt, "📋", f"alt_{style_key}_{idx}"),
+                                    height=50
+                                )
+                    else:
+                        # 결과가 문자열인 경우 (include_alternatives=False)
+                        st.components.v1.html(  # type: ignore
+                            create_copy_button(style_result, "📋 복사", f"style_{style_key}"),
+                            height=50
+                        )
+                        st.markdown(style_result)
 
-                st.markdown("")  # 스타일 간 간격
+                    st.markdown("")  # 스타일 간 간격
 
 
 # ============================================================================
