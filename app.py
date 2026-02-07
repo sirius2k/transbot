@@ -376,126 +376,94 @@ def setup_sidebar(provider: Literal["openai", "azure"]) -> tuple[str, dict[str, 
 
     st.sidebar.markdown("---")
 
-    # FEATURE-023: 대화 상황별 번역 옵션
+    # FEATURE-024: 번역 스타일 옵션 개선
     st.sidebar.markdown("#### 🎨 번역 스타일 옵션")
+    st.sidebar.markdown("**번역 스타일 선택** (다중 선택 가능)")
 
-    # 활성화 조건 확인
-    is_translation_completed = st.session_state.get("translation_completed", False)
-    source_lang = st.session_state.get("source_language", "")
-    target_lang = st.session_state.get("target_language", "")
-    is_korean_to_english = (source_lang == "Korean" and target_lang == "English")
+    # StyleTranslator 상수 import
+    from components.style_translator import StyleTranslator
 
-    # 활성화 여부 결정
-    is_style_option_enabled = is_translation_completed and is_korean_to_english
+    # 스타일 선택 체크박스 (기본값: 직역만 선택)
+    # 직역을 최상단에 배치
+    style_literal = st.sidebar.checkbox(
+        StyleTranslator.STYLE_LABELS[StyleTranslator.STYLE_LITERAL],
+        value=True,  # 기본 선택
+        key="style_literal"
+    )
+    style_conversational = st.sidebar.checkbox(
+        StyleTranslator.STYLE_LABELS[StyleTranslator.STYLE_CONVERSATIONAL],
+        value=False,
+        key="style_conversational"
+    )
+    style_business = st.sidebar.checkbox(
+        StyleTranslator.STYLE_LABELS[StyleTranslator.STYLE_BUSINESS],
+        value=False,
+        key="style_business"
+    )
+    style_formal = st.sidebar.checkbox(
+        StyleTranslator.STYLE_LABELS[StyleTranslator.STYLE_FORMAL],
+        value=False,
+        key="style_formal"
+    )
+    style_concise = st.sidebar.checkbox(
+        StyleTranslator.STYLE_LABELS[StyleTranslator.STYLE_CONCISE],
+        value=False,
+        key="style_concise"
+    )
 
-    if not is_style_option_enabled:
-        # 비활성화 상태: 안내 메시지 표시
-        st.sidebar.info(
-            "💡 **한국어→영어 번역 후 활성화됩니다.**\n\n"
-            "다양한 스타일(구어체, 비즈니스, 공식 등)의 번역 결과를 제공합니다."
-        )
-    else:
-        # 활성화 상태: 짧은/긴 텍스트 판별
-        from utils import is_short_text
-        input_text = st.session_state.get("input_text", "")
-        is_short = is_short_text(input_text)
+    # 선택된 스타일들을 session_state에 저장
+    selected_styles = []
+    if style_literal:
+        selected_styles.append(StyleTranslator.STYLE_LITERAL)
+    if style_conversational:
+        selected_styles.append(StyleTranslator.STYLE_CONVERSATIONAL)
+    if style_business:
+        selected_styles.append(StyleTranslator.STYLE_BUSINESS)
+    if style_formal:
+        selected_styles.append(StyleTranslator.STYLE_FORMAL)
+    if style_concise:
+        selected_styles.append(StyleTranslator.STYLE_CONCISE)
 
-        if is_short:
-            # 짧은 텍스트: 안내 메시지만 표시
-            st.sidebar.success(
-                "✨ **짧은 텍스트 감지**\n\n"
-                "AI가 자동으로 여러 스타일의 번역을 생성합니다.\n"
-                "- 자연스러운 구어체\n"
-                "- 간결하게\n"
-                "- (비즈니스 키워드 감지 시) 비즈니스 기본"
-            )
+    st.session_state.selected_styles = selected_styles
+
+    # 최소 하나는 선택해야 함
+    if not selected_styles:
+        st.sidebar.warning("⚠️ 최소 하나의 스타일을 선택해주세요.")
+
+    st.sidebar.markdown("---")
+
+    # 추가 옵션
+    st.sidebar.markdown("**추가 옵션**")
+
+    st.sidebar.checkbox(
+        "🏷️ 고유명사 유지",
+        value=False,
+        key="preserve_proper_nouns",
+        help="인명, 지명, 브랜드명 등을 원문 그대로 유지합니다."
+    )
+
+    st.sidebar.checkbox(
+        "🔄 대안 표현 함께 보기",
+        value=False,
+        key="include_alternatives",
+        help="각 스타일당 2-3개의 대안 표현을 추가로 제공합니다."
+    )
+
+    # 커스텀 스타일 지침
+    _custom_instruction = st.sidebar.text_area(
+        "✍️ 커스텀 스타일 지침 (선택사항)",
+        value="",
+        key="custom_style_instruction",
+        height=100,
+        help="예: \"유머러스한 톤으로 번역해주세요\""
+    )
+
+    # 스타일 재생성 버튼
+    if st.sidebar.button("🔄 스타일 재생성", use_container_width=True):
+        if not selected_styles:
+            st.sidebar.error("⚠️ 스타일을 하나 이상 선택해주세요.")
         else:
-            # 긴 텍스트: 스타일 선택 UI 표시
-            st.sidebar.markdown("**번역 스타일 선택** (다중 선택 가능)")
-
-            # StyleTranslator 상수 import
-            from components.style_translator import StyleTranslator
-
-            # 스타일 선택 체크박스 (기본값: 비즈니스 기본만 선택)
-            style_conversational = st.sidebar.checkbox(
-                StyleTranslator.STYLE_LABELS[StyleTranslator.STYLE_CONVERSATIONAL],
-                value=False,
-                key="style_conversational"
-            )
-            style_business = st.sidebar.checkbox(
-                StyleTranslator.STYLE_LABELS[StyleTranslator.STYLE_BUSINESS],
-                value=True,  # 기본 선택
-                key="style_business"
-            )
-            style_formal = st.sidebar.checkbox(
-                StyleTranslator.STYLE_LABELS[StyleTranslator.STYLE_FORMAL],
-                value=False,
-                key="style_formal"
-            )
-            style_literal = st.sidebar.checkbox(
-                StyleTranslator.STYLE_LABELS[StyleTranslator.STYLE_LITERAL],
-                value=False,
-                key="style_literal"
-            )
-            style_concise = st.sidebar.checkbox(
-                StyleTranslator.STYLE_LABELS[StyleTranslator.STYLE_CONCISE],
-                value=False,
-                key="style_concise"
-            )
-
-            # 선택된 스타일들을 session_state에 저장
-            selected_styles = []
-            if style_conversational:
-                selected_styles.append(StyleTranslator.STYLE_CONVERSATIONAL)
-            if style_business:
-                selected_styles.append(StyleTranslator.STYLE_BUSINESS)
-            if style_formal:
-                selected_styles.append(StyleTranslator.STYLE_FORMAL)
-            if style_literal:
-                selected_styles.append(StyleTranslator.STYLE_LITERAL)
-            if style_concise:
-                selected_styles.append(StyleTranslator.STYLE_CONCISE)
-
-            st.session_state.selected_styles = selected_styles
-
-            # 최소 하나는 선택해야 함
-            if not selected_styles:
-                st.sidebar.warning("⚠️ 최소 하나의 스타일을 선택해주세요.")
-
-            st.sidebar.markdown("---")
-
-            # 추가 옵션
-            st.sidebar.markdown("**추가 옵션**")
-
-            st.sidebar.checkbox(
-                "🏷️ 고유명사 유지",
-                value=False,
-                key="preserve_proper_nouns",
-                help="인명, 지명, 브랜드명 등을 원문 그대로 유지합니다."
-            )
-
-            st.sidebar.checkbox(
-                "🔄 대안 표현 함께 보기",
-                value=False,
-                key="include_alternatives",
-                help="각 스타일당 2-3개의 대안 표현을 추가로 제공합니다."
-            )
-
-            # 커스텀 스타일 지침
-            custom_instruction = st.sidebar.text_area(
-                "✍️ 커스텀 스타일 지침 (선택사항)",
-                value="",
-                key="custom_style_instruction",
-                height=100,
-                help="예: \"유머러스한 톤으로 번역해주세요\""
-            )
-
-            # 스타일 재생성 버튼 (긴 텍스트만)
-            if st.sidebar.button("🔄 스타일 재생성", use_container_width=True):
-                if not selected_styles:
-                    st.sidebar.error("⚠️ 스타일을 하나 이상 선택해주세요.")
-                else:
-                    regenerate_multi_style_translation()
+            regenerate_multi_style_translation()
 
     st.sidebar.markdown("---")
 
@@ -711,7 +679,7 @@ def update_statistics(
     Args:
         input_text: 입력 텍스트
         stats_placeholder: 통계를 표시할 placeholder
-        language_detector: 언어 감지기 인스턴스
+        language_detector: 언어 감지기 ���스턴스
         text_analyzer: 텍스트 분석기 인스턴스
         selected_model: 선택된 모델명
 
@@ -805,79 +773,69 @@ def handle_translation(
             st.session_state.source_language = source_lang
             st.session_state.target_language = target_lang
 
-            # FEATURE-023: 한국어→영어 번역인 경우 다중 스타일 번역 수행
-            if source_lang == "Korean" and target_lang == "English":
-                from components.style_translator import StyleTranslator
-                from utils import is_short_text
+            # FEATURE-024: 양방향 번역(한↔영) 모두 다중 스타일 번역 수행
+            from components.style_translator import StyleTranslator
 
-                # StyleTranslator 인스턴스 생성
-                style_translator = StyleTranslator(
-                    client=translation_manager.client,
-                    model=translation_manager.model,
-                    temperature=0.3,
-                    max_tokens=2000,
-                    timeout=30
-                )
+            # StyleTranslator 인스턴스 생성
+            style_translator = StyleTranslator(
+                client=translation_manager.client,
+                model=translation_manager.model,
+                temperature=0.3,
+                max_tokens=2000,
+                timeout=30
+            )
 
-                # 짧은/긴 텍스트 판별 후 스타일 선택
-                if is_short_text(input_text):
-                    # 짧은 텍스트: 자동 선택
-                    selected_styles = style_translator.auto_select_styles_for_short_text(input_text)
-                else:
-                    # 긴 텍스트: 사용자 선택 (최소 1개 이상)
-                    selected_styles = st.session_state.selected_styles
-                    if not selected_styles:
-                        # 기본값: 비즈니스 스타일
-                        selected_styles = [StyleTranslator.STYLE_BUSINESS]
+            # 사용자가 선택한 스타일 사용 (최소 1개 이상)
+            selected_styles = st.session_state.selected_styles
+            if not selected_styles:
+                # 기본값: 직역 스타일
+                selected_styles = [StyleTranslator.STYLE_LITERAL]
 
-                # 다중 스타일 번역 수행
-                preserve_proper_nouns = st.session_state.get("preserve_proper_nouns", False)
-                include_alternatives = st.session_state.get("include_alternatives", False)
-                custom_instruction = st.session_state.get("custom_style_instruction", "")
+            # 다중 스타일 번역 수행
+            preserve_proper_nouns = st.session_state.get("preserve_proper_nouns", False)
+            include_alternatives = st.session_state.get("include_alternatives", False)
+            custom_instruction = st.session_state.get("custom_style_instruction", "")
 
-                # 커스텀 지침이 있으면 각 스타일마다 개별 번역
-                if custom_instruction.strip():
-                    multi_style_results = {}
-                    for style in selected_styles:
-                        translation = style_translator.translate_single_style(
-                            text=input_text,
-                            style=style,
-                            source_lang=source_lang,
-                            target_lang=target_lang,
-                            preserve_proper_nouns=preserve_proper_nouns,
-                            custom_instruction=custom_instruction
-                        )
-
-                        if include_alternatives:
-                            alternatives = style_translator._generate_alternatives(
-                                text=input_text,
-                                base_translation=translation,
-                                style=style,
-                                source_lang=source_lang,
-                                target_lang=target_lang
-                            )
-                            multi_style_results[style] = {
-                                "primary": translation,
-                                "alternatives": alternatives
-                            }
-                        else:
-                            multi_style_results[style] = translation
-                else:
-                    # 일반 다중 스타일 번역
-                    multi_style_results = style_translator.translate_multi_style(
+            # 커스텀 지침이 있으면 각 스타일마다 개별 번역
+            if custom_instruction.strip():
+                multi_style_results = {}
+                for style in selected_styles:
+                    translation = style_translator.translate_single_style(
                         text=input_text,
-                        styles=selected_styles,
+                        style=style,
                         source_lang=source_lang,
                         target_lang=target_lang,
                         preserve_proper_nouns=preserve_proper_nouns,
-                        include_alternatives=include_alternatives
+                        custom_instruction=custom_instruction
                     )
 
-                # 결과 저장
-                st.session_state.multi_style_results = multi_style_results
+                    if include_alternatives:
+                        alternatives = style_translator._generate_alternatives(
+                            text=input_text,
+                            base_translation=translation,
+                            style=style,
+                            source_lang=source_lang,
+                            target_lang=target_lang
+                        )
+                        multi_style_results[style] = {
+                            "primary": translation,
+                            "alternatives": alternatives
+                        }
+                    else:
+                        multi_style_results[style] = translation
             else:
-                # 영어→한국어는 다중 스타일 미지원
-                st.session_state.multi_style_results = None
+                # 일반 다중 스타일 번역
+                multi_style_results = style_translator.translate_multi_style(
+                    text=input_text,
+                    styles=selected_styles,
+                    source_lang=source_lang,
+                    target_lang=target_lang,
+                    preserve_proper_nouns=preserve_proper_nouns,
+                    include_alternatives=include_alternatives
+                )
+
+            # 결과 저장
+            st.session_state.multi_style_results = multi_style_results
 
         except Exception as e:
             st.error(f"번역 중 오류가 발생했습니다: {str(e)}")
