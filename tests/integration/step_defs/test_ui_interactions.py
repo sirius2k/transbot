@@ -24,7 +24,7 @@ def page_loaded(page: Page):
     page.goto("http://localhost:8501")
     page.wait_for_load_state("networkidle")
     # URL 끝의 슬래시(/) 포함하여 검증
-    expect(page).to_have_url(re.compile(r"http://localhost:8501/?\"), timeout=5000)
+    expect(page).to_have_url(re.compile(r"http://localhost:8501/?"), timeout=5000)
 
 @given('사이드바가 열려 있음')
 def sidebar_opened(page: Page):

@@ -29,6 +29,6 @@ Feature: UI 인터랙션
 
   Scenario: 입력 필드 포커스 및 입력
     When 입력 필드를 클릭
-    And "Test input" 텍스트를 입력
+    And 사용자가 "Test input" 텍스트를 입력
     Then 입력 필드에 "Test input" 텍스트가 표시됨
     And 통계 정보가 실시간으로 표시됨
