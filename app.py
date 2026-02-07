@@ -630,11 +630,16 @@ def render_translation_result() -> None:
         # FEATURE-023: 다중 스타일 번역 결과 표시 (한국어→영어만)
         if st.session_state.multi_style_results:
             st.markdown("---")
-            st.subheader("🎨 다양한 스타일 번역")
 
             from components.style_translator import StyleTranslator
 
             multi_results = st.session_state.multi_style_results
+
+            # 다중 스타일인 경우만 헤더 표시 (원문 유지만 선택한 경우 제외)
+            is_single_literal = (len(multi_results) == 1 and StyleTranslator.STYLE_LITERAL in multi_results)
+
+            if not is_single_literal:
+                st.subheader("🎨 다양한 스타일 번역")
 
             # 각 스타일별로 세로 목록 표시
             for style_key, style_result in multi_results.items():
