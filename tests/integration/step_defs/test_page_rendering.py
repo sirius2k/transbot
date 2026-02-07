@@ -3,6 +3,8 @@ import pytest
 from pytest_bdd import scenarios, given, when, then, parsers
 from playwright.sync_api import Page, expect
 
+pytestmark = pytest.mark.integration
+
 # Feature 파일 로드
 scenarios('../features/TC-001-page-rendering.feature')
 

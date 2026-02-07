@@ -5,7 +5,9 @@
       "Bash(git:*)",
       "Bash(source:*)",
       "Bash(pytest:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(*/venv/bin/python:*)" ,
+      "Bash(*/venv/bin/pytest:*)" 
     ]
   }
 }
