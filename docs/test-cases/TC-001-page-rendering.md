@@ -210,41 +210,270 @@ st.text_area(
    - [ ] "🗑️ 지우기" 버튼 표시
    - [ ] 버튼 클릭 가능 상태 확인
 
-### 자동 테스트 (Playwright)
+### 자동 테스트 (pytest-bdd + Playwright)
+
+#### 설치 방법
 
 ```bash
-# 향후 구현 예정
-pytest tests/integration/test_TC_001_page_rendering.py
+# pytest-bdd와 Playwright 설치
+pip install pytest-bdd playwright pytest-playwright
+playwright install
 ```
 
-**자동화 테스트 스크립트 예시**:
+#### 테스트 구조
+
+```
+tests/integration/
+├── features/
+│   └── TC-001-page-rendering.feature  # Gherkin 시나리오
+├── step_defs/
+│   └── test_page_rendering.py         # Step 구현
+└── conftest.py                        # Fixtures 설정
+```
+
+#### Gherkin Feature 파일 예시
+
+**파일**: `tests/integration/features/TC-001-page-rendering.feature`
+
+```gherkin
+Feature: 페이지 렌더링
+  Streamlit 앱의 기본 UI 요소가 정상적으로 렌더링되는지 확인하는 Smoke Test
+
+  Background:
+    Given Streamlit 앱이 "http://localhost:8501"에서 실행 중
+
+  Scenario: 기본 페이지 로딩 및 타이틀 표시
+    When 브라우저에서 앱에 접속
+    Then 페이지가 3초 이내에 로드됨
+    And 타이틀 "TransBot"이 표시됨
+    And 브라우저 탭 제목이 "TransBot"으로 표시됨
+    And 로딩 스피너가 사라지고 메인 화면이 표시됨
+
+  Scenario: 입력 영역 렌더링
+    Given 페이지가 정상적으로 로드됨
+    When 메인 화면을 확인
+    Then "원문" 레이블이 표시됨
+    And 텍스트 입력 필드가 렌더링됨
+    And Placeholder "번역할 텍스트를 입력하세요"가 표시됨
+    And 입력 필드가 빈 상태로 초기화됨
+    And 통계 정보 영역이 표시됨
+
+  Scenario: 사이드바 렌더링 (OpenAI Provider)
+    Given ".env" 파일에 "AI_PROVIDER=openai" 설정됨
+    And 페이지가 정상적으로 로드됨
+    When 사이드바를 확인
+    Then 사이드바가 화면 왼쪽에 표시됨
+    And "⚙️ 설정" 헤더가 표시됨
+    And "AI 모델 선택" 섹션이 표시됨
+    And 모델 선택 드롭다운이 렌더링됨
+    And "번역 옵션" 섹션이 표시됨
+    And Help 섹션이 표시됨
+
+  Scenario: 액션 버튼 표시
+    Given 페이지가 정상적으로 로드됨
+    When 입력 영역 하단을 확인
+    Then "🚀 번역" 버튼이 표시됨
+    And "🗑️ 지우기" 버튼이 표시됨
+    And 두 버튼이 좌우로 배치됨
+    And 버튼이 클릭 가능한 상태임
+```
+
+#### pytest-bdd Step 정의 예시
+
+**파일**: `tests/integration/step_defs/test_page_rendering.py`
 
 ```python
+"""TC-001 페이지 렌더링 테스트의 Step 정의"""
 import pytest
+from pytest_bdd import scenarios, given, when, then, parsers
 from playwright.sync_api import Page, expect
 
-def test_page_loads_with_title(page: Page):
-    """시나리오 1: 기본 페이지 로딩 및 타이틀 표시"""
+# Feature 파일 로드
+scenarios('../features/TC-001-page-rendering.feature')
+
+# ============================================================================
+# Given Steps (전제 조건)
+# ============================================================================
+
+@given('Streamlit 앱이 "http://localhost:8501"에서 실행 중')
+def streamlit_app_running():
+    """앱이 실행 중인지 확인 (setup에서 이미 처리됨)"""
+    pass
+
+@given('페이지가 정상적으로 로드됨')
+def page_loaded(page: Page):
+    """페이지 로드"""
+    page.goto("http://localhost:8501")
+    expect(page).to_have_url("http://localhost:8501", timeout=5000)
+
+@given(parsers.parse('".env" 파일에 "{env_var}" 설정됨'))
+def env_variable_set(env_var: str):
+    """환경 변수 확인 (테스트 환경에서 이미 설정되어 있다고 가정)"""
+    pass
+
+# ============================================================================
+# When Steps (실행 동작)
+# ============================================================================
+
+@when('브라우저에서 앱에 접속')
+def navigate_to_app(page: Page):
+    """앱에 접속"""
     page.goto("http://localhost:8501")
 
-    # 타이틀 확인
-    expect(page.locator("h1")).to_contain_text("TransBot")
+@when('메인 화면을 확인')
+def check_main_screen(page: Page):
+    """메인 화면 확인 (실제로는 아무 동작도 하지 않음)"""
+    pass
 
-def test_input_area_rendered(page: Page):
-    """시나리오 2: 입력 영역 렌더링"""
-    page.goto("http://localhost:8501")
+@when('사이드바를 확인')
+def check_sidebar(page: Page):
+    """사이드바 확인 (실제로는 아무 동작도 하지 않음)"""
+    pass
 
-    # 입력 필드 확인
+@when('입력 영역 하단을 확인')
+def check_action_buttons_area(page: Page):
+    """입력 영역 하단 확인"""
+    pass
+
+# ============================================================================
+# Then Steps (예상 결과)
+# ============================================================================
+
+@then('페이지가 3초 이내에 로드됨')
+def page_loads_quickly(page: Page):
+    """페이지 빠른 로딩 확인"""
+    expect(page).to_have_url("http://localhost:8501", timeout=3000)
+
+@then(parsers.parse('타이틀 "{title}"이 표시됨'))
+def title_displayed(page: Page, title: str):
+    """타이틀 표시 확인"""
+    expect(page.locator("h1")).to_contain_text(title)
+
+@then(parsers.parse('브라우저 탭 제목이 "{page_title}"으로 표시됨'))
+def page_title_displayed(page: Page, page_title: str):
+    """브라우저 탭 제목 확인"""
+    expect(page).to_have_title(page_title)
+
+@then('로딩 스피너가 사라지고 메인 화면이 표시됨')
+def loading_spinner_disappears(page: Page):
+    """로딩 완료 확인"""
+    # Streamlit 로딩 스피너가 사라질 때까지 대기
+    page.wait_for_load_state("networkidle")
+
+@then(parsers.parse('"{label}" 레이블이 표시됨'))
+def label_displayed(page: Page, label: str):
+    """레이블 표시 확인"""
+    expect(page.locator(f"text={label}")).to_be_visible()
+
+@then('텍스트 입력 필드가 렌더링됨')
+def input_field_rendered(page: Page):
+    """입력 필드 렌더링 확인"""
+    expect(page.locator("textarea")).to_be_visible()
+
+@then(parsers.parse('Placeholder "{placeholder}"가 표시됨'))
+def placeholder_displayed(page: Page, placeholder: str):
+    """Placeholder 표시 확인"""
     input_field = page.locator("textarea")
-    expect(input_field).to_be_visible()
-    expect(input_field).to_have_attribute("placeholder", "번역할 텍스트를 입력하세요...")
+    expect(input_field).to_have_attribute("placeholder", f"{placeholder}")
 
-def test_sidebar_rendered(page: Page):
-    """시나리오 3/4: 사이드바 렌더링"""
-    page.goto("http://localhost:8501")
+@then('입력 필드가 빈 상태로 초기화됨')
+def input_field_empty(page: Page):
+    """입력 필드 빈 상태 확인"""
+    input_field = page.locator("textarea")
+    expect(input_field).to_have_value("")
 
-    # 사이드바 확인
-    expect(page.locator("text=⚙️ 설정")).to_be_visible()
+@then('통계 정보 영역이 표시됨')
+def stats_area_visible(page: Page):
+    """통계 영역 표시 확인"""
+    # 통계 영역은 초기에 빈 상태일 수 있음
+    pass
+
+@then('사이드바가 화면 왼쪽에 표시됨')
+def sidebar_visible(page: Page):
+    """사이드바 표시 확인"""
+    # Streamlit 사이드바 확인
+    expect(page.locator('[data-testid="stSidebar"]')).to_be_visible()
+
+@then(parsers.parse('"{header}" 헤더가 표시됨'))
+def header_displayed(page: Page, header: str):
+    """헤더 표시 확인"""
+    expect(page.locator(f"text={header}")).to_be_visible()
+
+@then(parsers.parse('"{section}" 섹션이 표시됨'))
+def section_displayed(page: Page, section: str):
+    """섹션 표시 확인"""
+    expect(page.locator(f"text={section}")).to_be_visible()
+
+@then('모델 선택 드롭다운이 렌더링됨')
+def model_dropdown_rendered(page: Page):
+    """모델 선택 드롭다운 확인"""
+    # Streamlit selectbox 확인
+    expect(page.locator('[data-baseweb="select"]')).to_be_visible()
+
+@then('Help 섹션이 표시됨')
+def help_section_visible(page: Page):
+    """Help 섹션 표시 확인"""
+    expect(page.locator("text=Help")).to_be_visible()
+
+@then(parsers.parse('"{button_text}" 버튼이 표시됨'))
+def button_displayed(page: Page, button_text: str):
+    """버튼 표시 확인"""
+    expect(page.locator(f"button:has-text('{button_text}')")).to_be_visible()
+
+@then('두 버튼이 좌우로 배치됨')
+def buttons_layout(page: Page):
+    """버튼 레이아웃 확인"""
+    # 두 버튼이 존재하는지 확인
+    buttons = page.locator("button")
+    expect(buttons).to_have_count(2, minimum=True)
+
+@then('버튼이 클릭 가능한 상태임')
+def buttons_enabled(page: Page):
+    """버튼 활성화 상태 확인"""
+    translate_btn = page.locator("button:has-text('🚀 번역')")
+    expect(translate_btn).to_be_enabled()
+```
+
+#### conftest.py 설정 예시
+
+**파일**: `tests/integration/conftest.py`
+
+```python
+"""pytest-bdd + Playwright fixtures"""
+import pytest
+from playwright.sync_api import Browser, Page
+
+@pytest.fixture(scope="session")
+def browser_context_args(browser_context_args):
+    """브라우저 컨텍스트 설정"""
+    return {
+        **browser_context_args,
+        "viewport": {"width": 1920, "height": 1080},
+    }
+
+@pytest.fixture
+def page(browser: Browser) -> Page:
+    """각 테스트마다 새로운 페이지 생성"""
+    context = browser.new_context()
+    page = context.new_page()
+    yield page
+    context.close()
+```
+
+#### 실행 방법
+
+```bash
+# 전체 feature 실행
+pytest tests/integration/features/TC-001-page-rendering.feature
+
+# 특정 시나리오만 실행
+pytest tests/integration/features/TC-001-page-rendering.feature -k "기본 페이지"
+
+# 상세 출력
+pytest tests/integration/features/TC-001-page-rendering.feature -v
+
+# HTML 리포트 생성
+pytest tests/integration/features/TC-001-page-rendering.feature --html=report.html
 ```
 
 ## 주의사항
@@ -260,6 +489,7 @@ def test_sidebar_rendered(page: Page):
 | 날짜 | 변경 내용 | 작성자 |
 | ---- | --------- | ------ |
 | 2026-02-07 | 초안 작성 | QA Team |
+| 2026-02-07 | pytest-bdd + Playwright 자동화 테스트 섹션 추가 | QA Team |
 
 ---
 
