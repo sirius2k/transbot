@@ -796,14 +796,18 @@ def handle_translation(
             # FEATURE-024: 양방향 번역(한↔영) 모두 다중 스타일 번역 수행
             from components.style_translator import StyleTranslator
 
-            # StyleTranslator 인스턴스 생성
-            style_translator = StyleTranslator(
-                client=translation_manager.client,
-                model=translation_manager.model,
-                temperature=0.3,
-                max_tokens=2000,
-                timeout=30
-            )
+            # StyleTranslator 인스턴스 생성 (Azure인 경우 deployment 전달)
+            style_translator_kwargs = {
+                "client": translation_manager.client,
+                "model": translation_manager.model,
+                "temperature": 0.3,
+                "max_tokens": 2000,
+                "timeout": 30
+            }
+            if hasattr(translation_manager, 'deployment'):
+                style_translator_kwargs["deployment"] = translation_manager.deployment
+
+            style_translator = StyleTranslator(**style_translator_kwargs)
 
             # 사용자가 선택한 스타일 사용 (최소 1개 이상)
             selected_styles = st.session_state.selected_styles
@@ -893,6 +897,7 @@ def regenerate_multi_style_translation() -> None:
     # API 클라이언트와 모델 정보 가져오기
     client = st.session_state.get("api_client")
     model = st.session_state.get("selected_model")
+    deployment = st.session_state.get("deployment")  # Azure deployment (있는 경우)
     if not client or not model:
         st.error("API 클라이언트 정보를 찾을 수 없습니다.")
         return
@@ -901,14 +906,18 @@ def regenerate_multi_style_translation() -> None:
         try:
             from components.style_translator import StyleTranslator
 
-            # StyleTranslator 인스턴스 생성
-            style_translator = StyleTranslator(
-                client=client,
-                model=model,
-                temperature=0.3,
-                max_tokens=2000,
-                timeout=30
-            )
+            # StyleTranslator 인스턴스 생성 (Azure인 경우 deployment 전달)
+            style_translator_kwargs = {
+                "client": client,
+                "model": model,
+                "temperature": 0.3,
+                "max_tokens": 2000,
+                "timeout": 30
+            }
+            if deployment:
+                style_translator_kwargs["deployment"] = deployment
+
+            style_translator = StyleTranslator(**style_translator_kwargs)
 
             # 옵션 가져오기
             preserve_proper_nouns = st.session_state.get("preserve_proper_nouns", False)
@@ -1007,8 +1016,9 @@ def main() -> None:
             deployment=selected_model_or_deployment,
             model=model_name  # 실제 모델명 전달
         )
-        # FEATURE-023: 실제 모델명 저장
+        # FEATURE-023: 실제 모델명 및 deployment 저장
         st.session_state.selected_model = model_name if model_name else selected_model_or_deployment
+        st.session_state.deployment = selected_model_or_deployment
     else:
         # OpenAI: model 파라미터 전달
         translation_manager = TranslationManagerFactory.create(
@@ -1018,6 +1028,7 @@ def main() -> None:
         )
         # FEATURE-023: 모델명 저장
         st.session_state.selected_model = selected_model_or_deployment
+        st.session_state.deployment = None  # OpenAI는 deployment 없음
 
     # 5. 입력 영역 렌더링
     stats_placeholder = render_input_area()

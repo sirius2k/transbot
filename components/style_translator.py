@@ -53,18 +53,21 @@ class StyleTranslator:
         model: str = "gpt-4o-mini",
         temperature: float = 0.3,
         max_tokens: int = 2000,
-        timeout: int = 30
+        timeout: int = 30,
+        deployment: Optional[str] = None
     ):
         """
         Args:
             client: OpenAI 클라이언트
-            model: 사용할 AI 모델
+            model: 사용할 AI 모델 (표시용)
             temperature: 생성 온도 (0-1)
             max_tokens: 최대 토큰 수
             timeout: 타임아웃 (초)
+            deployment: Azure deployment 이름 (Azure 사용 시 필수)
         """
         self.client = client
         self.model = model
+        self.deployment = deployment  # Azure deployment 이름
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.timeout = timeout
@@ -127,9 +130,10 @@ STYLE INSTRUCTION: {style_instruction}{proper_noun_instruction}
 
 Only respond with the translation, nothing else."""
 
-            # API 호출
+            # API 호출 (Azure인 경우 deployment 사용, 아니면 model 사용)
+            model_or_deployment = self.deployment if self.deployment else self.model
             response = self.client.chat.completions.create(
-                model=self.model,
+                model=model_or_deployment,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": text}
@@ -269,8 +273,10 @@ Provide 2-3 alternative ways to express the same meaning in {target_lang}, follo
 
 Only output the alternatives, one per line, without numbering or explanation."""
 
+            # API 호출 (Azure인 경우 deployment 사용, 아니면 model 사용)
+            model_or_deployment = self.deployment if self.deployment else self.model
             response = self.client.chat.completions.create(
-                model=self.model,
+                model=model_or_deployment,
                 messages=[
                     {"role": "system", "content": "You are a professional translator providing alternative expressions."},
                     {"role": "user", "content": prompt}

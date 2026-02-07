@@ -62,6 +62,17 @@ class TestStyleTranslatorInit:
         assert translator.max_tokens == 3000
         assert translator.timeout == 60
 
+    def test_init_with_azure_deployment(self, mock_openai_client):
+        """Azure deployment 파라미터로 초기화 테스트"""
+        translator = StyleTranslator(
+            client=mock_openai_client,
+            model="gpt-4o-mini",
+            deployment="my-deployment-name"
+        )
+
+        assert translator.deployment == "my-deployment-name"
+        assert translator.model == "gpt-4o-mini"
+
 
 class TestStyleConstants:
     """스타일 상수 테스트"""
@@ -202,6 +213,26 @@ class TestTranslateSingleStyle:
             )
 
         assert "API Error" in str(exc_info.value)
+
+    def test_translate_with_azure_deployment(self, mock_openai_client):
+        """Azure deployment 사용 시 번역 테스트"""
+        mock_openai_client.chat.completions.create.return_value.choices[0].message.content = "Thank you."
+
+        translator = StyleTranslator(
+            client=mock_openai_client,
+            model="gpt-4o-mini",
+            deployment="my-azure-deployment"
+        )
+
+        result = translator.translate_single_style(
+            text="감사합니다",
+            style=StyleTranslator.STYLE_BUSINESS
+        )
+
+        assert result == "Thank you."
+        # API 호출 시 deployment가 사용되었는지 확인
+        call_args = mock_openai_client.chat.completions.create.call_args
+        assert call_args[1]['model'] == "my-azure-deployment"
 
 
 class TestTranslateMultiStyle:
