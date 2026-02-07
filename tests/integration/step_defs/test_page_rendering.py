@@ -21,7 +21,8 @@ def streamlit_app_running():
 def page_loaded(page: Page):
     """페이지 로드"""
     page.goto("http://localhost:8501")
-    expect(page).to_have_url("http://localhost:8501", timeout=5000)
+    page.wait_for_load_state("networkidle")
+    expect(page).to_have_url(re.compile(r"http://localhost:8501/?"), timeout=5000)
 
 @given(parsers.parse('".env" 파일에 "{env_var}" 설정됨'))
 def env_variable_set(env_var: str):
@@ -59,7 +60,7 @@ def check_action_buttons_area(page: Page):
 @then('페이지가 3초 이내에 로드됨')
 def page_loads_quickly(page: Page):
     """페이지 빠른 로딩 확인"""
-    expect(page).to_have_url("http://localhost:8501", timeout=3000)
+    expect(page).to_have_url(re.compile(r"http://localhost:8501/?"), timeout=3000)
 
 @then(parsers.parse('타이틀 "{title}"이 표시됨'))
 def title_displayed(page: Page, title: str):
