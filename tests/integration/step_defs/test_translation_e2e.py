@@ -44,28 +44,32 @@ def keep_original_checked(page: Page):
         page.wait_for_timeout(500)
 
     # "원문 유지" 체크박스 찾기 및 체크
-    keep_original_checkbox = page.locator('label:has-text("원문 유지")').locator('input[type="checkbox"]')
+    keep_original_label = page.locator('label:has-text("원문 유지")')
+    keep_original_checkbox = keep_original_label.locator('input[type="checkbox"]')
     if not keep_original_checkbox.is_checked():
-        keep_original_checkbox.check()
+        # label을 클릭하여 체크박스 활성화
+        keep_original_label.click()
+        page.wait_for_timeout(300)
 
-@given('"다중 스타일" 옵션이 체크됨')
-def multi_style_checked(page: Page):
-    """다중 스타일 옵션 체크"""
-    # 사이드바 열기
+@given(parsers.parse('"{style_name}" 스타일이 선택됨'))
+def style_selected(page: Page, style_name: str):
+    """특정 스타일 체크박스 선택"""
+    # 사이드바 열기 (닫혀있을 수 있음)
     sidebar_button = page.locator('[data-testid="collapsedControl"]')
     if sidebar_button.is_visible():
         sidebar_button.click()
         page.wait_for_timeout(500)
 
-    # "다중 스타일" 체크박스 찾기 및 체크
-    multi_style_checkbox = page.locator('label:has-text("다중 스타일")').locator('input[type="checkbox"]')
-    if not multi_style_checkbox.is_checked():
-        multi_style_checkbox.check()
+    # Streamlit 체크박스는 label을 클릭해야 함 (input은 숨겨져 있음)
+    # 이모지가 포함된 전체 라벨 텍스트로 찾기
+    style_label = page.locator(f'label:has-text("{style_name}")')
 
-@given('"캐주얼" 스타일이 선택됨')
-def casual_style_selected(page: Page):
-    """캐주얼 스타일 선택 (기본값이므로 추가 동작 불필요)"""
-    pass
+    # 체크박스가 이미 체크되어 있는지 확인
+    style_checkbox = style_label.locator('input[type="checkbox"]')
+    if not style_checkbox.is_checked():
+        # label을 클릭하여 체크박스 활성화
+        style_label.click()
+        page.wait_for_timeout(300)
 
 # ============================================================================
 # When Steps (실행 동작)
@@ -78,14 +82,13 @@ def user_enters_text(page: Page, text: str):
     input_field.fill(text)
     page.wait_for_timeout(500)
 
-@when('사용자가 Markdown 텍스트를 입력:', target_fixture="markdown_text")
-def user_enters_markdown_text(page: Page, step):
+@when('사용자가 Markdown 텍스트를 입력')
+def user_enters_markdown_text(page: Page):
     """Markdown 텍스트 입력"""
-    markdown_text = step.doc_string.content
+    markdown_text = "# Hello World\n\nThis is a **bold** text."
     input_field = page.locator("textarea").first
     input_field.fill(markdown_text)
     page.wait_for_timeout(500)
-    return markdown_text
 
 @when(parsers.parse('"{button_text}" 버튼을 클릭'))
 def click_button(page: Page, button_text: str):
@@ -153,23 +156,17 @@ def original_and_translation_displayed(page: Page):
     # "원문"과 "번역" 텍스트가 모두 있는지 확인
     assert "원문" in page_content or "Original" in page_content, "원문이 표시되지 않음"
 
-@then('"캐주얼" 스타일 번역이 표시됨')
-def casual_style_translation_displayed(page: Page):
-    """캐주얼 스타일 번역 표시 확인"""
+@then(parsers.parse('"{style_name}" 스타일 번역이 표시됨'))
+def style_translation_displayed(page: Page, style_name: str):
+    """특정 스타일 번역 표시 확인"""
     page_content = page.content()
-    assert "캐주얼" in page_content or "Casual" in page_content, "캐주얼 스타일이 표시되지 않음"
-
-@then('"포멀" 스타일 번역이 표시됨')
-def formal_style_translation_displayed(page: Page):
-    """포멀 스타일 번역 표시 확인"""
-    page_content = page.content()
-    assert "포멀" in page_content or "Formal" in page_content, "포멀 스타일이 표시되지 않음"
+    assert style_name in page_content, f"{style_name} 스타일이 표시되지 않음"
 
 @then('두 스타일이 명확히 구분되어 표시됨')
 def two_styles_clearly_separated(page: Page):
     """두 스타일 구분 표시 확인"""
     page_content = page.content()
-    # 캐주얼과 포멀이 모두 표시되어야 함
-    casual_count = page_content.count("캐주얼") + page_content.count("Casual")
-    formal_count = page_content.count("포멀") + page_content.count("Formal")
-    assert casual_count > 0 and formal_count > 0, "두 스타일이 명확히 구분되지 않음"
+    # 자연스러운 구어체와 공식/문서용이 모두 표시되어야 함
+    conversational_count = page_content.count("자연스러운 구어체")
+    formal_count = page_content.count("공식/문서용")
+    assert conversational_count > 0 and formal_count > 0, "두 스타일이 명확히 구분되지 않음"
