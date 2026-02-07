@@ -120,6 +120,7 @@ TransBot은 Streamlit 기반의 영어-한국어 양방향 번역 웹 애플리�
 | ✅ FEATURE-016: [Langfuse 연동 (LLM 관찰성)](../feature-execution-plan/FEATURE-016.md)      | **P1**   | LLM 사용 추적, 비용 분석, 품질 모니터링, 프롬프트 최적화. 운영 인사이트 확보  |
 | ✅ FEATURE-017: [구조화된 로깅 시스템](../feature-execution-plan/FEATURE-017.md)            | **P1**   | API 호출, 에러, 사용자 행동 추적. 디버깅 및 모니터링 인프라. 운영 안정성 확보 |
 | ✅ FEATURE-023: [대화 상황별 번역 옵션](../feature-execution-plan/FEATURE-023.md)           | **P2**   | 한국어→영어 번역 시 5가지 스타일 제공. AI 자동 스타일 선택. 번역 품질 향상     |
+| ✅ FEATURE-024: [번역 스타일 옵션 개선](../feature-execution-plan/FEATURE-024.md)           | **P2**   | FEATURE-023 개선. 양방향 번역(한↔영) 지원. 직역 기본 선택. 사용자 선택권 향상 |
 
 #### 마이너 개선사항 (Quick Wins)
 
@@ -236,4 +237,4 @@ Phase 3 (P2 기능 - 외부 연동)
 
 ---
 
-**최종 수정일시**: 2026-02-07 14:30 (마이너 개선: Langfuse Prompt 표시 개선)
+**최종 수정일시**: 2026-02-07 14:30 (FEATURE-024 완료: 번역 스타일 옵션 개선)
