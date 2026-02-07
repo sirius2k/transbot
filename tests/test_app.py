@@ -196,15 +196,15 @@ class TestSetupSidebarOpenAI:
         assert call_args.kwargs["index"] == 1
 
     def test_openai_ui_rendering(self, mock_streamlit, mock_config):
-        """OpenAI provider 사용 시 '🔵 OpenAI' 표시"""
+        """OpenAI provider 사용 시 정보 섹션 표시"""
         from app import setup_sidebar
 
         mock_streamlit.sidebar.selectbox.return_value = "GPT-4o Mini (추천 - 가성비)"
 
         setup_sidebar("openai")
 
-        # Provider 정보가 올바르게 표시되는지 확인
-        mock_streamlit.sidebar.markdown.assert_any_call("**Provider:** 🔵 OpenAI")
+        # 정보 및 도움말 섹션이 표시되는지 확인
+        mock_streamlit.sidebar.markdown.assert_any_call("#### ℹ️ 정보 및 도움말")
 
 
 class TestSetupSidebarAzure:
@@ -324,15 +324,15 @@ class TestSetupSidebarAzure:
     def test_azure_ui_rendering(
         self, mock_streamlit, mock_config, mock_azure_deployments
     ):
-        """Azure provider 사용 시 '🟢 Azure OpenAI' 표시"""
+        """Azure provider 사용 시 정보 섹션 표시"""
         from app import setup_sidebar
 
         mock_streamlit.sidebar.selectbox.return_value = "gpt-4o-mini (Azure)"
 
         setup_sidebar("azure")
 
-        # Provider 정보가 올바르게 표시되는지 확인
-        mock_streamlit.sidebar.markdown.assert_any_call("**Provider:** 🟢 Azure OpenAI")
+        # 정보 및 도움말 섹션이 표시되는지 확인
+        mock_streamlit.sidebar.markdown.assert_any_call("#### ℹ️ 정보 및 도움말")
 
 
 class TestSetupSidebarEdgeCases:
@@ -459,7 +459,7 @@ class TestSetupSidebarEdgeCases:
         setup_sidebar("openai")
 
         # 헤더가 호출되었는지 확인
-        mock_streamlit.sidebar.header.assert_called_once_with("⚙️ 영어-한국어 번역기 설정")
+        mock_streamlit.sidebar.header.assert_called_once_with("⚙️ 설정")
 
     def test_sidebar_divider_called(self, mock_streamlit, mock_config):
         """사이드바 구분선이 올바르게 호출됨"""
