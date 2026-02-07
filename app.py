@@ -411,6 +411,29 @@ def setup_sidebar(provider: Literal["openai", "azure"]) -> tuple[str, dict[str, 
         key="style_concise"
     )
 
+    # 커스텀 스타일 체크박스
+    style_custom = st.sidebar.checkbox(
+        "✍️ 커스텀 스타일",
+        value=False,
+        key="style_custom_checkbox",
+        help="직접 번역 스타일을 지정할 수 있습니다."
+    )
+
+    # 커스텀 스타일이 선택된 경우에만 입력 박스 표시
+    if style_custom:
+        custom_instruction = st.sidebar.text_area(
+            "커스텀 스타일 지침",
+            value="",
+            key="custom_style_instruction",
+            height=100,
+            placeholder="예: 유머러스한 톤으로 번역해주세요",
+            help="원하는 번역 스타일을 자유롭게 입력하세요."
+        )
+    else:
+        # 커스텀 스타일이 선택되지 않은 경우 세션 상태 초기화
+        if "custom_style_instruction" in st.session_state:
+            st.session_state.custom_style_instruction = ""
+
     # 선택된 스타일들을 session_state에 저장
     selected_styles = []
     if style_literal:
@@ -447,15 +470,6 @@ def setup_sidebar(provider: Literal["openai", "azure"]) -> tuple[str, dict[str, 
         value=False,
         key="include_alternatives",
         help="각 스타일당 2-3개의 대안 표현을 추가로 제공합니다."
-    )
-
-    # 커스텀 스타일 지침
-    _custom_instruction = st.sidebar.text_area(
-        "✍️ 커스텀 스타일 지침 (선택사항)",
-        value="",
-        key="custom_style_instruction",
-        height=100,
-        help="예: \"유머러스한 톤으로 번역해주세요\""
     )
 
     # 스타일 재생성 버튼
