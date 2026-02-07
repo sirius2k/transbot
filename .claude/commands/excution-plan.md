@@ -6,12 +6,12 @@
 
 작업은 아래 순서대로 실행해줘.
 
-1. **PRD 확인**: PRD.md에서 해당 FEATURE 번호의 요구사항 확인
+1. **PRD 확인**: PRD.md에서 해당 FEATURE 번호 또는 마이너 업데이트의 요구사항 확인
 2. **복잡도 평가**: 기능의 복잡도 및 예상 소요 시간 평가
 3. **템플릿 선택**: 복잡도에 맞는 템플릿 선택 (Simple / Standard / Complex)
 4. **작업(Task) 분석**: 기능을 독립적인 Task로 분해하기 위한 분석
 5. **작업(Task) 분해**: Task별 상세 작업 내용 작성
-6. **FEATURE 문서 생성**: docs/feature-execution-plan/FEATURE-XXX.md 파일 생성
+6. **FEATURE 문서 생성**: Feature는 docs/feature-execution-plan/FEATURE-XXX.md 파일 생성, 마이너 업데이트는 MINOR-UPDATE-XXX.md 파일 생성
 7. **콘솔 출력**: 분해된 Task 목록을 사용자가 확인할 수 있도록 출력
 
 ## 핵심 목적
@@ -26,7 +26,7 @@
 
 ## FEATURE 문서 메타데이터
 
-모든 FEATURE-XXX.md 파일 최상단 "개요" 섹션에 다음 메타데이터를 포함해야 합니다:
+모든 FEATURE-XXX.md, MINOR-UPDATE-XXX.md 파일 최상단 "개요" 섹션에 다음 메타데이터를 포함해야 합니다:
 
 ```markdown
 ## 개요
@@ -63,38 +63,44 @@
 ### Template 1: Simple (1-3시간 작업)
 
 **적용 대상**:
+
 - 단순 UI 추가/수정
 - 간단한 함수 추가
 - 설정 변경
 - 문서 업데이트
 
 **메타데이터**:
+
 - 복잡도: Simple
 - 분석 수준: 없음
 
 **포함 섹션**:
+
 1. 개요
 2. 기능 설명
 3. 작업(Task) 분해 (간단)
 4. 완료 기준
 
-**예시**: FEATURE-001~007
+**예시**: FEATURE-001~007, MINOR-UPDATE-001~007
 
 ---
 
 ### Template 2: Standard (4-10시간 작업)
 
 **적용 대상**:
+
 - 중간 규모 기능 추가
 - 여러 파일 수정 필요
 - 기본 테스트 필요
 - 일부 아키텍처 변경
 
 **메타데이터**:
+
 - 복잡도: Standard
 - 분석 수준: 부분
 
 **포함 섹션**:
+
 1. 개요
 2. 기능 설명
 3. 배경 및 필요성 (간단)
@@ -111,6 +117,7 @@
 ### Template 3: Complex (10시간 이상 작업)
 
 **적용 대상**:
+
 - 대규모 기능 추가
 - 아키텍처 변경
 - 새로운 모듈/컴포넌트 추가
@@ -118,10 +125,12 @@
 - 외부 서비스 연동
 
 **메타데이터**:
+
 - 복잡도: Complex
 - 분석 수준: 완료
 
 **포함 섹션**:
+
 1. 개요 (전체 메타데이터)
 2. 기능 설명
 3. 배경 및 필요성 (상세)
@@ -136,18 +145,20 @@
 11. 리스크 및 대응 방안
 12. 참고 자료
 
-**예시**: FEATURE-008, 009, 010, 017
+**예시**: FEATURE-008, 009, 010, 017 또는 MINOR-UPDATE-008, 009, 010, 017
 
 ## 실행 방법
 
 ### 1. 작업(Task) 분석 프로세스
 
 #### 1.1 기능 이해
-- PRD.md에서 FEATURE 설명 읽기
+
+- PRD.md에서 FEATURE 또는 MINOR-UPDATE (마이너 업데이트) 설명 읽기
 - 기능의 목적과 사용자 가치 파악
 - 기술적 제약사항 확인
 
 #### 1.2 복잡도 평가
+
 다음 기준으로 복잡도 판단:
 
 - **Simple (1-3h)**:
@@ -169,11 +180,13 @@
   - 전체 아키텍처 변경 또는 신규 모듈
 
 #### 1.3 분석 수준 결정
+
 - Simple → 분석 없음
 - Standard → 분석 부분 (기본 요구사항 + 간단한 예시)
 - Complex → 분석 완료 (아키텍처 + 상세 코드 예시)
 
 #### 1.4 코드베이스 탐색
+
 - 관련 파일 확인 (Glob, Grep 사용)
 - 기존 패턴 파악
 - 재사용 가능한 컴포넌트 확인
@@ -181,6 +194,7 @@
 ### 2. 작업(Task) 분해 프로세스
 
 #### 2.1 Task 식별
+
 기능을 독립적인 작업 단위로 분해:
 
 1. **백엔드 Task**: 데이터 모델, 비즈니스 로직, API
@@ -190,9 +204,11 @@
 5. **문서화 Task**: README, CLAUDE, PRD 업데이트
 
 #### 2.2 Task 상세화
+
 각 Task에 대해:
 
 **Simple 템플릿**:
+
 - Task 번호 및 제목
 - 분류 (백엔드/프론트엔드)
 - 의존성
@@ -200,6 +216,7 @@
 - 예상 파일
 
 **Standard/Complex 템플릿**:
+
 - Task 번호 및 제목
 - **설명**: 1-2문장으로 목적 설명
 - **세부 작업**: 번호 매긴 리스트 (3-10개 항목)
@@ -209,12 +226,15 @@
 - **완료 조건**: 체크리스트 형식
 
 #### 2.3 의존성 분석
+
 - Task 간 의존성 파악
 - 병렬 작업 가능 여부 확인
 - 작업 순서 최적화
 
 #### 2.4 예상 시간 산정
+
 각 Task의 예상 시간:
+
 - 코드 작성: 실제 구현 시간
 - 테스트 작성: 코드 작성의 50%
 - 디버깅: 코드 작성의 30%
@@ -228,29 +248,34 @@
 ## FEATURE-XXX: [기능명]
 
 ### 메타데이터
+
 - 복잡도: Simple / Standard / Complex
 - 분석 수준: 완료 / 부분 / 없음
 - 예상 시간: Xh
 - Task 개수: Y개
 
 ### Task 목록
+
 1. Task X.1: [제목] (백엔드, 1h)
 2. Task X.2: [제목] (프론트엔드, 1.5h)
 3. Task X.3: [제목] (테스트, 0.5h)
-...
+   ...
 
 ### 의존성 관계
+
 - Task X.2 → Task X.1
 - Task X.3 → Task X.1, X.2
 
 ### 다음 단계
-1. docs/feature-execution-plan/FEATURE-XXX.md 파일 확인
+
+1. docs/feature-execution-plan/FEATURE-XXX.md 또는 docs/feature-execution-plan/MINOR-UPDATE-XXX.md 파일 확인
 2. resolve-issue 스킬로 각 Task를 GitHub Issue로 생성
 3. 순차적으로 이슈 해결 시작
 ```
 
 #### 3.2 파일 저장
-- 경로: `docs/feature-execution-plan/FEATURE-XXX.md`
+
+- 경로: `docs/feature-execution-plan/FEATURE-XXX.md` 또는 `docs/feature-execution-plan/MINOR-UPDATE-XXX.md`
 - 선택한 템플릿 형식으로 작성
 - Markdownlint 규칙 준수
 
@@ -259,61 +284,72 @@
 ### 필수 포함 사항
 
 #### 1. 아키텍처 설계 섹션
+
 ```markdown
 ## 아키텍처 설계
 
 ### 컴포넌트 구조
+
 \`\`\`text
 [디렉토리 트리 또는 다이어그램]
 \`\`\`
 
 ### [클래스/함수명] 설계
+
 \`\`\`python
 [실제 구현 코드 예시 30-50줄]
 \`\`\`
 
 ### 데이터 흐름
+
 \`\`\`text
 [데이터가 어떻게 흐르는지 설명]
 \`\`\`
 ```
 
 #### 2. 상세 Task 분해
+
 ```markdown
 ### Task X.Y: [제목] (백엔드/프론트엔드)
 
 **설명**: 1-2문장
 
 **세부 작업**:
+
 1. [구체적 작업 1]
 2. [구체적 작업 2]
-...
+   ...
 
 **예상 시간**: Xh
 
 **의존성**: Task X.Z 또는 FEATURE-YYY
 
 **테스트 범위**:
+
 - [테스트 항목 1]
 - [테스트 항목 2]
 
 **완료 조건**:
+
 - [ ] [조건 1]
 - [ ] [조건 2]
 ```
 
 #### 3. 테스트 계획 상세
+
 ```markdown
 ## 테스트 계획
 
 ### 테스트 케이스
 
-| ID | 시나리오 | 예상 결과 |
-| -- | -------- | --------- |
-| TC-1 | [시나리오] | [결과] |
+| ID   | 시나리오   | 예상 결과 |
+| ---- | ---------- | --------- |
+| TC-1 | [시나리오] | [결과]    |
+
 ...
 
 ### 단위 테스트 예시
+
 \`\`\`python
 [실제 pytest 코드 예시]
 \`\`\`
@@ -321,25 +357,28 @@
 
 ## resolve-issue 스킬 연동
 
-이 문서로 생성된 FEATURE-XXX.md는 resolve-issue 스킬에서 다음과 같이 활용됩니다:
+이 문서로 생성된 FEATURE-XXX.md / MINOR-UPDATE-XXX.md는 resolve-issue 스킬에서 다음과 같이 활용됩니다:
 
 ### 분석 수준별 워크플로우
 
 **분석 완료 (Complex)**:
+
 ```
-resolve-issue → FEATURE 읽기 → 아키텍처 참조 → 검증만 수행 (1 에이전트) → 코딩
+resolve-issue → FEATURE / MINOR-UPDATE 읽기 → 아키텍처 참조 → 검증만 수행 (1 에이전트) → 코딩
 토큰: ~10k, 시간: ~5분
 ```
 
 **분석 부분 (Standard)**:
+
 ```
-resolve-issue → FEATURE 읽기 → 부족한 부분 분석 (2-3 에이전트) → 코딩
+resolve-issue → FEATURE / MINOR-UPDATE 읽기 → 부족한 부분 분석 (2-3 에이전트) → 코딩
 토큰: ~15k, 시간: ~15분
 ```
 
 **분석 없음 (Simple)**:
+
 ```
-resolve-issue → FEATURE 읽기 → 전체 코드베이스 분석 (최대 10 에이전트) → 코딩
+resolve-issue → FEATURE / MINOR-UPDATE 읽기 → 전체 코드베이스 분석 (최대 10 에이전트) → 코딩
 토큰: ~30k, 시간: ~30분
 ```
 
@@ -359,12 +398,14 @@ FEATURE 문서 생성 전 확인:
 
 ## 예시
 
-### Simple 예시: FEATURE-001
+### Simple 예시: FEATURE-001 / MINOR-UPDATE-001
+
 - 복잡도: Simple
 - 분석 수준: 없음
 - 포함: 개요, 기능 설명, 간단한 Task 분해, 완료 기준
 
-### Complex 예시: FEATURE-008
+### Complex 예시: FEATURE-008 / MINOR-UPDATE-008
+
 - 복잡도: Complex
 - 분석 수준: 완료
 - 포함: 전체 섹션 + 아키텍처 설계 + 상세 코드 예시 + 테스트 계획
