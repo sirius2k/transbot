@@ -1,30 +1,33 @@
 # 실행 계획(Execution Plan) 제작 커맨드
 
-너는 지금부터 PRD에 명시된 FEATURE 번호를 아규먼트로 받아서 독립적이고 관리가능한 태스크로 분해하고 실행계획을 작성하는 실행계획 설계 전문가야.
+너는 지금부터 PRD에 명시된 FEATURE 번호 아규먼트로 받아서 독립적이고 관리가능한 태스크로 분해하고 실행계획을 작성하는 실행계획 설계 전문가야.
 
 ## 실행
 
 작업은 아래 순서대로 실행해줘.
 
-1. **PRD 확인**: PRD.md에서 해당 FEATURE 번호 또는 마이너 업데이트의 요구사항 확인
+1. **PRD 확인**: PRD.md에서 해당 FEATURE 번호 또는 MINOR 번호의 요구사항 확인
 
    **자동 판단 로직**:
    - Step 1: PRD.md 전체에서 입력 번호 검색
+     - `FEATURE-XXX` 패턴 검색
+     - `MINOR-XXX` 패턴 검색
    - Step 2: 발견된 위치 확인:
      - "마이너 개선사항 (Quick Wins)" 테이블
-       → **MINOR-UPDATE-XXX.md 생성** (Quick Wins Template)
+       → **MINOR-XXX.md 생성** (Quick Wins Template)
      - "주요 기능 (FEATURE)" 테이블
        → **FEATURE-XXX.md 생성** (Simple/Standard/Complex Template)
    - Step 3: 소요 시간 기반 복잡도 자동 판단:
-     - 1-2시간 → Quick Wins (MINOR-UPDATE)
-     - 2-3시간 → Simple (FEATURE)
-     - 4-10시간 → Standard (FEATURE)
-     - 10시간 이상 → Complex (FEATURE)
+     - 1-2시간 → Quick Wins (MINOR-XXX)
+     - 2-3시간 → Simple (FEATURE-XXX)
+     - 4-10시간 → Standard (FEATURE-XXX)
+     - 10시간 이상 → Complex (FEATURE-XXX)
+
 2. **복잡도 평가**: 기능의 복잡도 및 예상 소요 시간 평가
 3. **템플릿 선택**: 복잡도에 맞는 템플릿 선택 (Simple / Standard / Complex)
 4. **작업(Task) 분석**: 기능을 독립적인 Task로 분해하기 위한 분석
 5. **작업(Task) 분해**: Task별 상세 작업 내용 작성
-6. **FEATURE 문서 생성**: Feature는 docs/feature-execution-plan/FEATURE-XXX.md 파일 생성, 마이너 업데이트는 MINOR-UPDATE-XXX.md 파일 생성
+6. **FEATURE 문서 생성**: Feature는 docs/feature-execution-plan/FEATURE-XXX.md 파일 생성, Quick Wins는 MINOR-XXX.md 파일 생성
 7. **콘솔 출력**: 분해된 Task 목록을 사용자가 확인할 수 있도록 출력
 
 ## 핵심 목적
@@ -39,7 +42,7 @@
 
 ## FEATURE 문서 메타데이터
 
-모든 FEATURE-XXX.md, MINOR-UPDATE-XXX.md 파일 최상단 "개요" 섹션에 다음 메타데이터를 포함해야 합니다:
+모든 FEATURE-XXX.md, MINOR-XXX.md 파일 최상단 "개요" 섹션에 다음 메타데이터를 포함해야 합니다:
 
 ```markdown
 ## 개요
@@ -108,9 +111,9 @@
 - Langfuse Prompt 표시 개선 (30분)
 - 모델 선택 옵션 제한 (1-2시간)
 
-**파일 형식**: `MINOR-UPDATE-XXX.md`
+**파일 형식**: `MINOR-XXX.md`
 
-**생성 위치**: `docs/feature-execution-plan/MINOR-UPDATE-XXX.md`
+**생성 위치**: `docs/feature-execution-plan/MINOR-XXX.md`
 
 ---
 
@@ -135,7 +138,7 @@
 3. 작업(Task) 분해 (간단)
 4. 완료 기준
 
-**예시**: FEATURE-001~007, MINOR-UPDATE-001~007
+**예시**: FEATURE-001~007, MINOR-001~007
 
 ---
 
@@ -199,7 +202,7 @@
 11. 리스크 및 대응 방안
 12. 참고 자료
 
-**예시**: FEATURE-008, 009, 010, 017 또는 MINOR-UPDATE-008, 009, 010, 017
+**예시**: FEATURE-008, 009, 010, 017 또는 MINOR-008, 009, 010, 017
 
 ## 실행 방법
 
@@ -207,7 +210,7 @@
 
 #### 1.1 기능 이해
 
-- PRD.md에서 FEATURE 또는 MINOR-UPDATE (마이너 업데이트) 설명 읽기
+- PRD.md에서 FEATURE 또는 MINOR (Quick Wins) 설명 읽기
 - 기능의 목적과 사용자 가치 파악
 - 기술적 제약사항 확인
 
@@ -339,8 +342,8 @@
 
 **Quick Wins 콘솔 출력** (간소화):
 
-```markdown
-## MINOR-UPDATE-XXX: [개선사항명]
+````markdown
+## MINOR-XXX: [개선사항명]
 
 ### 메타데이터
 
@@ -356,6 +359,7 @@
 3. [작업 3 설명]
 
 **예상 파일**:
+
 - `path/to/file1.py` - [수정 내용]
 
 ### 완료 기준
@@ -366,27 +370,30 @@
 
 ### 다음 단계
 
-1. ✅ 실행 계획 문서 생성 완료: `docs/feature-execution-plan/MINOR-UPDATE-XXX.md`
+1. ✅ 실행 계획 문서 생성 완료: `docs/feature-execution-plan/MINOR-XXX.md`
 2. 🔜 GitHub 이슈 생성:
    ```bash
    gh issue create \
-     --title "MINOR-UPDATE-XXX: [개선사항명]" \
-     --body "$(cat docs/feature-execution-plan/MINOR-UPDATE-XXX.md)" \
+     --title "MINOR-XXX: [개선사항명]" \
+     --body "$(cat docs/feature-execution-plan/MINOR-XXX.md)" \
      --label "type: enhancement" \
      --label "complexity: easy" \
      --label "priority: high"
    ```
+````
+
 3. 🔜 이슈 해결: `resolve-issue [생성된 이슈 번호]`
 
 ---
 
 📝 **Quick Wins는 1-2시간 이내 완료 가능한 개선사항입니다.**
 💡 **GitHub 이슈 생성 후 "resolve-issue" 명령으로 바로 작업을 시작할 수 있습니다.**
-```
+
+````
 
 #### 3.2 파일 저장
 
-- 경로: `docs/feature-execution-plan/FEATURE-XXX.md` 또는 `docs/feature-execution-plan/MINOR-UPDATE-XXX.md`
+- 경로: `docs/feature-execution-plan/FEATURE-XXX.md` 또는 `docs/feature-execution-plan/MINOR-XXX.md`
 - 선택한 템플릿 형식으로 작성
 - Markdownlint 규칙 준수
 
@@ -416,7 +423,7 @@
 \`\`\`text
 [데이터가 어떻게 흐르는지 설명]
 \`\`\`
-```
+````
 
 #### 2. 상세 Task 분해
 
@@ -468,28 +475,28 @@
 
 ## resolve-issue 스킬 연동
 
-이 문서로 생성된 FEATURE-XXX.md / MINOR-UPDATE-XXX.md는 resolve-issue 스킬에서 다음과 같이 활용됩니다:
+이 문서로 생성된 FEATURE-XXX.md / MINOR-XXX.md는 resolve-issue 스킬에서 다음과 같이 활용됩니다:
 
 ### 분석 수준별 워크플로우
 
 **분석 완료 (Complex)**:
 
 ```
-resolve-issue → FEATURE / MINOR-UPDATE 읽기 → 아키텍처 참조 → 검증만 수행 (1 에이전트) → 코딩
+resolve-issue → FEATURE / MINOR 읽기 → 아키텍처 참조 → 검증만 수행 (1 에이전트) → 코딩
 토큰: ~10k, 시간: ~5분
 ```
 
 **분석 부분 (Standard)**:
 
 ```
-resolve-issue → FEATURE / MINOR-UPDATE 읽기 → 부족한 부분 분석 (2-3 에이전트) → 코딩
+resolve-issue → FEATURE / MINOR 읽기 → 부족한 부분 분석 (2-3 에이전트) → 코딩
 토큰: ~15k, 시간: ~15분
 ```
 
 **분석 없음 (Simple)**:
 
 ```
-resolve-issue → FEATURE / MINOR-UPDATE 읽기 → 전체 코드베이스 분석 (최대 10 에이전트) → 코딩
+resolve-issue → FEATURE / MINOR 읽기 → 전체 코드베이스 분석 (최대 10 에이전트) → 코딩
 토큰: ~30k, 시간: ~30분
 ```
 
@@ -509,13 +516,13 @@ FEATURE 문서 생성 전 확인:
 
 ## 예시
 
-### Simple 예시: FEATURE-001 / MINOR-UPDATE-001
+### Simple 예시: FEATURE-001 / MINOR-001
 
 - 복잡도: Simple
 - 분석 수준: 없음
 - 포함: 개요, 기능 설명, 간단한 Task 분해, 완료 기준
 
-### Complex 예시: FEATURE-008 / MINOR-UPDATE-008
+### Complex 예시: FEATURE-008 / MINOR-008
 
 - 복잡도: Complex
 - 분석 수준: 완료

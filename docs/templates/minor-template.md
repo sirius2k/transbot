@@ -1,4 +1,4 @@
-# MINOR-UPDATE-XXX: [개선사항 한 줄 설명]
+# MINOR-XXX: [개선사항 한 줄 설명]
 
 ## 개요
 

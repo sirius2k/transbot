@@ -91,7 +91,7 @@ FEATURE-001 (핵심 번역)
 - Task 분해 필요
 - Simple/Standard/Complex 템플릿 사용
 
-### MINOR-UPDATE-XXX.md
+### MINOR-XXX.md
 
 - 1-2시간 이내 완료 가능한 간단한 개선사항 (Quick Wins)
 - 단일 파일 수정
@@ -102,14 +102,14 @@ FEATURE-001 (핵심 번역)
 
 ```bash
 # 자동 판단 (PRD 위치 및 소요 시간 기반)
-execution-plan 006  # MINOR-UPDATE-006 자동 생성 (마이너 개선사항 테이블에 있는 경우)
-execution-plan 023  # FEATURE-023 자동 생성 (주요 기능 테이블에 있는 경우)
+execution-plan MINOR-006  # MINOR-006 자동 생성 (마이너 개선사항 테이블에 있는 경우)
+execution-plan FEATURE-023  # FEATURE-023 자동 생성 (주요 기능 테이블에 있는 경우)
 ```
 
 **자동 판단 로직**:
 
 1. PRD.md에서 입력 번호 검색
-2. "마이너 개선사항 (Quick Wins)" 테이블 → MINOR-UPDATE-XXX.md
+2. "마이너 개선사항 (Quick Wins)" 테이블 → MINOR-XXX.md
 3. "주요 기능 (FEATURE)" 테이블 → FEATURE-XXX.md
 4. 소요 시간 기반: 1-2h → Quick Wins, 2-3h → Simple, 4-10h → Standard, 10h+ → Complex
 
@@ -127,8 +127,8 @@ feature-execution-plan/
 ├── FEATURE-007.md      # 사이드바 UI (설정 섹션)
 ├── FEATURE-008.md      # Azure OpenAI Service 지원
 ├── FEATURE-009.md      # 환경 변수 기반 설정 관리 시스템
-├── MINOR-UPDATE-001.md # 지우기 버튼 (Quick Win)
-├── MINOR-UPDATE-002.md # 콘솔 로깅 간소화 (Quick Win)
+├── MINOR-001.md        # 지우기 버튼 (Quick Win)
+├── MINOR-002.md        # 콘솔 로깅 간소화 (Quick Win)
 └── ...
 ```
 

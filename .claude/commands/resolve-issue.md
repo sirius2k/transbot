@@ -6,10 +6,10 @@
 
 ### 1. 실행 계획 문서 진행현황 업데이트
 
-feature-execution-plan 폴더에서 이 이슈와 관련있는 FEATURE-XXX.md 또는 MINOR-UPDATE-XXX.md 파일내의 진행 현황 섹션의 정보를 업데이트 한다.
+feature-execution-plan 폴더에서 이 이슈와 관련있는 FEATURE-XXX.md 또는 MINOR-XXX.md 파일내의 진행 현황 섹션의 정보를 업데이트 한다.
 
 - **FEATURE-XXX.md**: 주요 기능 (2시간 이상 소요)
-- **MINOR-UPDATE-XXX.md**: Quick Wins (1-2시간 이내)
+- **MINOR-XXX.md**: Quick Wins (1-2시간 이내)
 
 ### 2. 이슈 불러오기
 
@@ -23,10 +23,10 @@ GitHub CLI를 사용해서 이슈를 불러와줘. 제목과, 본문, 레이블�
 
 **목적**: 중복 분석 방지 및 토큰 최적화
 
-feature-execution-plan 폴더에서 이 이슈와 관련있는 FEATURE-XXX.md 또는 MINOR-UPDATE-XXX.md 파일을 찾아서 읽는다.
+feature-execution-plan 폴더에서 이 이슈와 관련있는 FEATURE-XXX.md 또는 MINOR-XXX.md 파일을 찾아서 읽는다.
 
 - **FEATURE-XXX.md**: 주요 기능 (2시간 이상 소요)
-- **MINOR-UPDATE-XXX.md**: Quick Wins (1-2시간 이내)
+- **MINOR-XXX.md**: Quick Wins (1-2시간 이내)
 
 "분석 수준" 메타데이터를 확인한다.
 
@@ -44,7 +44,7 @@ feature-execution-plan 폴더에서 이 이슈와 관련있는 FEATURE-XXX.md �
 | **부분** | Task 분해 + 기본 요구사항 + 간단한 예시 | 최소 분석 | ~15분 | ~15k | 2-3개 |
 | **없음** | Task 분해만 | 전체 분석 | ~30분 | ~30k | 최대 10개 |
 
-**MINOR-UPDATE (Quick Win) 처리**:
+**MINOR (Quick Win) 처리**:
 
 - Quick Wins는 "분석 수준: 없음"으로 간주하지만, 작업이 단순하므로 1개 파일만 확인
 - 코드베이스 탐색 최소화 (1개 서브에이전트)
@@ -129,7 +129,7 @@ feature-execution-plan 폴더에서 이 이슈와 관련있는 FEATURE-XXX.md �
 
 ### 10. 실행 계획 문서 업데이트
 
-feature-execution-plan에서 이 이슈와 관련있는 FEATURE-XXX.md 또는 MINOR-UPDATE-XXX.md 파일에 작업한 내용을 모두 업데이트 한다.
+feature-execution-plan에서 이 이슈와 관련있는 FEATURE-XXX.md 또는 MINOR-XXX.md 파일에 작업한 내용을 모두 업데이트 한다.
 
 **FEATURE-XXX.md 업데이트 사항**:
 
@@ -137,7 +137,7 @@ feature-execution-plan에서 이 이슈와 관련있는 FEATURE-XXX.md 또는 MI
 - 구현 완료 후 발견된 이슈나 개선사항
 - 테스트 결과
 
-**MINOR-UPDATE-XXX.md 업데이트 사항**:
+**MINOR-XXX.md 업데이트 사항**:
 
 - 상태를 ✅ 완료로 변경
 - 완료일 기록
