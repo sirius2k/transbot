@@ -7,6 +7,19 @@
 작업은 아래 순서대로 실행해줘.
 
 1. **PRD 확인**: PRD.md에서 해당 FEATURE 번호 또는 마이너 업데이트의 요구사항 확인
+
+   **자동 판단 로직**:
+   - Step 1: PRD.md 전체에서 입력 번호 검색
+   - Step 2: 발견된 위치 확인:
+     - "마이너 개선사항 (Quick Wins)" 테이블
+       → **MINOR-UPDATE-XXX.md 생성** (Quick Wins Template)
+     - "주요 기능 (FEATURE)" 테이블
+       → **FEATURE-XXX.md 생성** (Simple/Standard/Complex Template)
+   - Step 3: 소요 시간 기반 복잡도 자동 판단:
+     - 1-2시간 → Quick Wins (MINOR-UPDATE)
+     - 2-3시간 → Simple (FEATURE)
+     - 4-10시간 → Standard (FEATURE)
+     - 10시간 이상 → Complex (FEATURE)
 2. **복잡도 평가**: 기능의 복잡도 및 예상 소요 시간 평가
 3. **템플릿 선택**: 복잡도에 맞는 템플릿 선택 (Simple / Standard / Complex)
 4. **작업(Task) 분석**: 기능을 독립적인 Task로 분해하기 위한 분석
@@ -59,6 +72,47 @@
   - 기존 워크플로우 유지
 
 ## Template 선택 가이드
+
+### Template 0: Quick Wins (1-2시간 작업)
+
+**적용 대상**:
+
+- 단일 파일 수정 (1-2개 파일)
+- 단일 목적 개선
+- 의존성 없음
+- 간단한 UI 수정, 설정 변경
+- 간단한 문서 업데이트
+
+**메타데이터**:
+
+- 복잡도: Quick Win (1-2h)
+- 분석 수준: 없음 (코드베이스 탐색 최소화)
+
+**포함 섹션**:
+
+1. 개요
+2. 작업 내용 (간단한 체크리스트 3-5개)
+3. 완료 기준
+
+**제외 섹션** (Simple과의 차이):
+
+- Task 분해 (단일 작업이므로 불필요)
+- 작업 흐름도 (간단하여 불필요)
+- 테스트 계획 (5개 이하 테스트로 간단)
+
+**예시**:
+
+- 지우기 버튼 추가 (30분)
+- 콘솔 로깅 간소화 (10분)
+- UI 레이아웃 개선 (30분 미만)
+- Langfuse Prompt 표시 개선 (30분)
+- 모델 선택 옵션 제한 (1-2시간)
+
+**파일 형식**: `MINOR-UPDATE-XXX.md`
+
+**생성 위치**: `docs/feature-execution-plan/MINOR-UPDATE-XXX.md`
+
+---
 
 ### Template 1: Simple (1-3시간 작업)
 
@@ -161,6 +215,14 @@
 
 다음 기준으로 복잡도 판단:
 
+- **Quick Win (1-2h)**:
+  - 단일 파일 수정 (1-2개)
+  - 의존성 없음
+  - 테스트 5개 이하
+  - 아키텍처 변경 없음
+  - 단일 목적 개선
+  - 예시: 버튼 추가, 설정 변경, 간단한 로직 수정
+
 - **Simple (1-3h)**:
   - 단일 파일 수정
   - 의존성 없음
@@ -244,6 +306,8 @@
 
 #### 3.1 콘솔 출력 포맷
 
+**FEATURE 콘솔 출력** (Task 분해 포함):
+
 ```markdown
 ## FEATURE-XXX: [기능명]
 
@@ -268,9 +332,56 @@
 
 ### 다음 단계
 
-1. docs/feature-execution-plan/FEATURE-XXX.md 또는 docs/feature-execution-plan/MINOR-UPDATE-XXX.md 파일 확인
+1. docs/feature-execution-plan/FEATURE-XXX.md 파일 확인
 2. resolve-issue 스킬로 각 Task를 GitHub Issue로 생성
 3. 순차적으로 이슈 해결 시작
+```
+
+**Quick Wins 콘솔 출력** (간소화):
+
+```markdown
+## MINOR-UPDATE-XXX: [개선사항명]
+
+### 메타데이터
+
+- 복잡도: Quick Win (1-2시간)
+- 분류: 백엔드 / 프론트엔드 / 문서화
+- 우선순위: P0 / P1 / P2 / P3
+- 예상 시간: Xh
+
+### 작업 내용
+
+1. [작업 1 설명]
+2. [작업 2 설명]
+3. [작업 3 설명]
+
+**예상 파일**:
+- `path/to/file1.py` - [수정 내용]
+
+### 완료 기준
+
+- [ ] [완료 조건 1]
+- [ ] [완료 조건 2]
+- [ ] [완료 조건 3]
+
+### 다음 단계
+
+1. ✅ 실행 계획 문서 생성 완료: `docs/feature-execution-plan/MINOR-UPDATE-XXX.md`
+2. 🔜 GitHub 이슈 생성:
+   ```bash
+   gh issue create \
+     --title "MINOR-UPDATE-XXX: [개선사항명]" \
+     --body "$(cat docs/feature-execution-plan/MINOR-UPDATE-XXX.md)" \
+     --label "type: enhancement" \
+     --label "complexity: easy" \
+     --label "priority: high"
+   ```
+3. 🔜 이슈 해결: `resolve-issue [생성된 이슈 번호]`
+
+---
+
+📝 **Quick Wins는 1-2시간 이내 완료 가능한 개선사항입니다.**
+💡 **GitHub 이슈 생성 후 "resolve-issue" 명령으로 바로 작업을 시작할 수 있습니다.**
 ```
 
 #### 3.2 파일 저장
