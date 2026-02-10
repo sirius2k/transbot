@@ -106,21 +106,21 @@ TransBot은 Streamlit 기반의 영어-한국어 양방향 번역 웹 애플리�
 
 2시간 이상 소요되거나 여러 파일 수정이 필요한 기능은 FEATURE-XXX로 관리됩니다.
 
-| 기능                                                                                        | 우선순위 | 선정 이유                                                                     |
-| ------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------- |
-| ✅ FEATURE-001: [영어 ↔ 한국어 양방향 번역](../feature-execution-plan/FEATURE-001.md)       | **P0**   | 서비스의 핵심 존재 이유                                                       |
-| ✅ FEATURE-002: [자동 언어 감지](../feature-execution-plan/FEATURE-002.md)                  | **P0**   | 사용자 편의성의 핵심                                                          |
-| ✅ FEATURE-006: [번역 결과 듀얼 복사 버튼](../feature-execution-plan/FEATURE-006.md)        | **P0**   | Use Case 직접 충족                                                            |
-| ✅ FEATURE-003: [다양한 AI 모델 선택](../feature-execution-plan/FEATURE-003.md)             | **P1**   | 비용/품질 선택권 제공                                                         |
-| ✅ FEATURE-005: [Markdown 포맷 지원 및 보존](../feature-execution-plan/FEATURE-005.md)      | **P1**   | 개발자 대상 기술 문서에 필수                                                  |
-| ✅ FEATURE-009: [환경 변수 기반 설정 관리 시스템](../feature-execution-plan/FEATURE-009.md) | **P1**   | 하드코딩 제거, 환경별 설정 분리                                               |
-| ✅ FEATURE-008: [Azure OpenAI Service 지원](../feature-execution-plan/FEATURE-008.md)       | **P1**   | 기업 환경(Azure) 사용자 지원. OpenAI/Azure 간 유연한 전환                     |
-| ✅ FEATURE-004: [글자수/토큰수 실시간 표시](../feature-execution-plan/FEATURE-004.md)       | **P2**   | 비용 예측 보조 기능                                                           |
-| ✅ FEATURE-007: [사이드바 UI (설정 섹션)](../feature-execution-plan/FEATURE-007.md)         | **P2**   | UI 레이아웃 구성 요소                                                         |
-| ✅ FEATURE-016: [Langfuse 연동 (LLM 관찰성)](../feature-execution-plan/FEATURE-016.md)      | **P1**   | LLM 사용 추적, 비용 분석, 품질 모니터링, 프롬프트 최적화. 운영 인사이트 확보  |
-| ✅ FEATURE-017: [구조화된 로깅 시스템](../feature-execution-plan/FEATURE-017.md)            | **P1**   | API 호출, 에러, 사용자 행동 추적. 디버깅 및 모니터링 인프라. 운영 안정성 확보 |
-| ✅ FEATURE-023: [대화 상황별 번역 옵션](../feature-execution-plan/FEATURE-023.md)           | **P2**   | 한국어→영어 번역 시 5가지 스타일 제공. AI 자동 스타일 선택. 번역 품질 향상     |
-| ✅ FEATURE-024: [번역 스타일 옵션 개선](../feature-execution-plan/FEATURE-024.md)           | **P2**   | FEATURE-023 개선. 양방향 번역(한↔영) 지원. 직역 기본 선택. 사용자 선택권 향상 |
+| ID | 기능 | 우선순위 | 소요 시간 | 선정 이유 | 이슈 |
+| ---- | ---- | -------- | --------- | --------- | ---- |
+| ✅ [FEATURE-001](../feature-execution-plan/FEATURE-001.md) | 영어 ↔ 한국어 양방향 번역 | **P0** | 3시간 | 서비스의 핵심 존재 이유 | - |
+| ✅ [FEATURE-002](../feature-execution-plan/FEATURE-002.md) | 자동 언어 감지 | **P0** | 2시간 | 사용자 편의성의 핵심 | - |
+| ✅ [FEATURE-006](../feature-execution-plan/FEATURE-006.md) | 번역 결과 듀얼 복사 버튼 | **P0** | 2시간 | Use Case 직접 충족 | - |
+| ✅ [FEATURE-003](../feature-execution-plan/FEATURE-003.md) | 다양한 AI 모델 선택 | **P1** | 2.5시간 | 비용/품질 선택권 제공 | - |
+| ✅ [FEATURE-005](../feature-execution-plan/FEATURE-005.md) | Markdown 포맷 지원 및 보존 | **P1** | 3시간 | 개발자 대상 기술 문서에 필수 | - |
+| ✅ [FEATURE-009](../feature-execution-plan/FEATURE-009.md) | 환경 변수 기반 설정 관리 시스템 | **P1** | 2.4시간 | 하드코딩 제거, 환경별 설정 분리 | - |
+| ✅ [FEATURE-008](../feature-execution-plan/FEATURE-008.md) | Azure OpenAI Service 지원 | **P1** | 5.2시간 | 기업 환경(Azure) 사용자 지원. OpenAI/Azure 간 유연한 전환 | - |
+| ✅ [FEATURE-004](../feature-execution-plan/FEATURE-004.md) | 글자수/토큰수 실시간 표시 | **P2** | 1.5시간 | 비용 예측 보조 기능 | - |
+| ✅ [FEATURE-007](../feature-execution-plan/FEATURE-007.md) | 사이드바 UI (설정 섹션) | **P2** | 2시간 | UI 레이아웃 구성 요소 | - |
+| ✅ [FEATURE-016](../feature-execution-plan/FEATURE-016.md) | Langfuse 연동 (LLM 관찰성) | **P1** | 7시간 | LLM 사용 추적, 비용 분석, 품질 모니터링, 프롬프트 최적화. 운영 인사이트 확보 | - |
+| ✅ [FEATURE-017](../feature-execution-plan/FEATURE-017.md) | 구조화된 로깅 시스템 | **P1** | 4시간 | API 호출, 에러, 사용자 행동 추적. 디버깅 및 모니터링 인프라. 운영 안정성 확보 | - |
+| ✅ [FEATURE-023](../feature-execution-plan/FEATURE-023.md) | 대화 상황별 번역 옵션 | **P2** | 14.5시간 | 한국어→영어 번역 시 5가지 스타일 제공. AI 자동 스타일 선택. 번역 품질 향상 | - |
+| ✅ [FEATURE-024](../feature-execution-plan/FEATURE-024.md) | 번역 스타일 옵션 개선 | **P2** | 3시간 | FEATURE-023 개선. 양방향 번역(한↔영) 지원. 직역 기본 선택. 사용자 선택권 향상 | - |
 
 #### 마이너 개선사항 (Quick Wins)
 
@@ -145,19 +145,18 @@ TransBot은 Streamlit 기반의 영어-한국어 양방향 번역 웹 애플리�
 
 #### 주요 기능 (FEATURE)
 
-| 기능                                                 | 우선순위 | 선정 이유                                                                                                                                                                         | Phase |
-| ---------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| 🔲 FEATURE-010: 번역 히스토리 저장 및 관리           | **P1**   | Use Case 직접 충족. 즐겨찾기 등 후속 기능의 기반 인프라                                                                                                                           | 2     |
-| 🔲 FEATURE-011: 사전 검색 기능                       | **P1**   | Use Case 직접 충족. 독립적 구현 가능                                                                                                                                              | 2     |
-| 🔲 FEATURE-012: 즐겨찾기 기능                        | **P2**   | 편의 기능. 히스토리 기능에 의존                                                                                                                                                   | 2.5   |
-| 🔲 FEATURE-013: 파일 업로드 일괄 번역                | **P2**   | "글자 수 제한 없이 번역" Use Case 충족                                                                                                                                            | 2.5   |
-| 🔲 FEATURE-014: 외부 툴 연동 (Notion, Confluence 등) | **P2**   | Use Case 직접 충족. 각 플랫폼 API 연동 필요로 복잡도 높음                                                                                                                         | 3     |
-| 🔲 FEATURE-015: 용어집(Glossary) 기능                | **P3**   | 고급 사용자 대상. 번역 품질 향상                                                                                                                                                  | 3     |
-| 🔲 FEATURE-018: 중국어 번역 지원 (간체자, 단방향)    | **P2**   | 중국어 문서 읽기 지원. 중국어→한국어/영어 번역만 제공. 입력 언어 확장                                                                                                             | 2.5   |
-| 🔲 FEATURE-019: UI 다국어 지원 (한국어/영어)         | **P3**   | 브라우저 언어 자동 감지 + 수동 전환. 쿠키 저장으로 설정 유지. 전역 사용자 경험 개선                                                                                               | 2.5   |
-| 🔲 FEATURE-020: 실시간 번역 결과 출력                | **P2**   | 실시간 응답 표시로 체감 대기 시간 단축. 긴 번역 시 진행 상황 확인 가능. 중단 버튼으로 사용자 제어권 향상                                                                          | 2.5   |
-| 🔲 FEATURE-021: 번역 품질 및 스타일 설정             | **P2**   | 사용자가 번역 품질(빠름/균형/정확), 스타일(직역↔자연스러움), 문체(존댓말/반말, 격식/캐주얼), 용어 일관성, 형식 유지를 직관적으로 선택 가능. 프롬프트 자동 최적화로 번역 품질 향상 | 2.5   |
-| 🔲 FEATURE-024: 번역 스타일 옵션 개선                | **P2**   | FEATURE-023 개선. 사용자 선택권 향상. 양방향 번역(한→영, 영→한) 지원. 직역 기본 제공                                                                                             | 2.5   |
+| ID | 기능 | 우선순위 | 예상 시간 | 선정 이유 | Phase |
+| ---- | ---- | -------- | --------- | --------- | ----- |
+| 🔲 [FEATURE-010](../feature-execution-plan/FEATURE-010.md) | 번역 히스토리 저장 및 관리 | **P1** | 8시간 | Use Case 직접 충족. 즐겨찾기 등 후속 기능의 기반 인프라 | 2 |
+| 🔲 [FEATURE-011](../feature-execution-plan/FEATURE-011.md) | 사전 검색 기능 | **P1** | 6시간 | Use Case 직접 충족. 독립적 구현 가능 | 2 |
+| 🔲 [FEATURE-012](../feature-execution-plan/FEATURE-012.md) | 즐겨찾기 기능 | **P2** | 3시간 | 편의 기능. 히스토리 기능에 의존 | 2.5 |
+| 🔲 [FEATURE-013](../feature-execution-plan/FEATURE-013.md) | 파일 업로드 일괄 번역 | **P2** | 7시간 | "글자 수 제한 없이 번역" Use Case 충족 | 2.5 |
+| 🔲 [FEATURE-014](../feature-execution-plan/FEATURE-014.md) | 외부 툴 연동 (Notion, Confluence 등) | **P2** | 12시간 | Use Case 직접 충족. 각 플랫폼 API 연동 필요로 복잡도 높음 | 3 |
+| 🔲 [FEATURE-015](../feature-execution-plan/FEATURE-015.md) | 용어집(Glossary) 기능 | **P3** | 8시간 | 고급 사용자 대상. 번역 품질 향상 | 3 |
+| 🔲 [FEATURE-018](../feature-execution-plan/FEATURE-018.md) | 중국어 번역 지원 (간체자, 단방향) | **P2** | 5시간 | 중국어 문서 읽기 지원. 중국어→한국어/영어 번역만 제공. 입력 언어 확장 | 2.5 |
+| 🔲 [FEATURE-019](../feature-execution-plan/FEATURE-019.md) | UI 다국어 지원 (한국어/영어) | **P3** | 6시간 | 브라우저 언어 자동 감지 + 수동 전환. 쿠키 저장으로 설정 유지. 전역 사용자 경험 개선 | 2.5 |
+| 🔲 [FEATURE-020](../feature-execution-plan/FEATURE-020.md) | 실시간 번역 결과 출력 | **P2** | 5시간 | 실시간 응답 표시로 체감 대기 시간 단축. 긴 번역 시 진행 상황 확인 가능. 중단 버튼으로 사용자 제어권 향상 | 2.5 |
+| 🔲 [FEATURE-021](../feature-execution-plan/FEATURE-021.md) | 번역 품질 및 스타일 설정 | **P2** | 7시간 | 사용자가 번역 품질(빠름/균형/정확), 스타일(직역↔자연스러움), 문체(존댓말/반말, 격식/캐주얼), 용어 일관성, 형식 유지를 직관적으로 선택 가능. 프롬프트 자동 최적화로 번역 품질 향상 | 2.5 |
 
 ### 5.4 권장 개발 순서
 
@@ -256,4 +255,4 @@ Phase 3 (P2 기능 - 외부 연동)
 
 ---
 
-**최종 수정일시**: 2026-02-08 14:30 (모델 선택 옵션 제한 기능 완료 상태로 반영)
+**최종 수정일시**: 2026-02-10 00:15 (FEATURE 테이블에 ID와 소요 시간 추가, MINOR와 구조 통일)
